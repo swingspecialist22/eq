@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>에너지 퀘스트 — 공학자 선택</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:#0d0805;min-height:100vh;
+  font-family:'Courier New',monospace;color:#e0e0e0;
+  user-select:none;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+#starfield{position:fixed;inset:0;pointer-events:none;z-index:0;}
+#title-area{text-align:center;margin-bottom:24px;position:relative;z-index:2;}
+#game-logo{font-size:11px;letter-spacing:8px;color:#ff8800;text-transform:uppercase;margin-bottom:6px;}
+#select-title{font-size:13px;color:#ffe8aa;letter-spacing:2px;}
+#card-grid{display:flex;gap:16px;position:relative;z-index:2;}
+.char-card{
+  width:168px;background:#120e08;border:2px solid #3a2a1a;
+  border-radius:8px;cursor:pointer;overflow:hidden;position:relative;
+  transition:border-color .15s,transform .15s,box-shadow .15s;
+}
+.char-card:hover{border-color:#cc6622;transform:translateY(-5px);box-shadow:0 10px 28px #00000088,0 0 18px #cc662233;}
+.char-card.selected{border-color:#ff8800;transform:translateY(-7px);box-shadow:0 12px 36px #000000aa,0 0 26px #ff880055;}
+.char-card.selected::after{
+  content:'▼ 선택됨';position:absolute;bottom:0;left:0;right:0;
+  background:#ff8800;color:#1a0a00;font-size:9px;letter-spacing:2px;
+  text-align:center;padding:3px 0;font-weight:bold;
+}
+.card-canvas-wrap{
+  background:#0a0806;display:flex;align-items:center;justify-content:center;
+  position:relative;border-bottom:1px solid #2a1a08;overflow:hidden;
+}
+.card-canvas-wrap canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block;}
+.card-info{padding:10px 12px 22px;}
+.card-job{font-size:9px;letter-spacing:2px;color:#cc6622;margin-bottom:4px;}
+.card-name{font-size:16px;color:#ffe8aa;font-weight:bold;margin-bottom:5px;}
+.card-desc{font-size:9px;color:#887766;line-height:1.65;}
+.card-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px;}
+.tag{font-size:8px;padding:2px 7px;border-radius:10px;border:1px solid;letter-spacing:1px;}
+#bottom-area{margin-top:20px;position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:11px;min-height:80px;}
+#name-area{display:none;flex-direction:column;align-items:center;gap:7px;animation:fadeIn .3s ease-out;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+#name-label{font-size:10px;color:#887766;letter-spacing:2px;}
+#name-input{
+  background:#1a1208;border:1px solid #6a4a1a;border-radius:4px;
+  color:#ffe8aa;font-family:'Courier New',monospace;font-size:15px;
+  padding:7px 18px;text-align:center;outline:none;width:220px;letter-spacing:2px;
+  transition:border-color .15s;
+}
+#name-input:focus{border-color:#ff8800;}
+#name-hint{font-size:9px;color:#443322;}
+#start-btn{
+  display:none;background:#6a2a08;border:2px solid #ff8800;color:#ffcc88;
+  font-family:'Courier New',monospace;font-size:13px;padding:10px 40px;
+  border-radius:5px;cursor:pointer;letter-spacing:3px;
+  transition:background .15s,box-shadow .15s,transform .1s;animation:fadeIn .3s ease-out;
+}
+#start-btn:hover{background:#9a3a10;box-shadow:0 0 18px #ff880055;transform:scale(1.03);}
+#start-btn:active{transform:scale(0.98);}
+#key-hint{font-size:9px;color:#332211;letter-spacing:1px;margin-top:2px;}
+#transition{position:fixed;inset:0;background:#0d0805;opacity:0;pointer-events:none;z-index:100;transition:opacity .5s;}
+#transition.go{opacity:1;pointer-events:all;}
+/* 반응형 래퍼 */
+#main-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  position:relative;z-index:2;
+  transform-origin:top center;
+}
+</style>
+<link rel="manifest" href="/manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#ff8800">
+</head>
+<body>
+<canvas id="starfield"></canvas>
+<div id="main-wrap">
+  <div id="title-area">
+    <div id="game-logo">☀ Energy Quest</div>
+    <div id="select-title">당신의 여정을 함께할 공학자를 선택하세요</div>
+  </div>
+  <div id="card-grid"></div>
+  <div id="bottom-area">
+    <div id="name-area">
+      <div id="name-label">공학자 이름</div>
+      <input id="name-input" type="text" maxlength="8" spellcheck="false"/>
+      <div id="name-hint">최대 8자 · 수정 가능</div>
+    </div>
+    <button id="start-btn">▶ 모험 시작!</button>
+    <div id="key-hint">1 · 2 · 3 · 4 키로 선택 &nbsp;|&nbsp; ENTER 로 시작</div>
+  </div>
+</div>
+<div id="transition"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// 픽셀아트 헬퍼 (bx,by = 발 중심 기준점, 픽셀 단위)
+// ═══════════════════════════════════════════════════
+function px(ctx,bx,by,sc,x,y,w,h,c,o){
+  o=o||'#111';
+  ctx.fillStyle=o;
+  ctx.fillRect((bx+x-1)*sc,(by+y-1)*sc,(w+2)*sc,(h+2)*sc);
+  ctx.fillStyle=c;
+  ctx.fillRect((bx+x)*sc,(by+y)*sc,w*sc,h*sc);
+}
+function fi(ctx,bx,by,sc,x,y,w,h,c){
+  ctx.fillStyle=c;
+  ctx.fillRect((bx+x)*sc,(by+y)*sc,w*sc,h*sc);
+}
+
+// ═══════════════════════════════════════════════════
+// 캐릭터별 드로우 함수
+// ═══════════════════════════════════════════════════
+
+// 햇살: 파란 헬멧+고글, 파란 작업복, 균형체형
+function drawHaetsal(ctx,bx,by,sc,p,fr){
+  var lL=fr===1?3:(fr===3?-3:0), lR=fr===1?-3:(fr===3?3:0);
+  var aS=fr===1?2:(fr===3?-2:0);
+  px(ctx,bx,by,sc,-10,-5,8,4,p.shoe);
+  px(ctx,bx,by,sc,2,-5,8,4,p.shoe);
+  px(ctx,bx,by,sc,-9,-15+lL,7,11,p.pants);
+  px(ctx,bx,by,sc,2,-15+lR,7,11,p.pants);
+  px(ctx,bx,by,sc,-11,-30,22,16,p.cloth);
+  fi(ctx,bx,by,sc,-3,-27,6,5,p.badge);
+  fi(ctx,bx,by,sc,-2,-26,4,4,p.badge2);
+  px(ctx,bx,by,sc,-16,-28+aS,5,12,p.cloth);
+  px(ctx,bx,by,sc,11,-28-aS,5,12,p.cloth);
+  fi(ctx,bx,by,sc,-16,-17+aS,5,4,p.skin);
+  fi(ctx,bx,by,sc,11,-17-aS,5,4,p.skin);
+  px(ctx,bx,by,sc,-11,-50,22,21,p.skin);
+  fi(ctx,bx,by,sc,-13,-44,3,8,p.skin);
+  fi(ctx,bx,by,sc,10,-44,3,8,p.skin);
+  fi(ctx,bx,by,sc,-8,-44,5,6,'#fff');
+  fi(ctx,bx,by,sc,3,-44,5,6,'#fff');
+  fi(ctx,bx,by,sc,-7,-42,3,4,p.eyeColor);
+  fi(ctx,bx,by,sc,4,-42,3,4,p.eyeColor);
+  fi(ctx,bx,by,sc,-7,-42,1,1,'#fff');
+  fi(ctx,bx,by,sc,4,-42,1,1,'#fff');
+  fi(ctx,bx,by,sc,-8,-45,4,2,p.hair);
+  fi(ctx,bx,by,sc,4,-45,4,2,p.hair);
+  fi(ctx,bx,by,sc,-4,-36,2,2,'#c06060');
+  fi(ctx,bx,by,sc,-2,-35,5,2,'#c06060');
+  fi(ctx,bx,by,sc,3,-36,2,2,'#c06060');
+  px(ctx,bx,by,sc,-12,-61,24,14,p.hair);
+  fi(ctx,bx,by,sc,-13,-54,3,10,p.hair);
+  fi(ctx,bx,by,sc,10,-54,3,10,p.hair);
+  px(ctx,bx,by,sc,-12,-63,24,5,p.goggle);
+  fi(ctx,bx,by,sc,-9,-62,7,4,p.goggle2);
+  fi(ctx,bx,by,sc,2,-62,7,4,p.goggle2);
+  fi(ctx,bx,by,sc,-1,-62,2,4,'#0a0a1a');
+  fi(ctx,bx,by,sc,-9,-67,18,6,p.goggle);
+  fi(ctx,bx,by,sc,-7,-69,14,4,p.goggle2);
+  fi(ctx,bx,by,sc,5,-73,3,5,p.antenna);
+  fi(ctx,bx,by,sc,6,-75,2,3,p.antenna2);
+}
+
+// 나리: 포니테일+안경, 흰 연구복, 날씬
+function drawNari(ctx,bx,by,sc,p,fr){
+  var aS=fr===1?2:(fr===3?-2:0);
+  px(ctx,bx,by,sc,-9,-4,7,4,p.shoe);
+  px(ctx,bx,by,sc,2,-4,7,5,p.shoe);
+  px(ctx,bx,by,sc,-12,-15,24,12,p.pants);
+  fi(ctx,bx,by,sc,-11,-8,22,4,'#3a3a6a');
+  px(ctx,bx,by,sc,-10,-34,20,20,p.cloth);
+  fi(ctx,bx,by,sc,-8,-30,5,4,p.goggle);
+  fi(ctx,bx,by,sc,3,-30,5,4,p.goggle);
+  fi(ctx,bx,by,sc,-2,-33,4,16,'#cce8f0');
+  px(ctx,bx,by,sc,-15,-32+aS,4,14,p.cloth);
+  px(ctx,bx,by,sc,11,-32-aS,4,14,p.cloth);
+  fi(ctx,bx,by,sc,-15,-19+aS,4,4,p.skin);
+  fi(ctx,bx,by,sc,11,-19-aS,4,4,p.skin);
+  px(ctx,bx,by,sc,-10,-53,20,21,p.skin);
+  fi(ctx,bx,by,sc,-11,-47,3,8,p.skin);
+  fi(ctx,bx,by,sc,8,-47,3,8,p.skin);
+  fi(ctx,bx,by,sc,-7,-46,5,7,'#fff');
+  fi(ctx,bx,by,sc,2,-46,5,7,'#fff');
+  fi(ctx,bx,by,sc,-6,-44,4,5,p.eyeColor);
+  fi(ctx,bx,by,sc,3,-44,4,5,p.eyeColor);
+  fi(ctx,bx,by,sc,-6,-44,2,2,'#fff');
+  fi(ctx,bx,by,sc,3,-44,2,2,'#fff');
+  fi(ctx,bx,by,sc,-7,-47,6,2,'#1a1a3a');
+  fi(ctx,bx,by,sc,2,-47,6,2,'#1a1a3a');
+  fi(ctx,bx,by,sc,-3,-37,2,1,'#c08888');
+  fi(ctx,bx,by,sc,-1,-36,4,1,'#c08888');
+  fi(ctx,bx,by,sc,3,-37,2,1,'#c08888');
+  // 안경
+  px(ctx,bx,by,sc,-9,-47,6,6,'#a8dde8',p.goggle);
+  px(ctx,bx,by,sc,3,-47,6,6,'#a8dde8',p.goggle);
+  fi(ctx,bx,by,sc,-3,-45,2,4,p.goggle);
+  // 머리
+  px(ctx,bx,by,sc,-11,-63,22,13,p.hair);
+  fi(ctx,bx,by,sc,-12,-57,3,10,p.hair);
+  fi(ctx,bx,by,sc,9,-57,3,10,p.hair);
+  // 포니테일
+  px(ctx,bx,by,sc,9,-67,5,36,p.hair);
+  fi(ctx,bx,by,sc,10,-33,4,6,p.hair);
+  // 머리띠
+  px(ctx,bx,by,sc,-12,-64,24,4,p.goggle);
+}
+
+// 누리: 삐죽머리+안전모, 주황 작업복, 통통
+function drawNuri(ctx,bx,by,sc,p,fr){
+  var lL=fr===1?3:(fr===3?-3:0), lR=fr===1?-3:(fr===3?3:0);
+  var aS=fr===1?2:(fr===3?-2:0);
+  px(ctx,bx,by,sc,-11,-5,9,6,p.shoe);
+  px(ctx,bx,by,sc,2,-5,9,6,p.shoe);
+  fi(ctx,bx,by,sc,-11,-8,9,4,'#4a3a18');
+  fi(ctx,bx,by,sc,2,-8,9,4,'#4a3a18');
+  px(ctx,bx,by,sc,-10,-18+lL,8,14,p.pants);
+  px(ctx,bx,by,sc,2,-18+lR,8,14,p.pants);
+  fi(ctx,bx,by,sc,-11,-14,3,6,'#2a1a08');
+  fi(ctx,bx,by,sc,9,-14,3,6,'#2a1a08');
+  px(ctx,bx,by,sc,-13,-34,26,17,p.cloth);
+  fi(ctx,bx,by,sc,-5,-30,10,5,p.cloth2);
+  fi(ctx,bx,by,sc,-10,-27,3,4,'#ffdd00');
+  fi(ctx,bx,by,sc,7,-27,2,5,'#aaa');
+  fi(ctx,bx,by,sc,-10,-34,3,18,p.cloth2);
+  fi(ctx,bx,by,sc,7,-34,3,18,p.cloth2);
+  px(ctx,bx,by,sc,-18,-32+aS,6,14,p.cloth);
+  px(ctx,bx,by,sc,12,-32-aS,6,14,p.cloth);
+  fi(ctx,bx,by,sc,-18,-19+aS,6,4,p.skin);
+  fi(ctx,bx,by,sc,12,-19-aS,6,4,p.skin);
+  px(ctx,bx,by,sc,12,-20,6,6,'#2a1a08');
+  px(ctx,bx,by,sc,-11,-52,22,20,p.skin);
+  fi(ctx,bx,by,sc,-13,-46,3,8,p.skin);
+  fi(ctx,bx,by,sc,10,-46,3,8,p.skin);
+  fi(ctx,bx,by,sc,-8,-44,6,6,'#fff');
+  fi(ctx,bx,by,sc,2,-44,6,6,'#fff');
+  fi(ctx,bx,by,sc,-7,-42,4,4,p.eyeColor);
+  fi(ctx,bx,by,sc,3,-42,4,4,p.eyeColor);
+  fi(ctx,bx,by,sc,-6,-42,2,2,'#fff');
+  fi(ctx,bx,by,sc,4,-42,2,2,'#fff');
+  fi(ctx,bx,by,sc,-9,-45,5,2,'#2a1800');
+  fi(ctx,bx,by,sc,3,-45,5,2,'#2a1800');
+  fi(ctx,bx,by,sc,-5,-36,10,2,'#c05050');
+  fi(ctx,bx,by,sc,-4,-35,8,3,'#f08080');
+  fi(ctx,bx,by,sc,-5,-36,2,5,'#c05050');
+  fi(ctx,bx,by,sc,3,-36,2,5,'#c05050');
+  // 삐죽머리
+  px(ctx,bx,by,sc,-12,-62,24,13,p.hair);
+  fi(ctx,bx,by,sc,-14,-64,4,8,p.hair);
+  fi(ctx,bx,by,sc,-8,-69,4,11,p.hair);
+  fi(ctx,bx,by,sc,-2,-72,4,13,p.hair);
+  fi(ctx,bx,by,sc,4,-69,4,10,p.hair);
+  fi(ctx,bx,by,sc,9,-63,5,8,p.hair);
+  fi(ctx,bx,by,sc,-6,-72,3,4,'#4a3010');
+  // 안전모
+  px(ctx,bx,by,sc,-13,-67,26,7,'#ffdd00');
+  fi(ctx,bx,by,sc,-11,-70,22,5,'#ffcc00');
+  fi(ctx,bx,by,sc,4,-72,6,5,'#ffdd00');
+  // 고글 (올린)
+  px(ctx,bx,by,sc,-9,-70,7,4,'#ff8800');
+  px(ctx,bx,by,sc,3,-70,7,4,'#ff8800');
+  fi(ctx,bx,by,sc,-8,-69,5,3,'#ffcc88');
+  fi(ctx,bx,by,sc,4,-69,5,3,'#ffcc88');
+}
+
+// 새벽: 후드+마스크, 보라 사이버, 날카로움
+function drawSaebyeok(ctx,bx,by,sc,p,fr){
+  var lL=fr===1?3:(fr===3?-3:0), lR=fr===1?-3:(fr===3?3:0);
+  var aS=fr===1?2:(fr===3?-2:0);
+  px(ctx,bx,by,sc,-10,-5,9,5,p.shoe);
+  px(ctx,bx,by,sc,2,-5,9,5,p.shoe);
+  fi(ctx,bx,by,sc,-10,-7,9,3,'#1a1030');
+  fi(ctx,bx,by,sc,2,-7,9,3,'#1a1030');
+  px(ctx,bx,by,sc,-9,-17+lL,7,13,p.pants);
+  px(ctx,bx,by,sc,2,-17+lR,7,13,p.pants);
+  px(ctx,bx,by,sc,-13,-35,26,19,p.cloth);
+  fi(ctx,bx,by,sc,-11,-32,6,5,p.cloth2);
+  fi(ctx,bx,by,sc,5,-32,6,5,p.cloth2);
+  fi(ctx,bx,by,sc,-13,-36,26,4,'#4a2a6a');
+  fi(ctx,bx,by,sc,-11,-28,8,2,'#cc44ff');
+  fi(ctx,bx,by,sc,3,-28,8,2,'#cc44ff');
+  fi(ctx,bx,by,sc,-11,-24,22,1,'#cc44ff44');
+  px(ctx,bx,by,sc,-18,-33+aS,5,16,p.cloth);
+  px(ctx,bx,by,sc,13,-33-aS,5,16,p.cloth);
+  fi(ctx,bx,by,sc,-18,-18+aS,5,4,p.skin);
+  fi(ctx,bx,by,sc,13,-18-aS,5,4,p.skin);
+  px(ctx,bx,by,sc,-19,-21,7,5,'#1a0a2a');
+  fi(ctx,bx,by,sc,-18,-20,5,4,'#cc44ff44');
+  px(ctx,bx,by,sc,-10,-52,20,20,p.skin);
+  fi(ctx,bx,by,sc,-11,-46,2,7,p.skin);
+  fi(ctx,bx,by,sc,9,-46,2,7,p.skin);
+  // 마스크
+  px(ctx,bx,by,sc,-11,-42,22,12,p.cloth2);
+  fi(ctx,bx,by,sc,-9,-40,18,3,'#3a1a5a');
+  fi(ctx,bx,by,sc,-9,-37,18,2,'#cc44ff33');
+  // 눈
+  fi(ctx,bx,by,sc,-8,-48,6,5,'#fff');
+  fi(ctx,bx,by,sc,2,-48,6,5,'#fff');
+  fi(ctx,bx,by,sc,-7,-47,4,3,p.eyeColor);
+  fi(ctx,bx,by,sc,3,-47,4,3,p.eyeColor);
+  fi(ctx,bx,by,sc,-7,-47,2,1,'#fff');
+  fi(ctx,bx,by,sc,3,-47,2,1,'#fff');
+  fi(ctx,bx,by,sc,-8,-49,7,1,'#1a0a2a');
+  fi(ctx,bx,by,sc,2,-49,6,1,'#1a0a2a');
+  // 머리
+  px(ctx,bx,by,sc,-11,-62,22,14,p.hair);
+  fi(ctx,bx,by,sc,-12,-56,3,10,p.hair);
+  fi(ctx,bx,by,sc,9,-56,3,10,p.hair);
+  // 후드
+  px(ctx,bx,by,sc,-14,-65,28,8,'#4a2a6a');
+  fi(ctx,bx,by,sc,-12,-63,24,6,p.cloth);
+  // 이어폰
+  px(ctx,bx,by,sc,-14,-47,3,5,'#cc44ff');
+  fi(ctx,bx,by,sc,-14,-45,3,3,p.goggle);
+  // 비대칭 앞머리
+  fi(ctx,bx,by,sc,-13,-66,10,6,p.hair);
+  fi(ctx,bx,by,sc,-14,-68,6,4,p.hair);
+}
+
+// ═══════════════════════════════════════════════════
+// 캐릭터 데이터
+// ═══════════════════════════════════════════════════
+var CHARS=[
+  {
+    id:'haetsal', defaultName:'햇살', job:'에너지 공학자',
+    desc:'태양처럼 밝고 넉넉한 베테랑 현장 공학자.\n어떤 상황도 웃으며 돌파한다.',
+    tags:[{label:'균형형',color:'#4488cc'},{label:'올라운더',color:'#cc8822'}],
+    palette:{cloth:'#3a8aff',cloth2:'#2060cc',hair:'#3d2200',skin:'#f5c49a',pants:'#1a3a80',shoe:'#22223e',goggle:'#1a3fa0',goggle2:'#4488ff',antenna:'#ff8800',antenna2:'#ffcc00',badge:'#ffcc00',badge2:'#ff8800',eyeColor:'#1a1a8a'},
+    drawFn:drawHaetsal
+  },
+  {
+    id:'nari', defaultName:'나리', job:'에너지 연구원',
+    desc:'냉철한 두뇌의 신재생에너지 박사.\n데이터로 DEC의 약점을 정확히 파고든다.',
+    tags:[{label:'지식형',color:'#22aacc'},{label:'퀴즈강화',color:'#22aa66'}],
+    palette:{cloth:'#e8f4f8',cloth2:'#88ccdd',hair:'#4a4a7a',skin:'#f8e0d0',pants:'#2a2a5a',shoe:'#1a1a3a',goggle:'#22aacc',goggle2:'#88ddee',antenna:'#22aacc',antenna2:'#aaeeff',badge:'#aaeeff',badge2:'#22aacc',eyeColor:'#1a88aa'},
+    drawFn:drawNari
+  },
+  {
+    id:'nuri', defaultName:'누리', job:'천재 발명가',
+    desc:'엉뚱하지만 기발한 아이디어의 소유자.\n폐품으로 발명품을 뚝딱 만들어낸다.',
+    tags:[{label:'발명형',color:'#cc6622'},{label:'아이템강화',color:'#aaaa22'}],
+    palette:{cloth:'#cc6a1a',cloth2:'#aa4a08',hair:'#2a1800',skin:'#e8b888',pants:'#3a2a10',shoe:'#2a1a08',goggle:'#cc6a1a',goggle2:'#ffaa44',antenna:'#ffdd00',antenna2:'#ffffff',badge:'#ffdd00',badge2:'#ff8800',eyeColor:'#3a2a00'},
+    drawFn:drawNuri
+  },
+  {
+    id:'saebyeok', defaultName:'새벽', job:'정보전 해커',
+    desc:'어둠 속에서 DEC 시스템을 해킹하는 사이버 전사.\n말은 적고 실력은 최고다.',
+    tags:[{label:'스피드형',color:'#aa44cc'},{label:'정보강화',color:'#cc2266'}],
+    palette:{cloth:'#4a1a6a',cloth2:'#2a0a4a',hair:'#1a0a2a',skin:'#f0d8e8',pants:'#1a0a2a',shoe:'#0a0818',goggle:'#8822cc',goggle2:'#cc66ff',antenna:'#cc44ff',antenna2:'#ffaaff',badge:'#cc44ff',badge2:'#8822cc',eyeColor:'#8822cc'},
+    drawFn:drawSaebyeok
+  },
+];
+
+var SC=3, CW=168, CH=200, BX=CW/2/SC, BY=(CH-12)/SC;
+
+// ═══════════════════════════════════════════════════
+// 별 배경
+// ═══════════════════════════════════════════════════
+(function(){
+  var c=document.getElementById('starfield');
+  var ctx=c.getContext('2d');
+  c.width=window.innerWidth; c.height=window.innerHeight;
+  var stars=[];
+  for(var i=0;i<130;i++) stars.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.2+0.3,speed:Math.random()*0.15+0.03,phase:Math.random()*Math.PI*2});
+  (function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    var now=Date.now()/1000;
+    for(var i=0;i<stars.length;i++){
+      var s=stars[i];
+      var a=0.25+0.5*((Math.sin(now*s.speed+s.phase)+1)/2);
+      ctx.fillStyle='rgba(255,220,150,'+a+')';
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  })();
+})();
+
+// ═══════════════════════════════════════════════════
+// 카드 생성
+// ═══════════════════════════════════════════════════
+var selectedId=null;
+var cardEls={};
+
+CHARS.forEach(function(ch){
+  var card=document.createElement('div');
+  card.className='char-card';
+
+  var wrap=document.createElement('div');
+  wrap.className='card-canvas-wrap';
+  wrap.style.height=CH+'px';
+
+  var cv=document.createElement('canvas');
+  cv.width=CW; cv.height=CH;
+  wrap.appendChild(cv);
+
+  var info=document.createElement('div');
+  info.className='card-info';
+  var tagsHtml=ch.tags.map(function(t){
+    return '<span class="tag" style="color:'+t.color+';border-color:'+t.color+'44">'+t.label+'</span>';
+  }).join('');
+  info.innerHTML='<div class="card-job">'+ch.job+'</div><div class="card-name">'+ch.defaultName+'</div><div class="card-desc">'+ch.desc.replace(/\n/g,'<br>')+'</div><div class="card-tags">'+tagsHtml+'</div>';
+
+  card.appendChild(wrap);
+  card.appendChild(info);
+  document.getElementById('card-grid').appendChild(card);
+  cardEls[ch.id]={card:card,cv:cv};
+
+  var cctx=cv.getContext('2d');
+  cctx.imageSmoothingEnabled=false;
+  drawBg(cctx,ch,CW,CH);
+  ch.drawFn(cctx,BX,BY,SC,ch.palette,0);
+
+  card.addEventListener('click',function(id){return function(){selectChar(id);};}(ch.id));
+});
+
+function drawBg(cctx,ch,w,h){
+  cctx.clearRect(0,0,w,h);
+  cctx.fillStyle=ch.palette.cloth+'18';
+  cctx.fillRect(0,0,w,h);
+}
+
+// ═══════════════════════════════════════════════════
+// 애니메이션
+// ═══════════════════════════════════════════════════
+var animTick=0, animFr=0;
+(function loop(){
+  animTick++;
+  if(animTick%26===0) animFr=(animFr+2)%4; // 0→2→0 걷기 프레임
+  if(selectedId){
+    var ch=null;
+    for(var i=0;i<CHARS.length;i++) if(CHARS[i].id===selectedId){ch=CHARS[i];break;}
+    if(ch){
+      var cv=cardEls[ch.id].cv;
+      var cctx=cv.getContext('2d');
+      cctx.imageSmoothingEnabled=false;
+      drawBg(cctx,ch,CW,CH);
+      var bounce=animFr===2?-1:0;
+      ch.drawFn(cctx,BX,BY+bounce,SC,ch.palette,animFr);
+    }
+  }
+  requestAnimationFrame(loop);
+})();
+
+// ═══════════════════════════════════════════════════
+// 선택 / 시작
+// ═══════════════════════════════════════════════════
+function selectChar(id){
+  if(selectedId){
+    cardEls[selectedId].card.classList.remove('selected');
+    var prev=null;
+    for(var i=0;i<CHARS.length;i++) if(CHARS[i].id===selectedId){prev=CHARS[i];break;}
+    if(prev){
+      var cv=cardEls[selectedId].cv;
+      var cctx=cv.getContext('2d');
+      cctx.imageSmoothingEnabled=false;
+      drawBg(cctx,prev,CW,CH);
+      prev.drawFn(cctx,BX,BY,SC,prev.palette,0);
+    }
+  }
+  selectedId=id;
+  cardEls[id].card.classList.add('selected');
+  var ch=null;
+  for(var i=0;i<CHARS.length;i++) if(CHARS[i].id===id){ch=CHARS[i];break;}
+  var na=document.getElementById('name-area');
+  var ni=document.getElementById('name-input');
+  na.style.display='flex';
+  ni.value=ch.defaultName;
+  ni.focus(); ni.select();
+  document.getElementById('start-btn').style.display='block';
+}
+
+function startGame(){
+  if(!selectedId) return;
+  var ch=null;
+  for(var i=0;i<CHARS.length;i++) if(CHARS[i].id===selectedId){ch=CHARS[i];break;}
+  var nameVal=document.getElementById('name-input').value.trim()||ch.defaultName;
+  localStorage.setItem('eq_char_id',ch.id);
+  localStorage.setItem('eq_char_name',nameVal);
+  localStorage.setItem('eq_char_job',ch.job);
+  localStorage.setItem('eq_char_pal',JSON.stringify(ch.palette));
+  localStorage.removeItem('eq_level');
+  localStorage.removeItem('eq_exp');
+  localStorage.removeItem('eq_coins');
+  localStorage.removeItem('eq_stage1_cleared');
+  var tr=document.getElementById('transition');
+  tr.classList.add('go');
+  setTimeout(function(){window.location.href='prologue.html';},600);
+}
+
+document.getElementById('start-btn').addEventListener('click',startGame);
+document.addEventListener('keydown',function(e){
+  var map={'1':0,'2':1,'3':2,'4':3};
+  if(e.key in map) selectChar(CHARS[map[e.key]].id);
+  if(e.key==='Enter'&&selectedId) startGame();
+});
+
+// ══════════════════════════════════════════════════════════
+// 반응형 스케일링 — 모니터 크기에 관계없이 꽉 차게 표시
+// ══════════════════════════════════════════════════════════
+(function initResponsive(){
+  function fitLayout(){
+    var wrap=document.getElementById('main-wrap');
+    if(!wrap)return;
+    // 기준 크기: 카드 4장 + 간격 = 약 720px 너비, 높이 약 560px
+    var BASE_W=720, BASE_H=560;
+    var maxW=window.innerWidth-24;
+    var maxH=window.innerHeight-24;
+    var scaleRaw=Math.min(maxW/BASE_W, maxH/BASE_H);
+    var scale=Math.round(scaleRaw*4)/4; // 0.25 단위
+    scale=Math.max(0.5, Math.min(2.0, scale));
+    wrap.style.transform='scale('+scale+')';
+    wrap.style.marginBottom=((BASE_H*scale)-BASE_H)+'px';
+  }
+  fitLayout();
+  window.addEventListener('resize',fitLayout);
+})();
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+</body>
+</html>
