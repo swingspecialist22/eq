@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>에너지 퀘스트 — 프롤로그</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Courier New',monospace;user-select:none;overflow:hidden;padding-top:8px;}
+#game-wrapper{position:relative;}
+#game-canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges;}
+
+/* 대화창 */
+#dialog-box{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(8,5,2,0.97);border-top:2px solid #604020;
+  padding:12px 18px 14px;display:none;font-size:12px;line-height:1.8;min-height:72px;z-index:10;
+}
+#dialog-speaker{color:#ff8800;font-weight:bold;margin-bottom:3px;font-size:11px;letter-spacing:1px;}
+#dialog-text{color:#e8e8e8;white-space:pre-wrap;min-height:36px;}
+#dialog-continue{color:#555;font-size:10px;text-align:right;margin-top:4px;animation:blink .9s step-end infinite;}
+@keyframes blink{50%{opacity:0;}}
+
+/* 건너뛰기 */
+#skip-btn{
+  position:absolute;top:12px;right:12px;
+  background:rgba(0,0,0,0.7);border:1px solid #443322;
+  color:#886644;font-family:'Courier New',monospace;font-size:10px;
+  padding:5px 12px;border-radius:3px;cursor:pointer;letter-spacing:1px;z-index:20;
+  transition:border-color .15s,color .15s;
+}
+#skip-btn:hover{border-color:#886644;color:#ccaa77;}
+
+/* 씬 타이틀 오버레이 */
+#scene-title{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;z-index:15;
+  pointer-events:none;opacity:0;transition:opacity .6s;
+}
+#scene-title.show{opacity:1;}
+#scene-title .st-label{font-size:10px;letter-spacing:4px;color:#ff8800;margin-bottom:8px;}
+#scene-title .st-text{font-size:18px;color:#ffe8aa;letter-spacing:3px;font-weight:bold;}
+
+/* 블랙아웃 오버레이 */
+#blackout{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:12;transition:opacity .8s;}
+#blackout.on{opacity:1;}
+
+/* 화면 전환 */
+#transition{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:100;transition:opacity .6s;}
+#transition.go{opacity:1;pointer-events:all;}
+
+/* DEC 경고 오버레이 */
+#dec-alert{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  z-index:14;opacity:0;pointer-events:none;transition:opacity .4s;
+}
+#dec-alert.show{opacity:1;}
+#dec-alert-box{
+  background:rgba(20,0,0,0.92);border:2px solid #cc1111;border-radius:6px;
+  padding:18px 36px;text-align:center;
+}
+#dec-alert-box .da-label{font-size:9px;letter-spacing:4px;color:#cc1111;margin-bottom:6px;}
+#dec-alert-box .da-text{font-size:20px;color:#ff4444;font-weight:bold;letter-spacing:4px;}
+#dec-alert-box .da-sub{font-size:10px;color:#884444;margin-top:6px;letter-spacing:2px;}
+</style>
+<link rel="manifest" href="/manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#ff8800">
+</head>
+<body>
+<div id="game-wrapper">
+  <canvas id="game-canvas"></canvas>
+  <button id="skip-btn">[ 건너뛰기 ▶▶ ]</button>
+  <div id="dialog-box">
+    <div id="dialog-speaker"></div>
+    <div id="dialog-text"></div>
+    <div id="dialog-continue">[ SPACE / ENTER / 클릭 ]</div>
+  </div>
+  <div id="scene-title">
+    <div class="st-label">PROLOGUE</div>
+    <div class="st-text" id="scene-title-text"></div>
+  </div>
+  <div id="blackout"></div>
+  <div id="dec-alert">
+    <div id="dec-alert-box">
+      <div class="da-label">WARNING</div>
+      <div class="da-text">DEC</div>
+      <div class="da-sub">DARK ENERGY CORPORATION</div>
+    </div>
+  </div>
+</div>
+<div id="transition"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// 캔버스 / 상수
+// ═══════════════════════════════════════════════════════
+var TS=48, COLS=17, ROWS=11;
+var W=COLS*TS, H=ROWS*TS;
+var canvas=document.getElementById('game-canvas');
+var ctx=canvas.getContext('2d');
+canvas.width=W; canvas.height=H;
+ctx.imageSmoothingEnabled=false;
+document.getElementById('game-wrapper').style.width=W+'px';
+document.getElementById('game-wrapper').style.height=H+'px';
+
+// localStorage에서 캐릭터 팔레트 로드
+var charPal=null, charName='햇살', charJob='에너지 공학자', charDrawFn=null;
+try{charPal=JSON.parse(localStorage.getItem('eq_char_pal'));}catch(e){}
+charName=localStorage.getItem('eq_char_name')||'햇살';
+charJob=localStorage.getItem('eq_char_job')||'에너지 공학자';
+var charId=localStorage.getItem('eq_char_id')||'haetsal';
+if(!charPal) charPal={cloth:'#3a8aff',cloth2:'#2060cc',hair:'#3d2200',skin:'#f5c49a',pants:'#1a3a80',shoe:'#22223e',goggle:'#1a3fa0',goggle2:'#4488ff',antenna:'#ff8800',antenna2:'#ffcc00',badge:'#ffcc00',badge2:'#ff8800',eyeColor:'#1a1a8a'};
+
+// ═══════════════════════════════════════════════════════
+// 픽셀아트 헬퍼
+// ═══════════════════════════════════════════════════════
+function px(bx,by,sc,x,y,w,h,c,o){
+  o=o||'#111';
+  ctx.fillStyle=o; ctx.fillRect((bx+x-1)*sc,(by+y-1)*sc,(w+2)*sc,(h+2)*sc);
+  ctx.fillStyle=c; ctx.fillRect((bx+x)*sc,(by+y)*sc,w*sc,h*sc);
+}
+function fi(bx,by,sc,x,y,w,h,c){
+  ctx.fillStyle=c; ctx.fillRect((bx+x)*sc,(by+y)*sc,w*sc,h*sc);
+}
+
+// ═══════════════════════════════════════════════════════
+// 캐릭터 드로우 (character-select와 동일 로직)
+// ═══════════════════════════════════════════════════════
+function drawHaetsal(bx,by,sc,p,fr){
+  var lL=fr===1?3:(fr===3?-3:0),lR=fr===1?-3:(fr===3?3:0),aS=fr===1?2:(fr===3?-2:0);
+  px(bx,by,sc,-10,-5,8,4,p.shoe);px(bx,by,sc,2,-5,8,4,p.shoe);
+  px(bx,by,sc,-9,-15+lL,7,11,p.pants);px(bx,by,sc,2,-15+lR,7,11,p.pants);
+  px(bx,by,sc,-11,-30,22,16,p.cloth);fi(bx,by,sc,-3,-27,6,5,p.badge);fi(bx,by,sc,-2,-26,4,4,p.badge2);
+  px(bx,by,sc,-16,-28+aS,5,12,p.cloth);px(bx,by,sc,11,-28-aS,5,12,p.cloth);
+  fi(bx,by,sc,-16,-17+aS,5,4,p.skin);fi(bx,by,sc,11,-17-aS,5,4,p.skin);
+  px(bx,by,sc,-11,-50,22,21,p.skin);fi(bx,by,sc,-13,-44,3,8,p.skin);fi(bx,by,sc,10,-44,3,8,p.skin);
+  fi(bx,by,sc,-8,-44,5,6,'#fff');fi(bx,by,sc,3,-44,5,6,'#fff');
+  fi(bx,by,sc,-7,-42,3,4,p.eyeColor);fi(bx,by,sc,4,-42,3,4,p.eyeColor);
+  fi(bx,by,sc,-7,-42,1,1,'#fff');fi(bx,by,sc,4,-42,1,1,'#fff');
+  fi(bx,by,sc,-8,-45,4,2,p.hair);fi(bx,by,sc,4,-45,4,2,p.hair);
+  fi(bx,by,sc,-4,-36,2,2,'#c06060');fi(bx,by,sc,-2,-35,5,2,'#c06060');fi(bx,by,sc,3,-36,2,2,'#c06060');
+  px(bx,by,sc,-12,-61,24,14,p.hair);fi(bx,by,sc,-13,-54,3,10,p.hair);fi(bx,by,sc,10,-54,3,10,p.hair);
+  px(bx,by,sc,-12,-63,24,5,p.goggle);fi(bx,by,sc,-9,-62,7,4,p.goggle2);fi(bx,by,sc,2,-62,7,4,p.goggle2);fi(bx,by,sc,-1,-62,2,4,'#0a0a1a');
+  fi(bx,by,sc,-9,-67,18,6,p.goggle);fi(bx,by,sc,-7,-69,14,4,p.goggle2);
+  fi(bx,by,sc,5,-73,3,5,p.antenna);fi(bx,by,sc,6,-75,2,3,p.antenna2);
+}
+function drawNari(bx,by,sc,p,fr){
+  var aS=fr===1?2:(fr===3?-2:0);
+  px(bx,by,sc,-9,-4,7,4,p.shoe);px(bx,by,sc,2,-4,7,5,p.shoe);
+  px(bx,by,sc,-12,-15,24,12,p.pants);fi(bx,by,sc,-11,-8,22,4,'#3a3a6a');
+  px(bx,by,sc,-10,-34,20,20,p.cloth);fi(bx,by,sc,-8,-30,5,4,p.goggle);fi(bx,by,sc,3,-30,5,4,p.goggle);fi(bx,by,sc,-2,-33,4,16,'#cce8f0');
+  px(bx,by,sc,-15,-32+aS,4,14,p.cloth);px(bx,by,sc,11,-32-aS,4,14,p.cloth);
+  fi(bx,by,sc,-15,-19+aS,4,4,p.skin);fi(bx,by,sc,11,-19-aS,4,4,p.skin);
+  px(bx,by,sc,-10,-53,20,21,p.skin);fi(bx,by,sc,-11,-47,3,8,p.skin);fi(bx,by,sc,8,-47,3,8,p.skin);
+  fi(bx,by,sc,-7,-46,5,7,'#fff');fi(bx,by,sc,2,-46,5,7,'#fff');
+  fi(bx,by,sc,-6,-44,4,5,p.eyeColor);fi(bx,by,sc,3,-44,4,5,p.eyeColor);
+  fi(bx,by,sc,-6,-44,2,2,'#fff');fi(bx,by,sc,3,-44,2,2,'#fff');
+  fi(bx,by,sc,-7,-47,6,2,'#1a1a3a');fi(bx,by,sc,2,-47,6,2,'#1a1a3a');
+  fi(bx,by,sc,-3,-37,2,1,'#c08888');fi(bx,by,sc,-1,-36,4,1,'#c08888');fi(bx,by,sc,3,-37,2,1,'#c08888');
+  px(bx,by,sc,-9,-47,6,6,'#a8dde8',p.goggle);px(bx,by,sc,3,-47,6,6,'#a8dde8',p.goggle);fi(bx,by,sc,-3,-45,2,4,p.goggle);
+  px(bx,by,sc,-11,-63,22,13,p.hair);fi(bx,by,sc,-12,-57,3,10,p.hair);fi(bx,by,sc,9,-57,3,10,p.hair);
+  px(bx,by,sc,9,-67,5,36,p.hair);fi(bx,by,sc,10,-33,4,6,p.hair);
+  px(bx,by,sc,-12,-64,24,4,p.goggle);
+}
+function drawNuri(bx,by,sc,p,fr){
+  var lL=fr===1?3:(fr===3?-3:0),lR=fr===1?-3:(fr===3?3:0),aS=fr===1?2:(fr===3?-2:0);
+  px(bx,by,sc,-11,-5,9,6,p.shoe);px(bx,by,sc,2,-5,9,6,p.shoe);fi(bx,by,sc,-11,-8,9,4,'#4a3a18');fi(bx,by,sc,2,-8,9,4,'#4a3a18');
+  px(bx,by,sc,-10,-18+lL,8,14,p.pants);px(bx,by,sc,2,-18+lR,8,14,p.pants);fi(bx,by,sc,-11,-14,3,6,'#2a1a08');fi(bx,by,sc,9,-14,3,6,'#2a1a08');
+  px(bx,by,sc,-13,-34,26,17,p.cloth);fi(bx,by,sc,-5,-30,10,5,p.cloth2);fi(bx,by,sc,-10,-27,3,4,'#ffdd00');fi(bx,by,sc,7,-27,2,5,'#aaa');
+  fi(bx,by,sc,-10,-34,3,18,p.cloth2);fi(bx,by,sc,7,-34,3,18,p.cloth2);
+  px(bx,by,sc,-18,-32+aS,6,14,p.cloth);px(bx,by,sc,12,-32-aS,6,14,p.cloth);fi(bx,by,sc,-18,-19+aS,6,4,p.skin);fi(bx,by,sc,12,-19-aS,6,4,p.skin);px(bx,by,sc,12,-20,6,6,'#2a1a08');
+  px(bx,by,sc,-11,-52,22,20,p.skin);fi(bx,by,sc,-13,-46,3,8,p.skin);fi(bx,by,sc,10,-46,3,8,p.skin);
+  fi(bx,by,sc,-8,-44,6,6,'#fff');fi(bx,by,sc,2,-44,6,6,'#fff');fi(bx,by,sc,-7,-42,4,4,p.eyeColor);fi(bx,by,sc,3,-42,4,4,p.eyeColor);fi(bx,by,sc,-6,-42,2,2,'#fff');fi(bx,by,sc,4,-42,2,2,'#fff');
+  fi(bx,by,sc,-9,-45,5,2,'#2a1800');fi(bx,by,sc,3,-45,5,2,'#2a1800');fi(bx,by,sc,-5,-36,10,2,'#c05050');fi(bx,by,sc,-4,-35,8,3,'#f08080');fi(bx,by,sc,-5,-36,2,5,'#c05050');fi(bx,by,sc,3,-36,2,5,'#c05050');
+  px(bx,by,sc,-12,-62,24,13,p.hair);fi(bx,by,sc,-14,-64,4,8,p.hair);fi(bx,by,sc,-8,-69,4,11,p.hair);fi(bx,by,sc,-2,-72,4,13,p.hair);fi(bx,by,sc,4,-69,4,10,p.hair);fi(bx,by,sc,9,-63,5,8,p.hair);fi(bx,by,sc,-6,-72,3,4,'#4a3010');
+  px(bx,by,sc,-13,-67,26,7,'#ffdd00');fi(bx,by,sc,-11,-70,22,5,'#ffcc00');fi(bx,by,sc,4,-72,6,5,'#ffdd00');
+  px(bx,by,sc,-9,-70,7,4,'#ff8800');px(bx,by,sc,3,-70,7,4,'#ff8800');fi(bx,by,sc,-8,-69,5,3,'#ffcc88');fi(bx,by,sc,4,-69,5,3,'#ffcc88');
+}
+function drawSaebyeok(bx,by,sc,p,fr){
+  var lL=fr===1?3:(fr===3?-3:0),lR=fr===1?-3:(fr===3?3:0),aS=fr===1?2:(fr===3?-2:0);
+  px(bx,by,sc,-10,-5,9,5,p.shoe);px(bx,by,sc,2,-5,9,5,p.shoe);fi(bx,by,sc,-10,-7,9,3,'#1a1030');fi(bx,by,sc,2,-7,9,3,'#1a1030');
+  px(bx,by,sc,-9,-17+lL,7,13,p.pants);px(bx,by,sc,2,-17+lR,7,13,p.pants);
+  px(bx,by,sc,-13,-35,26,19,p.cloth);fi(bx,by,sc,-11,-32,6,5,p.cloth2);fi(bx,by,sc,5,-32,6,5,p.cloth2);fi(bx,by,sc,-13,-36,26,4,'#4a2a6a');
+  fi(bx,by,sc,-11,-28,8,2,'#cc44ff');fi(bx,by,sc,3,-28,8,2,'#cc44ff');fi(bx,by,sc,-11,-24,22,1,'#cc44ff44');
+  px(bx,by,sc,-18,-33+aS,5,16,p.cloth);px(bx,by,sc,13,-33-aS,5,16,p.cloth);fi(bx,by,sc,-18,-18+aS,5,4,p.skin);fi(bx,by,sc,13,-18-aS,5,4,p.skin);
+  px(bx,by,sc,-19,-21,7,5,'#1a0a2a');fi(bx,by,sc,-18,-20,5,4,'#cc44ff44');
+  px(bx,by,sc,-10,-52,20,20,p.skin);fi(bx,by,sc,-11,-46,2,7,p.skin);fi(bx,by,sc,9,-46,2,7,p.skin);
+  px(bx,by,sc,-11,-42,22,12,p.cloth2);fi(bx,by,sc,-9,-40,18,3,'#3a1a5a');fi(bx,by,sc,-9,-37,18,2,'#cc44ff33');
+  fi(bx,by,sc,-8,-48,6,5,'#fff');fi(bx,by,sc,2,-48,6,5,'#fff');fi(bx,by,sc,-7,-47,4,3,p.eyeColor);fi(bx,by,sc,3,-47,4,3,p.eyeColor);fi(bx,by,sc,-7,-47,2,1,'#fff');fi(bx,by,sc,3,-47,2,1,'#fff');fi(bx,by,sc,-8,-49,7,1,'#1a0a2a');fi(bx,by,sc,2,-49,6,1,'#1a0a2a');
+  px(bx,by,sc,-11,-62,22,14,p.hair);fi(bx,by,sc,-12,-56,3,10,p.hair);fi(bx,by,sc,9,-56,3,10,p.hair);
+  px(bx,by,sc,-14,-65,28,8,'#4a2a6a');fi(bx,by,sc,-12,-63,24,6,p.cloth);
+  px(bx,by,sc,-14,-47,3,5,'#cc44ff');fi(bx,by,sc,-14,-45,3,3,p.goggle);
+  fi(bx,by,sc,-13,-66,10,6,p.hair);fi(bx,by,sc,-14,-68,6,4,p.hair);
+}
+
+var DRAW_FNS={haetsal:drawHaetsal,nari:drawNari,nuri:drawNuri,saebyeok:drawSaebyeok};
+charDrawFn=DRAW_FNS[charId]||drawHaetsal;
+
+// ═══════════════════════════════════════════════════════
+// NPC 드로우 (촌장, 어머니)
+// ═══════════════════════════════════════════════════════
+function drawNPCMom(bx,by,sc,fr){
+  // 어머니: 따뜻한 갈색 옷, 앞치마
+  var aS=fr===1?1:(fr===3?-1:0);
+  px(bx,by,sc,-9,-5,7,4,'#3a2a1a');px(bx,by,sc,2,-5,7,4,'#3a2a1a');
+  px(bx,by,sc,-10,-16,20,12,'#c8783a');
+  fi(bx,by,sc,-6,-16,12,10,'#e8e0c0'); // 앞치마
+  fi(bx,by,sc,-4,-14,8,7,'#d4cca8');
+  px(bx,by,sc,-14,-28+aS,4,13,'#c8783a');px(bx,by,sc,10,-28-aS,4,13,'#c8783a');
+  fi(bx,by,sc,-14,-16+aS,4,4,'#f5c49a');fi(bx,by,sc,10,-16-aS,4,4,'#f5c49a');
+  px(bx,by,sc,-10,-46,20,19,'#f5c49a');fi(bx,by,sc,-11,-40,3,7,'#f5c49a');fi(bx,by,sc,8,-40,3,7,'#f5c49a');
+  fi(bx,by,sc,-7,-40,5,5,'#fff');fi(bx,by,sc,2,-40,5,5,'#fff');
+  fi(bx,by,sc,-6,-38,3,3,'#884444');fi(bx,by,sc,3,-38,3,3,'#884444');
+  fi(bx,by,sc,-6,-38,1,1,'#fff');fi(bx,by,sc,3,-38,1,1,'#fff');
+  fi(bx,by,sc,-7,-41,4,2,'#6a3a00');fi(bx,by,sc,3,-41,4,2,'#6a3a00');
+  fi(bx,by,sc,-3,-33,6,2,'#c06060'); // 입
+  px(bx,by,sc,-10,-56,20,13,'#8b4513'); // 머리
+  fi(bx,by,sc,-11,-50,3,7,'#8b4513');fi(bx,by,sc,8,-50,3,7,'#8b4513');
+  fi(bx,by,sc,-7,-58,6,3,'#aa6622'); // 하이라이트
+  // 머리 묶음
+  px(bx,by,sc,8,-58,5,8,'#8b4513');fi(bx,by,sc,9,-66,3,10,'#8b4513');
+}
+
+function drawNPCElder(bx,by,sc,fr){
+  // 촌장: 흰 수염, 갈색 로브
+  var aS=fr===1?1:(fr===3?-1:0);
+  px(bx,by,sc,-9,-5,7,5,'#5a3a18');px(bx,by,sc,2,-5,7,5,'#5a3a18');
+  px(bx,by,sc,-11,-18,22,14,'#8a6a2a');fi(bx,by,sc,-9,-16,18,10,'#aa8a3a');
+  fi(bx,by,sc,-5,-14,10,7,'#c4a250');
+  px(bx,by,sc,-14,-28+aS,5,13,'#8a6a2a');px(bx,by,sc,9,-28-aS,5,13,'#8a6a2a');
+  fi(bx,by,sc,-14,-16+aS,5,4,'#f5c49a');fi(bx,by,sc,9,-16-aS,5,4,'#f5c49a');
+  px(bx,by,sc,-10,-46,20,19,'#f5ddb0');fi(bx,by,sc,-11,-40,3,7,'#f5ddb0');fi(bx,by,sc,8,-40,3,7,'#f5ddb0');
+  fi(bx,by,sc,-7,-40,5,5,'#fff');fi(bx,by,sc,2,-40,5,5,'#fff');
+  fi(bx,by,sc,-6,-38,3,3,'#3a3a5a');fi(bx,by,sc,3,-38,3,3,'#3a3a5a');
+  fi(bx,by,sc,-6,-38,1,1,'#fff');fi(bx,by,sc,3,-38,1,1,'#fff');
+  fi(bx,by,sc,-7,-41,4,2,'#cccccc');fi(bx,by,sc,3,-41,4,2,'#cccccc'); // 흰 눈썹
+  // 수염
+  fi(bx,by,sc,-6,-34,12,2,'#e8e8e8');fi(bx,by,sc,-5,-32,10,4,'#e8e8e8');fi(bx,by,sc,-4,-28,8,6,'#e8e8e8');fi(bx,by,sc,-2,-24,4,4,'#dddddd');
+  px(bx,by,sc,-10,-56,20,13,'#cccccc'); // 흰 머리
+  fi(bx,by,sc,-11,-50,3,7,'#cccccc');fi(bx,by,sc,8,-50,3,7,'#cccccc');
+  // 지팡이
+  px(bx,by,sc,13,-50,3,46,'#7a5020');fi(bx,by,sc,11,-52,7,4,'#aa7a30');
+}
+
+function drawNPCDECAgent(bx,by,sc,fr){
+  // DEC 요원: 검정 갑옷, 빨간 마크
+  var lL=fr===1?3:(fr===3?-3:0),lR=fr===1?-3:(fr===3?3:0),aS=fr===1?2:(fr===3?-2:0);
+  px(bx,by,sc,-10,-5,8,5,'#0a0a14');px(bx,by,sc,2,-5,8,5,'#0a0a14');fi(bx,by,sc,-11,-8,9,4,'#14141e');fi(bx,by,sc,2,-8,9,4,'#14141e');
+  px(bx,by,sc,-9,-18+lL,7,14,'#1a1a2e');px(bx,by,sc,2,-18+lR,7,14,'#1a1a2e');
+  px(bx,by,sc,-12,-34,24,17,'#1a1a2e');fi(bx,by,sc,-10,-30,20,12,'#22222e');
+  fi(bx,by,sc,-5,-29,10,7,'#cc0000'); // DEC 마크
+  fi(bx,by,sc,-3,-27,6,4,'#880000');fi(bx,by,sc,-1,-26,2,2,'#ff2200');
+  px(bx,by,sc,-17,-32+aS,5,14,'#1a1a2e');px(bx,by,sc,12,-32-aS,5,14,'#1a1a2e');
+  fi(bx,by,sc,-17,-19+aS,5,5,'#22222e');fi(bx,by,sc,12,-19-aS,5,5,'#22222e');
+  // 어깨 갑옷
+  px(bx,by,sc,-17,-34,6,8,'#cc1111');px(bx,by,sc,11,-34,6,8,'#cc1111');
+  px(bx,by,sc,-11,-50,22,19,'#22222e');fi(bx,by,sc,-12,-44,3,8,'#22222e');fi(bx,by,sc,9,-44,3,8,'#22222e');
+  // 헬멧 바이저
+  fi(bx,by,sc,-9,-44,18,7,'#ff220022'); // 빨간 바이저 글로우
+  fi(bx,by,sc,-8,-44,5,5,'#ff2200');fi(bx,by,sc,3,-44,5,5,'#ff2200'); // 눈
+  fi(bx,by,sc,-3,-43,6,3,'#cc0000');
+  px(bx,by,sc,-12,-60,24,13,'#1a1a2e');fi(bx,by,sc,-13,-53,3,9,'#1a1a2e');fi(bx,by,sc,10,-53,3,9,'#1a1a2e');
+  px(bx,by,sc,-12,-62,24,5,'#cc1111');fi(bx,by,sc,-9,-61,18,4,'#880000');
+  fi(bx,by,sc,-9,-67,18,7,'#1a1a2e');fi(bx,by,sc,-7,-69,14,5,'#22222e');
+}
+
+// ═══════════════════════════════════════════════════════
+// 타일 드로우 (프롤로그 전용 마을 테마)
+// ═══════════════════════════════════════════════════════
+// 타일 ID
+var T={GRASS:0,PATH:1,HOUSE:2,TREE:3,WALL:4,PLAZA:5,DARK:6,FENCE:7,FLOWER:8,WELL:9,BARREL:10};
+
+function drawTile(id,sx,sy){
+  var s=TS;
+  ctx.save(); ctx.translate(sx,sy);
+  switch(id){
+    case T.GRASS:
+      ctx.fillStyle='#2a5a18'; ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#336622';
+      for(var i=0;i<6;i++){ctx.fillRect(4+i*8,6,2,3);ctx.fillRect(6+i*8,16,2,4);ctx.fillRect(3+i*8,28,2,3);ctx.fillRect(7+i*7,38,2,4);}
+      break;
+    case T.PATH:
+      ctx.fillStyle='#c8a060'; ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#d4aa70'; ctx.fillRect(3,3,s-6,s-6);
+      ctx.strokeStyle='#b89050';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(0,s/2);ctx.lineTo(s,s/2);ctx.stroke();
+      break;
+    case T.HOUSE:
+      ctx.fillStyle='#c8783a'; ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#aa5a22'; ctx.fillRect(4,s/2,s-8,s/2-4);
+      ctx.fillStyle='#e8aa55';
+      ctx.beginPath();ctx.moveTo(s/2,4);ctx.lineTo(4,s/2);ctx.lineTo(s-4,s/2);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#88ccff'; ctx.fillRect(s/2-8,s/2+6,10,10);
+      ctx.strokeStyle='#5a3a18';ctx.lineWidth=1;ctx.strokeRect(s/2-8,s/2+6,10,10);
+      break;
+    case T.TREE:
+      ctx.fillStyle='#2a5a18'; ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#7a4a18'; ctx.fillRect(s/2-4,s/2,8,s/2-2);
+      ctx.fillStyle='#1a6a10'; ctx.beginPath();ctx.arc(s/2,s/2-4,18,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#2a8a18'; ctx.beginPath();ctx.arc(s/2-4,s/2-6,12,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#3a9a28'; ctx.beginPath();ctx.arc(s/2+4,s/2-8,10,0,Math.PI*2);ctx.fill();
+      break;
+    case T.WALL:
+      ctx.fillStyle='#a06828'; ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#b8782e';
+      for(var r=0;r<4;r++) for(var c=0;c<4;c++) if((r+c)%2===0) ctx.fillRect(c*12+1,r*12+1,10,10);
+      break;
+    case T.PLAZA:
+      ctx.fillStyle='#c0a868'; ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#d0b878'; ctx.fillRect(4,4,s-8,s-8);
+      ctx.strokeStyle='#a89050';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(s/2,0);ctx.lineTo(s/2,s);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(0,s/2);ctx.lineTo(s,s/2);ctx.stroke();
+      break;
+    case T.DARK:
+      ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#0f0f0f';
+      for(var i=0;i<4;i++) for(var j=0;j<4;j++) if((i+j)%2===0) ctx.fillRect(i*12,j*12,12,12);
+      break;
+    case T.FENCE:
+      ctx.fillStyle='#2a5a18'; ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#8a5a28';
+      ctx.fillRect(0,16,s,4); ctx.fillRect(0,28,s,4);
+      for(var i=0;i<4;i++){ctx.fillRect(i*12,10,4,24);}
+      break;
+    case T.FLOWER:
+      ctx.fillStyle='#2a5a18'; ctx.fillRect(0,0,s,s);
+      for(var i=0;i<3;i++){
+        ctx.fillStyle='#336622';ctx.fillRect(6+i*16,s-14,3,10);
+        ctx.fillStyle=['#ff8800','#ff4488','#ffee00'][i];
+        ctx.beginPath();ctx.arc(7+i*16,s-14,5,0,Math.PI*2);ctx.fill();
+      }
+      break;
+    case T.WELL:
+      ctx.fillStyle='#c0a868'; ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#7a5020'; ctx.fillRect(s/2-10,s/2-2,20,16);
+      ctx.fillStyle='#3a6aaa'; ctx.fillRect(s/2-8,s/2,16,12);
+      ctx.fillStyle='#8a6030';
+      ctx.fillRect(s/2-12,s/2-4,4,20); ctx.fillRect(s/2+8,s/2-4,4,20);
+      ctx.fillRect(s/2-12,s/2-8,24,6);
+      break;
+    case T.BARREL:
+      ctx.fillStyle='#c0a868'; ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#7a4010'; ctx.fillRect(s/2-8,s/2-4,16,20);
+      ctx.fillStyle='#5a3008'; ctx.fillRect(s/2-9,s/2,18,3);ctx.fillRect(s/2-9,s/2+8,18,3);
+      ctx.strokeStyle='#aa6020';ctx.lineWidth=1;ctx.strokeRect(s/2-8,s/2-4,16,20);
+      break;
+    default:
+      ctx.fillStyle='#2a5a18'; ctx.fillRect(0,0,s,s);
+  }
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════
+// 씬별 맵 데이터
+// ═══════════════════════════════════════════════════════
+var G=T.GRASS, P=T.PATH, H=T.HOUSE, E=T.TREE, W=T.WALL, L=T.PLAZA, D=T.DARK, F=T.FENCE, Fl=T.FLOWER, We=T.WELL, B=T.BARREL;
+
+// 씬0: 집 앞 마을 풍경
+var MAP_VILLAGE=[
+  E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,E,
+  E,H,H,W,G,G,G,G,H,H,W,G,G,E,E,E,E,
+  E,H,H,W,G,G,G,G,H,H,W,G,G,Fl,E,E,E,
+  E,W,W,W,G,G,G,G,W,W,W,G,G,G,E,E,E,
+  E,G,G,G,G,We,G,G,G,G,G,G,G,G,E,E,E,
+  E,G,G,G,G,G,G,G,G,G,G,G,G,G,Fl,E,E,
+  E,Fl,G,P,P,P,P,P,P,P,P,P,G,G,G,E,E,
+  E,G,G,P,L,L,L,L,L,L,P,G,G,G,G,E,E,
+  F,F,F,P,L,L,L,L,L,L,P,G,G,G,G,E,E,
+  G,G,G,P,P,P,P,P,P,P,P,G,G,G,G,G,G,
+  G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,
+];
+
+// 씬4: 정전 후 어두운 마을
+var MAP_DARK=[
+  D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,
+  D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,
+  D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,
+  D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,
+  D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,
+  D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,
+  D,D,D,P,P,P,P,P,P,P,P,P,D,D,D,D,D,
+  D,D,D,P,L,L,L,L,L,L,P,D,D,D,D,D,D,
+  D,D,D,P,L,L,L,L,L,L,P,D,D,D,D,D,D,
+  D,D,D,P,P,P,P,P,P,P,P,D,D,D,D,D,D,
+  D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,
+];
+
+var currentMap=MAP_VILLAGE;
+
+// ═══════════════════════════════════════════════════════
+// 스프라이트 상태
+// ═══════════════════════════════════════════════════════
+var sprites={
+  player:{x:4.5, y:7.5, tx:4.5, ty:7.5, moving:false, facing:'down', fr:0},
+  mom:   {x:6.5, y:7.5, visible:true},
+  elder: {x:7.0, y:7.5, visible:false},
+  agent1:{x:12.0,y:6.5, visible:false},
+  agent2:{x:13.0,y:6.5, visible:false},
+};
+
+// DEC 드론 (씬3)
+var drone={x:-2, y:1.5, visible:false, speed:0.04};
+
+// ═══════════════════════════════════════════════════════
+// 대화 시스템
+// ═══════════════════════════════════════════════════════
+var $db=document.getElementById('dialog-box');
+var $ds=document.getElementById('dialog-speaker');
+var $dt=document.getElementById('dialog-text');
+var dialogActive=false, dialogQueue=[], twText='', twIdx=0, twDone=false;
+var TW_SPEED=1.8, dialogOnClose=null;
+
+function openDialog(lines, onClose){
+  dialogQueue=lines.slice();
+  dialogOnClose=onClose||null;
+  dialogActive=true;
+  $db.style.display='block';
+  nextLine();
+}
+function nextLine(){
+  if(!dialogQueue.length){
+    $db.style.display='none';
+    dialogActive=false;
+    if(dialogOnClose){var fn=dialogOnClose;dialogOnClose=null;fn();}
+    return;
+  }
+  var line=dialogQueue.shift();
+  $ds.textContent=line.speaker;
+  twText=line.text; twIdx=0; twDone=false;
+  $dt.textContent='';
+}
+function advanceDialog(){
+  if(!dialogActive) return;
+  if(!twDone){$dt.textContent=twText;twIdx=twText.length;twDone=true;return;}
+  nextLine();
+}
+
+// ═══════════════════════════════════════════════════════
+// 씬 타이틀
+// ═══════════════════════════════════════════════════════
+function showSceneTitle(text, duration, cb){
+  var el=document.getElementById('scene-title');
+  document.getElementById('scene-title-text').textContent=text;
+  el.classList.add('show');
+  setTimeout(function(){el.classList.remove('show');if(cb)setTimeout(cb,700);},duration||1800);
+}
+
+// ═══════════════════════════════════════════════════════
+// 페이드 유틸
+// ═══════════════════════════════════════════════════════
+function fadeOut(cb){ var b=document.getElementById('blackout');b.classList.add('on');setTimeout(cb||function(){},850);}
+function fadeIn(cb){  var b=document.getElementById('blackout');b.classList.remove('on');if(cb)setTimeout(cb,850);}
+function flashDEC(cb){
+  var a=document.getElementById('dec-alert');
+  a.classList.add('show');
+  setTimeout(function(){a.classList.remove('show');if(cb)setTimeout(cb,400);},1800);
+}
+
+// ═══════════════════════════════════════════════════════
+// 자동 이동 시스템
+// ═══════════════════════════════════════════════════════
+var autoMoves=[];
+var autoMoveCb=null;
+function queueMove(who, targetX, targetY, facing, cb){
+  autoMoves.push({who:who,tx:targetX,ty:targetY,facing:facing,cb:cb});
+}
+function processAutoMove(){
+  if(!autoMoves.length) return;
+  var m=autoMoves[0];
+  var sp=sprites[m.who];
+  if(!sp) return;
+  sp.facing=m.facing||sp.facing;
+  var dx=m.tx-sp.x, dy=m.ty-sp.y;
+  var dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist<0.05){
+    sp.x=m.tx; sp.y=m.ty; sp.fr=0;
+    autoMoves.shift();
+    if(m.cb) m.cb();
+    return;
+  }
+  var speed=0.04;
+  sp.x+=dx/dist*speed;
+  sp.y+=dy/dist*speed;
+}
+
+// ═══════════════════════════════════════════════════════
+// 씬 스크립트
+// ═══════════════════════════════════════════════════════
+var sceneLock=false;
+
+function runScene0(){
+  // 씬0: 집 앞, 어머니가 말 걸기
+  showSceneTitle('어느 조용한 아침…', 2000, function(){
+    sprites.mom.visible=true;
+    sprites.player.x=4.5; sprites.player.y=8.5; sprites.player.facing='right';
+    sprites.mom.x=6.5; sprites.mom.y=8.5;
+    openDialog([
+      {speaker:'어머니', text:'잘 잤니, '+charName+'야? 오늘도 발전소 쪽은 조용하던데...'},
+      {speaker:'어머니', text:'요즘 마을에 이상한 소문이 돌아. DEC라는 조직이 에너지를 독점하고 있다나봐.'},
+      {speaker:charName, text:'...DEC? 그 검은 로고 달린 트럭들이 요즘 자꾸 마을 근처에서 보이던데.'},
+      {speaker:'어머니', text:'광장에 촌장 어르신이 나오셨어. 중요한 발표가 있다고 하더구나. 한 번 가봐.'},
+    ], function(){
+      queueMove('player', 7.5, 7.5, 'right', function(){
+        queueMove('player', 7.5, 7.0, 'up', function(){
+          runScene1();
+        });
+      });
+    });
+  });
+}
+
+function runScene1(){
+  // 씬1: 광장으로 이동, 촌장 등장
+  fadeOut(function(){
+    sprites.mom.visible=false;
+    sprites.elder.visible=true;
+    sprites.elder.x=7.0; sprites.elder.y=7.5;
+    sprites.player.x=5.5; sprites.player.y=8.5; sprites.player.facing='right';
+    currentMap=MAP_VILLAGE;
+    fadeIn(function(){
+      showSceneTitle('마을 광장', 1500, function(){
+        queueMove('player', 7.5, 8.0, 'right', function(){
+          sprites.player.facing='up';
+          openDialog([
+            {speaker:'촌장 어르신', text:'마을 사람들이여! 드디어 우리가 두려워하던 일이 벌어지고 말았소!'},
+            {speaker:'촌장 어르신', text:'"다크에너지 코퍼레이션" — DEC가 이 지역 에너지 공급망을 완전히 장악했소!'},
+            {speaker:'촌장 어르신', text:'석유, 가스, 전기... 모든 자원을 그들이 틀어쥐고 있소. 이대로라면 우리 마을에 에너지가 끊기는 건 시간 문제요.'},
+            {speaker:charName, text:'(DEC... 들어본 적 있어. 세계 곳곳에서 재생에너지 발전소를 파괴하고 있다는 조직.)'},
+            {speaker:'촌장 어르신', text:charName+'야, 자네는 공학자지 않나! 자네라면 우리가 스스로 에너지를 만들 방법을 찾을 수 있을 거야!'},
+          ], function(){
+            runScene2();
+          });
+        });
+      });
+    });
+  });
+}
+
+function runScene2(){
+  // 씬2: DEC 드론 등장 연출
+  flashDEC(function(){
+    drone.visible=true; drone.x=-2; drone.y=1.5;
+    openDialog([
+      {speaker:'긴급 방송', text:'[DEC 공식 발표] 본 지역의 모든 에너지 자원은 이제 다크에너지 코퍼레이션의 소유입니다.'},
+      {speaker:'긴급 방송', text:'자체 발전 시도는 엄격히 금지됩니다. 위반 시 즉시 단전 조치합니다. — DEC'},
+    ], function(){
+      runScene3();
+    });
+  });
+}
+
+function runScene3(){
+  // 씬3: 정전 — 마을이 어두워짐
+  fadeOut(function(){
+    currentMap=MAP_DARK;
+    drone.visible=false;
+    sprites.elder.x=5.5; sprites.elder.y=7.5;
+    sprites.player.x=7.5; sprites.player.y=8.5; sprites.player.facing='up';
+    fadeIn(function(){
+      openDialog([
+        {speaker:'촌장 어르신', text:'결국... 전기가 끊겼어. DEC 놈들이 정말로 단전을 시켜버린 거야.'},
+        {speaker:charName,       text:'(마을 전체가 어둠에 잠겼다. 냉장고도, 가로등도, 병원 의료기기도...)'},
+        {speaker:'촌장 어르신', text:''+charName+'야. 이 어둠을 끝낼 수 있는 건 자네뿐이야.'},
+        {speaker:'촌장 어르신', text:'재생에너지 기술로 우리가 직접 전기를 만들어야 해. DEC에 맞설 유일한 방법이야.'},
+        {speaker:charName,       text:'...알겠어요. 제가 나서볼게요. 태양, 바람, 그리고 기술 — 우리가 가진 것들로 싸워봅시다!'},
+      ], function(){
+        runScene4();
+      });
+    });
+  });
+}
+
+function runScene4(){
+  // 씬4: 결의 — 출발
+  fadeOut(function(){
+    currentMap=MAP_VILLAGE;
+    sprites.elder.visible=false;
+    sprites.player.x=8.5; sprites.player.y=8.5; sprites.player.facing='down';
+    fadeIn(function(){
+      showSceneTitle('새로운 여정의 시작', 2200, function(){
+        openDialog([
+          {speaker:charName, text:'첫 번째 목적지 — 태양의 사막. 거기에 버려진 태양광 발전소가 있다고 했어.'},
+          {speaker:charName, text:'DEC가 부숴놓은 발전소를 다시 일으켜 세우자. 그게 시작이야.'},
+          {speaker:'촌장 어르신', text:'조심해서 가게나, '+charName+'! 마을 사람들이 응원하고 있어!'},
+        ], function(){
+          goToGame();
+        });
+      });
+    });
+  });
+}
+
+function goToGame(){
+  var tr=document.getElementById('transition');
+  tr.classList.add('go');
+  setTimeout(function(){window.location.href='stage1.html';},700);
+}
+
+// ═══════════════════════════════════════════════════════
+// 게임 루프
+// ═══════════════════════════════════════════════════════
+var globalTick=0, walkFr=0;
+function gameLoop(){
+  globalTick++;
+  if(globalTick%18===0) walkFr=(walkFr+2)%4;
+
+  // 자동이동 처리
+  processAutoMove();
+  if(autoMoves.length>0){
+    var sp=sprites[autoMoves[0].who];
+    if(sp) sp.fr=walkFr;
+  }
+
+  // 드론 이동
+  if(drone.visible){
+    drone.x+=drone.speed;
+    if(drone.x>COLS+2) drone.visible=false;
+  }
+
+  // 맵 렌더
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+  for(var r=0;r<ROWS;r++)
+    for(var c=0;c<COLS;c++)
+      drawTile(currentMap[r*COLS+c], c*TS, r*TS);
+
+  // 스프라이트 렌더
+  if(sprites.mom.visible) drawNPCMom(sprites.mom.x*TS, sprites.mom.y*TS, 1, 0);
+  if(sprites.elder.visible) drawNPCElder(sprites.elder.x*TS, sprites.elder.y*TS, 1, 0);
+  if(sprites.agent1.visible) drawNPCDECAgent(sprites.agent1.x*TS, sprites.agent1.y*TS, 1, walkFr);
+  if(sprites.agent2.visible) drawNPCDECAgent(sprites.agent2.x*TS, sprites.agent2.y*TS, 1, walkFr);
+
+  // 드론 (간단한 사각형 비행체)
+  if(drone.visible){
+    var dx=drone.x*TS, dy=drone.y*TS;
+    ctx.fillStyle='#111';ctx.fillRect(dx-18,dy-8,36,14);
+    ctx.fillStyle='#cc1111';ctx.fillRect(dx-16,dy-6,32,10);
+    ctx.fillStyle='#ff2200';ctx.fillRect(dx-8,dy-4,16,6);
+    ctx.fillStyle='#ff000088';ctx.fillRect(dx-22,dy-4,6,6);ctx.fillRect(dx+16,dy-4,6,6);
+    // 프로펠러
+    ctx.fillStyle='#888';ctx.fillRect(dx-24,dy-10,10,4);ctx.fillRect(dx+14,dy-10,10,4);
+    // DEC 마크
+    ctx.fillStyle='#ff0000';ctx.font='bold 8px Courier New';ctx.textAlign='center';ctx.fillText('DEC',dx,dy+1);
+  }
+
+  // 플레이어
+  charDrawFn(sprites.player.x*TS, sprites.player.y*TS, 1, charPal, sprites.player.fr);
+
+  // 타이핑 효과
+  if(dialogActive && !twDone){
+    twIdx+=TW_SPEED;
+    if(twIdx>=twText.length){twIdx=twText.length;twDone=true;}
+    $dt.textContent=twText.slice(0,Math.floor(twIdx));
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+// ═══════════════════════════════════════════════════════
+// 입력
+// ═══════════════════════════════════════════════════════
+function handleAdvance(){
+  if(dialogActive) advanceDialog();
+}
+document.addEventListener('keydown',function(e){
+  if(e.key===' '||e.key==='Enter') handleAdvance();
+});
+document.getElementById('dialog-box').addEventListener('click', handleAdvance);
+
+document.getElementById('skip-btn').addEventListener('click',function(){
+  fadeOut(function(){goToGame();});
+});
+
+// ═══════════════════════════════════════════════════════
+// 시작
+// ═══════════════════════════════════════════════════════
+requestAnimationFrame(gameLoop);
+// 잠깐 로딩 후 씬 시작
+setTimeout(runScene0, 400);
+
+// ══════════════════════════════════════════════════════════
+// 반응형 스케일링 — 모니터 크기에 관계없이 꽉 차게 표시
+// ══════════════════════════════════════════════════════════
+(function initResponsive(){
+  function fitCanvas(){
+    var wrapper=document.getElementById('game-wrapper');
+    if(!wrapper)return;
+    var cvs=wrapper.querySelector('canvas');
+    if(!cvs)return;
+    var gameW=cvs.width, gameH=cvs.height;
+    var CHROME=32;
+    var maxW=window.innerWidth-16;
+    var maxH=window.innerHeight-CHROME;
+    var scaleRaw=Math.min(maxW/gameW, maxH/gameH);
+    var scale=Math.round(scaleRaw*2)/2;
+    scale=Math.max(0.5,scale);
+    wrapper.style.transform='scale('+scale+')';
+    wrapper.style.transformOrigin='top center';
+    wrapper.style.marginBottom=((gameH*scale)-gameH)+'px';
+    document.body.style.overflow='hidden';
+  }
+  fitCanvas();
+  window.addEventListener('resize',fitCanvas);
+})();
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+</body>
+</html>

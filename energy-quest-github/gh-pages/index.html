@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>에너지 퀘스트</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#060c08;display:flex;align-items:center;justify-content:center;
+  min-height:100vh;font-family:'Nanum Gothic Coding',sans-serif;color:#fff;overflow:hidden;}
+#splash{text-align:center;padding:20px;}
+#splash h1{font-size:26px;color:#ff8800;margin-bottom:8px;text-shadow:0 0 20px #ff8800aa;}
+#splash .sub{font-size:12px;color:#666;letter-spacing:3px;margin-bottom:32px;}
+.btn{display:block;width:220px;margin:12px auto;padding:16px;font-size:16px;
+  border-radius:8px;border:2px solid;background:transparent;
+  cursor:pointer;font-family:inherit;letter-spacing:1px;transition:background .15s;}
+#btn-new{border-color:#ff8800;color:#ff8800;}
+#btn-new:active{background:rgba(255,136,0,0.3);}
+#btn-continue{border-color:#44aaff;color:#44aaff;}
+#btn-continue:active{background:rgba(68,170,255,0.3);}
+#save-info{font-size:11px;color:#555;margin-top:6px;}
+</style>
+<link rel="manifest" href="/manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#ff8800">
+</head>
+<body>
+<div id="splash">
+  <h1>⚡ 에너지 퀘스트</h1>
+  <div class="sub">ENERGY QUEST</div>
+  <button class="btn" id="btn-new" onclick="newGame()">새 게임</button>
+  <button class="btn" id="btn-continue" id="btn-continue" onclick="continueGame()" style="display:none">이어하기 ▶</button>
+  <div id="save-info"></div>
+</div>
+<script>
+window.onload = function(){
+  const lv  = localStorage.getItem('eq_level');
+  const s1  = localStorage.getItem('eq_stage1_cleared');
+  if(s1 || lv){
+    document.getElementById('btn-continue').style.display='block';
+    document.getElementById('save-info').textContent =
+      'Lv.'+(lv||1)+' — 저장된 게임이 있어요';
+  }
+};
+
+function newGame(){
+  // 세이브 초기화
+  localStorage.clear();
+  window.location.href='character-select.html';
+}
+
+function continueGame(){
+  // 클리어된 스테이지 중 가장 최근 다음 스테이지로
+  const stages=['eq_stage1_cleared','eq_stage2_cleared','eq_stage3_cleared','eq_stage4_cleared'];
+  let next = 1;
+  for(let i=stages.length-1;i>=0;i--){
+    if(localStorage.getItem(stages[i])==='1'){ next=Math.min(i+2,4); break; }
+  }
+  window.location.href='stage'+next+'.html';
+}
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+</body>
+</html>
