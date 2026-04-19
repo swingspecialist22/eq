@@ -134,11 +134,6 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
   #joystick-base,#btn-confirm{display:none!important;}
 }
 </style>
-<link rel="manifest" href="/manifest.json">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="theme-color" content="#ff8800">
 </head>
 <body>
 <div id="game-title">⚙ ENERGY QUEST — 공장 던전</div>
@@ -634,7 +629,8 @@ const TW_SPEED=2.5;
 const $db=document.getElementById('dialog-box');
 const $ds=document.getElementById('dialog-speaker');
 const $dt=document.getElementById('dialog-text');
-function openDialog(sp,lines,onClose=null){currentSpeaker=sp;currentLines=lines;dialogLineIdx=0;dialogActive=true;dialogOnClose=onClose;$db.style.display='block';startTW(lines[0]);}
+function openDialog(sp,lines,onClose=null){
+  SFX.play('quiz_answer_npc_talk');currentSpeaker=sp;currentLines=lines;dialogLineIdx=0;dialogActive=true;dialogOnClose=onClose;$db.style.display='block';startTW(lines[0]);}
 function startTW(line){twText=line;twIdx=0;twDone=false;$ds.textContent=currentSpeaker;$dt.textContent='';}
 function advanceDialog(){
   if(!twDone){$dt.textContent=twText;twIdx=twText.length;twDone=true;return;}
@@ -662,6 +658,7 @@ function checkItemPickup(){
     if(player.inventory.has(item.id))continue;
     if(item.tx===player.tx&&item.ty===player.ty){
       player.inventory.add(item.id);gainExp(item.exp);gainCoin(item.coins);
+      SFX.play('item_collect');
       showItemPopup(item);updateHUD();return;
     }
   }
@@ -746,6 +743,7 @@ function launchGateQuestion(idx){
 }
 function updateTimer(){$qtimer.textContent=quizState.timerVal;$qtimer.className=quizState.timerVal<=8?'urgent':'';}
 function selectChoice(idx){
+  SFX.play('quiz_answer_npc_talk');
   if(quizState.answered)return;
   quizState.selectedIdx=idx;
   document.querySelectorAll('.choice-btn').forEach((b,i)=>b.classList.toggle('selected',i===idx));
@@ -763,10 +761,12 @@ function submitAnswer(timeout=false){
   });
   $qresult.style.display='block';
   if(timeout||!ok){
+    SFX.play('quiz_false');
     $rbadge.textContent='✗ 오답!';$rbadge.className='result-badge ng';
     $rexp.textContent='처음부터 다시 도전해야 해!';$rnext.textContent='[ 다시 도전 → Q1부터 ]';
     $rexpl.textContent='💡 '+q.explanation;
   } else {
+    SFX.play('quiz_true');
     $rbadge.textContent='✓ 정답!';$rbadge.className='result-badge ok';
     gainExp(q.exp);gainCoin(q.coins);spawnFloat(`+${q.exp} EXP`,'#f97316',W/2-30,H/2-80);
     if(quizState.currentIdx===2){$rexp.textContent='🎉 3문제 모두 통과! MANU-9 격파!';$rnext.textContent='[ 관문 통과! → ]';}
@@ -781,7 +781,8 @@ $rnext.addEventListener('click',()=>{
   if(!ok||quizState.timerVal===0){closeQuizOverlay();setTimeout(()=>startGateQuiz(),200);}
   else if(quizState.currentIdx<2){closeQuizOverlay();setTimeout(()=>launchGateQuestion(quizState.currentIdx+1),200);}
   else{
-    closeQuizOverlay();gameState.gateCleared=true;gameState.stageComplete=true;updateHUD();
+    closeQuizOverlay();SFX.play('victory');
+    gameState.gateCleared=true;gameState.stageComplete=true;updateHUD();
     saveToLocalStorage();
     setTimeout(()=>{
       openDialog('MANU-9',[
@@ -814,7 +815,8 @@ function handlePortal(){
   ],()=>{
     const co=document.getElementById('clear-overlay');
     co.classList.add('show');
-    setTimeout(()=>{window.location.href='stage5.html';},3000);
+    setTimeout(()=>{SFX.play('warp');
+      window.location.href='stage5.html';},3000);
   });
 }
 
@@ -839,7 +841,8 @@ function showQuestLog(){
 // ══════════════════════════════════════════════════════════
 function gainExp(n){
   player.exp+=n;
-  while(player.exp>=player.expMax){player.exp-=player.expMax;player.lv++;player.expMax=Math.floor(player.expMax*1.4);showLvUp();}
+  while(player.exp>=player.expMax){player.exp-=player.expMax;SFX.play('stage_clear');
+    player.lv++;player.expMax=Math.floor(player.expMax*1.4);showLvUp();}
   updateHUD();
 }
 function gainCoin(n){player.coins+=n;updateHUD();}
@@ -1563,7 +1566,54 @@ requestAnimationFrame(gameLoop);
   }
 })();
 
+
+// ═══════════════════════════════════════════════════════════
+// 오디오 엔진
+// ═══════════════════════════════════════════════════════════
+const SFX = (function(){
+  const BASE = 'audio/';
+  const cache = {};
+  function get(name){
+    if(!cache[name]){
+      cache[name] = new Audio(BASE + name + '.mp3');
+      cache[name].preload = 'auto';
+    }
+    return cache[name];
+  }
+  let bgmEl = null;
+  return {
+    play(name){
+      try {
+        const a = get(name).cloneNode();
+        a.play().catch(()=>{});
+      } catch(e){}
+    },
+    bgmStart(){
+      if(bgmEl) return;
+      bgmEl = new Audio(BASE + 'bgm.mp3');
+      bgmEl.loop = true;
+      bgmEl.volume = 0.7;
+      bgmEl.play().catch(()=>{});
+    },
+    bgmStop(){
+      if(bgmEl){ bgmEl.pause(); bgmEl = null; }
+    }
+  };
+})();
+
+// 첫 터치/클릭 시 BGM 시작 (브라우저 자동재생 정책 대응)
+(function(){
+  function startBGM(){
+    SFX.bgmStart();
+    document.removeEventListener('touchstart', startBGM);
+    document.removeEventListener('click', startBGM);
+    document.removeEventListener('keydown', startBGM);
+  }
+  document.addEventListener('touchstart', startBGM, {once:true});
+  document.addEventListener('click', startBGM, {once:true});
+  document.addEventListener('keydown', startBGM, {once:true});
+})();
+
 </script>
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>

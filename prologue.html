@@ -63,11 +63,6 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 #dec-alert-box .da-text{font-size:20px;color:#ff4444;font-weight:bold;letter-spacing:4px;}
 #dec-alert-box .da-sub{font-size:10px;color:#884444;margin-top:6px;letter-spacing:2px;}
 </style>
-<link rel="manifest" href="/manifest.json">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="theme-color" content="#ff8800">
 </head>
 <body>
 <div id="game-wrapper">
@@ -705,7 +700,54 @@ setTimeout(runScene0, 400);
   fitCanvas();
   window.addEventListener('resize',fitCanvas);
 })();
+
+// ═══════════════════════════════════════════════════════════
+// 오디오 엔진
+// ═══════════════════════════════════════════════════════════
+const SFX = (function(){
+  const BASE = 'audio/';
+  const cache = {};
+  function get(name){
+    if(!cache[name]){
+      cache[name] = new Audio(BASE + name + '.mp3');
+      cache[name].preload = 'auto';
+    }
+    return cache[name];
+  }
+  let bgmEl = null;
+  return {
+    play(name){
+      try {
+        const a = get(name).cloneNode();
+        a.play().catch(()=>{});
+      } catch(e){}
+    },
+    bgmStart(){
+      if(bgmEl) return;
+      bgmEl = new Audio(BASE + 'bgm.mp3');
+      bgmEl.loop = true;
+      bgmEl.volume = 0.7;
+      bgmEl.play().catch(()=>{});
+    },
+    bgmStop(){
+      if(bgmEl){ bgmEl.pause(); bgmEl = null; }
+    }
+  };
+})();
+
+// 첫 터치/클릭 시 BGM 시작 (브라우저 자동재생 정책 대응)
+(function(){
+  function startBGM(){
+    SFX.bgmStart();
+    document.removeEventListener('touchstart', startBGM);
+    document.removeEventListener('click', startBGM);
+    document.removeEventListener('keydown', startBGM);
+  }
+  document.addEventListener('touchstart', startBGM, {once:true});
+  document.addEventListener('click', startBGM, {once:true});
+  document.addEventListener('keydown', startBGM, {once:true});
+})();
+
 </script>
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>
