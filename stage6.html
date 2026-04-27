@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>에너지 퀘스트 — DEC 본부 최심부</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#06020e;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100vh;font-family:'Courier New',monospace;color:#e0e0e0;user-select:none;overflow:hidden;padding-top:8px;}
+#game-title{font-size:13px;letter-spacing:6px;text-transform:uppercase;color:#cc44ff;margin-bottom:10px;text-shadow:0 0 12px #cc44ff88;}
+#game-wrapper{position:relative;border:2px solid #5a0a8a;box-shadow:0 0 60px #000000cc,0 0 100px #cc44ff22;}
+#game-canvas{display:block;image-rendering:pixelated;}
+#hud{position:absolute;top:0;left:0;right:0;padding:8px 12px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;}
+#hud-left{background:rgba(0,0,0,0.82);border:1px solid #5a1a7a;border-radius:4px;padding:6px 12px;font-size:11px;line-height:2;}
+#hud-left .name{color:#cc44ff;font-size:12px;font-weight:bold;}
+#exp-bar-wrap{width:110px;height:6px;background:#100020;border-radius:3px;margin-top:2px;overflow:hidden;}
+#exp-bar{height:6px;background:linear-gradient(90deg,#cc44ff,#ff44cc);border-radius:3px;transition:width .5s;}
+#hud-right{background:rgba(0,0,0,0.82);border:1px solid #5a1a7a;border-radius:4px;padding:6px 12px;font-size:10px;line-height:1.9;text-align:right;color:#999;}
+#hud-right .zone{color:#dd99ff;font-size:11px;}
+#hud-mission{background:rgba(0,0,0,0.82);border:1px solid #7a1a3a;border-radius:4px;padding:5px 10px;font-size:10px;line-height:1.8;color:#aa8899;}
+#hud-mission .mtitle{color:#ff6688;font-size:10px;font-weight:bold;letter-spacing:1px;}
+#dialog-box{position:absolute;bottom:0;left:0;right:0;background:rgba(6,2,14,0.97);border-top:2px solid #7a1a9a;padding:12px 18px 14px;display:none;font-size:12px;line-height:1.75;min-height:70px;z-index:5;}
+#dialog-box .speaker{color:#cc44ff;font-weight:bold;margin-bottom:3px;font-size:11px;}
+#dialog-text{color:#eeddf8;white-space:pre-wrap;}
+#dialog-continue{color:#555;font-size:10px;text-align:right;margin-top:5px;animation:blink .9s step-end infinite;}
+@keyframes blink{50%{opacity:0;}}
+#item-popup{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#0e0418,#180828);border:2px solid #9933cc;border-radius:8px;padding:16px 28px;text-align:center;z-index:20;box-shadow:0 0 40px #9933cc66;transition:transform .25s cubic-bezier(.34,1.56,.64,1),opacity .25s;opacity:0;pointer-events:none;min-width:260px;}
+#item-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
+#item-popup .ip-label{font-size:9px;letter-spacing:3px;color:#cc88ff;margin-bottom:6px;}
+#item-popup .ip-icon{font-size:32px;margin:4px 0;}
+#item-popup .ip-name{font-size:14px;color:#eeccff;font-weight:bold;margin-bottom:6px;}
+#item-popup .ip-desc{font-size:10px;color:#7a5a88;line-height:1.6;white-space:pre-wrap;}
+#item-popup .ip-exp{font-size:11px;color:#cc44ff;margin-top:8px;}
+/* 자물쇠 퍼즐 오버레이 */
+#puzzle-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px);z-index:10;}
+#puzzle-overlay.active{display:flex;}
+#puzzle-panel{width:min(640px,96%);background:#08020e;border:2px solid #7a1a9a;border-radius:8px;box-shadow:0 0 40px #cc44ff33;overflow:hidden;animation:qIn .22s ease-out;}
+@keyframes qIn{from{transform:scale(.92) translateY(20px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+#puzzle-header{background:linear-gradient(135deg,#060112,#0e0820);border-bottom:1px solid #7a1a9a;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;}
+#puzzle-gate-tag{font-size:10px;letter-spacing:2px;color:#cc44ff;background:#100020;border:1px solid #7a1a9a;padding:3px 10px;border-radius:12px;}
+#puzzle-title{font-size:12px;color:#eeccff;}
+#puzzle-body{padding:18px 20px 16px;}
+#puzzle-desc{font-size:12px;color:#cc99ee;line-height:1.7;margin-bottom:16px;border-left:2px solid #7a1a9a;padding-left:12px;}
+#puzzle-slots{display:flex;gap:8px;justify-content:center;margin-bottom:14px;flex-wrap:wrap;}
+.pz-slot{width:118px;min-height:58px;border:2px dashed #3a1a4a;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;color:#5a3a6a;font-family:'Courier New',monospace;transition:border-color .15s,background .15s;position:relative;cursor:pointer;}
+.pz-slot.highlight{border-color:#cc44ff;background:rgba(204,68,255,0.08);}
+.pz-slot.filled{border-style:solid;border-color:#9933cc;background:rgba(153,51,204,0.1);}
+.pz-slot .slot-label{position:absolute;top:3px;left:6px;font-size:9px;color:#5a3a6a;font-family:'Courier New',monospace;}
+.pz-slot .slot-content{font-size:11px;color:#cc99ff;text-align:center;padding:4px;font-family:'Courier New',monospace;}
+#puzzle-cards{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:14px;}
+.pz-card{background:#100820;border:1px solid #3a1a4a;border-radius:6px;padding:9px 12px;font-size:11px;color:#cc99ee;font-family:'Courier New',monospace;cursor:grab;text-align:center;min-width:88px;transition:transform .1s,border-color .12s;user-select:none;line-height:1.5;}
+.pz-card:hover{border-color:#cc44ff;background:#1a0a2a;transform:translateY(-2px);}
+.pz-card.used{opacity:.25;pointer-events:none;}
+#puzzle-feedback{font-size:11px;text-align:center;min-height:18px;margin-bottom:10px;color:#5a3a6a;font-family:'Courier New',monospace;}
+#puzzle-feedback.ok{color:#66ffaa;}
+#puzzle-feedback.ng{color:#ff6688;}
+#puzzle-submit{display:block;margin:0 auto;background:transparent;border:1px solid #7a1a9a;color:#cc44ff;font-family:'Courier New',monospace;font-size:12px;padding:9px 28px;border-radius:4px;cursor:pointer;letter-spacing:1px;}
+#puzzle-submit:hover{background:#180828;}
+#puzzle-submit:disabled{opacity:.3;cursor:default;}
+#levelup-popup{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#0a0118,#180828);border:2px solid #cc44ff;border-radius:8px;padding:20px 40px;text-align:center;z-index:20;box-shadow:0 0 40px #cc44ff66;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;pointer-events:none;}
+#levelup-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
+#levelup-popup .lu-title{font-size:11px;letter-spacing:3px;color:#cc44ff;margin-bottom:6px;}
+#levelup-popup .lu-lv{font-size:36px;color:#eeccff;font-weight:bold;text-shadow:0 0 20px #cc44ff;}
+#levelup-popup .lu-sub{font-size:10px;color:#5a2a8a;margin-top:4px;}
+#restore-overlay{position:absolute;inset:0;background:rgba(180,60,255,0);pointer-events:none;z-index:25;transition:background 0.3s;}
+#restore-overlay.flash{background:rgba(180,60,255,0.3);}
+@keyframes expFloat{0%{transform:translateY(0);opacity:1;}100%{transform:translateY(-60px);opacity:0;}}
+#controls-hint{margin-top:8px;font-size:10px;color:#444;letter-spacing:1px;}
+#controls-hint span{color:#777;}
+#quest-log-btn{position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.6);border:1px solid #3a1a4a;color:#8a4aaa;font-size:9px;padding:4px 8px;border-radius:3px;cursor:pointer;letter-spacing:1px;font-family:'Courier New',monospace;}
+#quest-log-btn:hover{border-color:#8a3aaa;color:#cc88ff;}
+</style>
+</head>
+<body>
+<div id="game-title">⚡ ENERGY QUEST — DEC 본부 최심부</div>
+<div id="game-wrapper">
+  <canvas id="game-canvas"></canvas>
+  <div id="hud">
+    <div id="hud-left">
+      <div class="name" id="hud-name">공학자</div>
+      <div>Lv.<span id="hud-lv">1</span> &nbsp; EXP <span id="hud-exp">0</span>/<span id="hud-expmax">120</span></div>
+      <div id="exp-bar-wrap"><div id="exp-bar" style="width:0%"></div></div>
+    </div>
+    <div id="hud-mission">
+      <div class="mtitle">🔴 미션</div>
+      <div>게이트: <span id="hud-gate-count">0</span>/3 해제</div>
+      <div>코어: <span id="hud-core-status" style="color:#444">봉인됨</span></div>
+    </div>
+    <div id="hud-right">
+      <div class="zone" id="hud-zone">DEC 최심부</div>
+      <div>에너지 코인 ⚡ <span id="hud-coin">0</span></div>
+      <div id="hud-coords" style="font-size:9px;color:#333">x:0 y:0</div>
+    </div>
+  </div>
+  <div id="dialog-box">
+    <div class="speaker" id="dialog-speaker"></div>
+    <div id="dialog-text"></div>
+    <div id="dialog-continue">[ SPACE / ENTER 계속 ]</div>
+  </div>
+  <div id="item-popup">
+    <div class="ip-label">★ 에너지 결정체 획득! ★</div>
+    <div class="ip-icon" id="ip-icon">💎</div>
+    <div class="ip-name" id="ip-name">아이템</div>
+    <div class="ip-desc" id="ip-desc"></div>
+    <div class="ip-exp" id="ip-exp">+EXP</div>
+  </div>
+  <!-- 자물쇠 퍼즐 오버레이 -->
+  <div id="puzzle-overlay">
+    <div id="puzzle-panel">
+      <div id="puzzle-header">
+        <div id="puzzle-gate-tag">보안 게이트</div>
+        <div id="puzzle-title">에너지 시퀀스 해제</div>
+      </div>
+      <div id="puzzle-body">
+        <div id="puzzle-desc"></div>
+        <div id="puzzle-slots"></div>
+        <div id="puzzle-cards"></div>
+        <div id="puzzle-feedback"></div>
+        <button id="puzzle-submit" disabled>[ 시퀀스 실행 ]</button>
+      </div>
+    </div>
+  </div>
+  <div id="levelup-popup">
+    <div class="lu-title">LEVEL UP!</div>
+    <div class="lu-lv" id="lu-lv-num">2</div>
+    <div class="lu-sub" id="lu-sub-text">새로운 기술 해금!</div>
+  </div>
+  <div id="restore-overlay"></div>
+  <button id="quest-log-btn" onclick="showQuestLog()">📋 퀘스트</button>
+</div>
+<div id="controls-hint"><span>↑↓←→ / WASD</span> 이동 &nbsp;|&nbsp; <span>SPACE / ENTER</span> 대화·확인</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONSTANTS — stage2와 동일 스케일
+// ═══════════════════════════════════════════════════════
+const TS=56, VIEW_COLS=14, VIEW_ROWS=11;
+const W=VIEW_COLS*TS, H=VIEW_ROWS*TS;
+const STEP_FRAMES=8;
+
+// 타일 ID
+const T={
+  VOID:0,   // 허공 (코어 바깥)
+  FLOOR:1,  // 기본 바닥
+  PATH:2,   // 에너지 복도
+  WALL:3,   // 벽
+  CORE:4,   // 다크 에너지 코어 (벽, 장식)
+  GATE:5,   // 보안 게이트
+  SIGN:6,   // 안내판 (벽)
+  PORTAL:7, // 보스룸 포털 (walkable)
+  PIPE:8,   // 에너지 파이프 (장식, 벽)
+  ALARM:9,  // 경보 구역 (walkable)
+  TERM:10,  // 터미널 전시물 (벽)
+  CAGE:11,  // 포로 감금 구역 (walkable)
+};
+const WALKABLE=new Set([T.FLOOR,T.PATH,T.PORTAL,T.ALARM,T.CAGE]);
+
+// ═══════════════════════════════════════════════════════
+// MAP 20×14 — 다크 에너지 코어 룸
+//  서쪽: 포로 감금 구역 (게이트A·C)
+//  중앙: 다크 에너지 코어 (4×8블록)
+//  동쪽: DEC 연구동 (게이트B)
+//  남쪽: 포털 구역
+//  게이트A(9,1) 게이트C(4,3) 게이트B(9,10) 포털(16,11)
+// ═══════════════════════════════════════════════════════
+const MAP_W=20, MAP_H=14;
+const MAP=[
+//0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
+   3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3, // R0
+   3, 11, 11, 11,  3,  2,  2,  2,  2,  5,  2,  2,  2,  2,  3,  9,  9,  9,  9,  3, // R1 게이트A(9,1)
+   3, 11, 11, 11,  3,  2,  4,  4,  4,  4,  4,  4,  4,  2,  3,  9,  9,  9,  9,  3, // R2
+   3, 11,  1,  1,  5,  2,  4,  4,  4,  4,  4,  4,  4,  2,  3,  9,  9,  9,  9,  3, // R3 게이트C(4,3)
+   3,  1,  1,  1,  3,  2,  4,  4,  4,  4,  4,  4,  4,  2,  3,  8,  8,  8,  9,  3, // R4
+   3,  9,  9,  9,  3,  2,  4,  4,  4,  4,  4,  4,  4,  2,  3,  9,  9,  9,  9,  3, // R5
+   3,  9,  9,  9,  3,  2,  4,  4,  4,  4,  4,  4,  4,  2, 10,  9,  9,  9,  9,  3, // R6 터미널(14,6)
+   3,  9,  9,  9,  3,  2,  4,  4,  4,  4,  4,  4,  4,  2,  3,  9,  9,  9,  9,  3, // R7
+   3,  1,  1,  1,  3,  2,  4,  4,  4,  4,  4,  4,  4,  2,  3,  8,  8,  8,  9,  3, // R8
+   3,  1,  1,  1,  3,  2,  4,  4,  4,  4,  4,  4,  4,  2,  3,  9,  9,  9,  9,  3, // R9
+   3,  1,  1,  1,  3,  2,  2,  2,  2,  5,  2,  2,  2,  2,  3,  9,  9,  9,  9,  3, // R10 게이트B(9,10)
+   3,  3,  3,  3,  3,  2,  2,  2,  2,  2,  2,  2,  2,  2,  3,  1,  7,  1,  9,  3, // R11 포털(16,11)
+   3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3, // R12
+   3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3, // R13
+];
+
+const GATES=[
+  {tx:9, ty:1, id:'gateA', label:'게이트 A'},
+  {tx:4, ty:3, id:'gateC', label:'게이트 C'},
+  {tx:9,ty:10, id:'gateB', label:'게이트 B'},
+];
+const PORTAL={tx:16, ty:11};
+
+// ═══════════════════════════════════════════════════════
+// 자물쇠 퍼즐 데이터 (게이트 3개)
+// ═══════════════════════════════════════════════════════
+const PUZZLES={
+  gateA:{
+    gateLabel:'보안 게이트 A — 에너지 변환',
+    desc:'태양광 발전의 에너지 변환 과정을 올바른 순서로 배열하라.\n시퀀스가 일치해야 게이트가 해제된다.',
+    slots:['1단계','2단계','3단계'],
+    answer:['태양빛(광에너지)','전자 이동 발생','전기 에너지 출력'],
+    cards:['전기 에너지 출력','태양빛(광에너지)','열에너지 손실','전자 이동 발생'],
+    hint:'빛 → 전자 → 전기 순서를 생각해봐.',
+    exp:40,coins:8,
+  },
+  gateC:{
+    gateLabel:'보안 게이트 C — 재생에너지 분류',
+    desc:'에너지원을 올바른 특성 슬롯에 배치하라.\n각 슬롯의 특성에 맞는 에너지원이어야 한다.',
+    slots:['날씨 무관 24h','조석 현상 이용','유기물 연소'],
+    answer:['지열 발전','조력 발전','바이오매스'],
+    cards:['지열 발전','태양광 발전','조력 발전','바이오매스'],
+    hint:'땅속 열 / 밀물썰물 / 폐기물을 각각 생각해봐.',
+    exp:40,coins:8,
+  },
+  gateB:{
+    gateLabel:'보안 게이트 B — ESS 작동 순서',
+    desc:'에너지 저장 시스템(ESS)의 작동 순서를 완성하라.\n4단계 시퀀스가 정확해야 코어에 접근할 수 있다.',
+    slots:['1단계','2단계','3단계','4단계'],
+    answer:['재생에너지 발전','잉여 전력 저장','수요 급증 감지','저장 전력 방출'],
+    cards:['저장 전력 방출','재생에너지 발전','열 손실 발생','수요 급증 감지','잉여 전력 저장'],
+    hint:'만들고 → 저장하고 → 감지하고 → 방출한다.',
+    exp:45,coins:9,
+  },
+};
+
+// ═══════════════════════════════════════════════════════
+// ITEMS — 에너지 결정체 3개
+// ═══════════════════════════════════════════════════════
+const ITEMS=[
+  {id:'crystal_solar',tx:2,ty:2,icon:'💎',name:'태양 에너지 결정체',
+   story:'DEC가 압수한 태양광 연구 데이터.',
+   desc:'"태양광 패널 1㎡는 하루 약 4~6kWh를 생산해.\n지구 1시간 햇빛 = 인류 1년치 에너지."',
+   exp:20,coins:4,color:'#ffcc44'},
+  {id:'crystal_wind',tx:2,ty:8,icon:'🔷',name:'풍력 에너지 결정체',
+   story:'DEC 서버에 봉인된 풍력 발전 데이터.',
+   desc:'"풍력 발전량은 풍속의 세제곱에 비례해.\n바람이 2배 빠르면 발전량은 8배!"',
+   exp:20,coins:4,color:'#44ccff'},
+  {id:'crystal_ess',tx:17,ty:9,icon:'🔮',name:'ESS 제어 결정체',
+   story:'DEC가 독점한 에너지 저장 기술 코드.',
+   desc:'"ESS는 재생에너지의 간헐성을 보완해.\n낮에 모은 태양광을 밤에 쓸 수 있게 해줘."',
+   exp:20,coins:4,color:'#cc44ff'},
+];
+
+// ═══════════════════════════════════════════════════════
+// NPC
+// ═══════════════════════════════════════════════════════
+const NPCS=[
+  {tx:2,ty:1,color:'#88ffcc',name:'포로 박사',isGuard:false,_t:0,
+   getDialog:function(){
+     this._t++;
+     const g=gameState.gatesCleared.size;
+     if(g===3)return['게이트가 모두 열렸어! 포털로 가!','블랙하트는 에너지 조합 전략에 약해.','재생에너지 카드를 잘 조합하면 반드시 이길 수 있어!'];
+     if(this._t===1)return['DEC에 잡혀 여기 갇혀 있어요...','블랙하트가 이 코어로 전국 전력망을 독점 통제하고 있어요!',`게이트 3개를 해제해야 포털이 열려요. 지금 ${g}개 됐어요.`,'각 게이트엔 에너지 지식 퍼즐이 있어요!'];
+     return[`게이트 ${g}/3 해제됐어요. 힘내요!`,'지금까지 배운 에너지 지식을 잘 생각해봐요!'];
+   }},
+  {tx:3,ty:2,color:'#ffd788',name:'포로 기술자',isGuard:false,
+   getDialog:function(){
+     if(gameState.gatesCleared.has('gateA'))return['게이트 A를 열었군요! 대단해요!','게이트 C는 서쪽 감금 구역 안쪽에 있어요.','에너지원 특성을 잘 떠올려봐요.'];
+     return['DEC가 우리 연구 결과를 모두 뺏어갔어요...','에너지 결정체 3개를 찾으면 중요한 정보가 담겨 있어요!','맵 곳곳에 흩어져 있으니 찾아봐요.'];
+   }},
+  {tx:17,ty:5,color:'#ff8844',name:'DEC 기술자',isGuard:false,
+   getDialog:function(){
+     if(gameState.gatesCleared.has('gateB'))return['...게이트까지 뚫었군. 이미 내 편이야.','블랙하트에게 전해: 재생에너지는 막을 수 없다고.','포털 바로 위에 있어.'];
+     return['...나도 이 독점 계획이 옳다고 생각 안 해.','게이트 B는 ESS 작동 순서야. 잘 생각해봐.','...이 말은 못 들은 걸로 해.'];
+   }},
+  {tx:9,ty:11,color:'#cc1111',name:'DEC 경비대장',isGuard:true,getDialog:()=>[]},
+];
+
+const BUBBLE_NPCS=[
+  {tx:1,ty:3,color:'#ffaacc',bubble:'"에너지 데이터를\n빼앗겼어..."'},
+  {tx:3,ty:3,color:'#aaccff',bubble:'"코어가 활성화되면\n세상이 끝장나..."'},
+];
+
+const SIGNS=[
+  {tx:5,ty:1,text:['[DEC 최심부 안내]\n서쪽: 포로 감금 구역 (게이트 A·C)\n동쪽: DEC 연구동 (게이트 B)\n중앙: 다크 에너지 코어\n⚠ 게이트 3개 해제 → 포털 활성화']},
+  {tx:9,ty:11,text:['[보스룸 경고]\n⚠ 블랙하트 코어 구역\n게이트를 모두 해제해야 포털이 열린다.\n...준비됐으면 들어와.']},
+];
+
+const EXHIBITS=[
+  {tx:14,ty:6,label:'DEC 에너지 독점 콘솔',
+   dialog:['💻 [DEC 에너지 독점 통제 콘솔]','이 콘솔이 전국 전력망을 원격으로 제어하고 있어.','블랙하트는 여기서 재생에너지 발전소를 하나씩 차단하고 있어!','콘솔을 무력화하려면 블랙하트를 직접 상대해야 해.','지금까지 배운 에너지 지식이 최후의 무기야!']},
+];
+
+// ═══════════════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════════════
+const gameState={gatesCleared:new Set(),allGatesCleared:false,stageComplete:false};
+const player={
+  tx:9,ty:11,facing:'up',
+  moving:false,startPx:0,startPy:0,px:0,py:0,moveProgress:0,
+  lv:1,exp:0,expMax:120,coins:0,
+  animFrame:0,animTick:0,
+  inventory:new Set(),
+  charId:'haetsal',charName:'공학자',charJob:'에너지 공학자',charPal:null,
+};
+const LV_UNLOCK={2:'에너지 분석 해금!',3:'코어 해킹 해금!',4:'에너지 마스터!',5:'DEC 격파 준비!'};
+
+// ═══════════════════════════════════════════════════════
+// INPUT
+// ═══════════════════════════════════════════════════════
+const keys={};
+let confirmPressed=false;
+let puzzleActive=false;
+window.addEventListener('keydown',e=>{
+  keys[e.key]=true;
+  if((e.key===' '||e.key==='Enter')&&!keys['_ch']){confirmPressed=true;keys['_ch']=true;}
+  e.preventDefault();
+});
+window.addEventListener('keyup',e=>{keys[e.key]=false;if(e.key===' '||e.key==='Enter')keys['_ch']=false;});
+
+// ═══════════════════════════════════════════════════════
+// 이동
+// ═══════════════════════════════════════════════════════
+function canWalk(nx,ny){
+  if(nx<0||ny<0||nx>=MAP_W||ny>=MAP_H) return false;
+  const t=MAP[ny*MAP_W+nx];
+  if(WALKABLE.has(t)) return true;
+  // 게이트: 타일값 5 (T.GATE) — 해제됐으면 통과
+  if(t===5){
+    const g=GATES.find(g=>g.tx===nx&&g.ty===ny);
+    return g && gameState.gatesCleared.has(g.id);
+  }
+  return false;
+}
+function processMovementInput(){
+  if(player.moving||dialogActive||puzzleActive||itemPopupActive)return;
+  if(keys['ArrowUp']||keys['w']||keys['W'])       tryMove(0,-1,'up');
+  else if(keys['ArrowDown']||keys['s']||keys['S']) tryMove(0,1,'down');
+  else if(keys['ArrowLeft']||keys['a']||keys['A']) tryMove(-1,0,'left');
+  else if(keys['ArrowRight']||keys['d']||keys['D'])tryMove(1,0,'right');
+}
+function tryMove(dx,dy,dir){
+  const nx=player.tx+dx,ny=player.ty+dy;
+  player.facing=dir;
+  if(nx<0||ny<0||nx>=MAP_W||ny>=MAP_H)return;
+  if(!canWalk(nx,ny))return;
+  for(const n of NPCS){if(n.tx===nx&&n.ty===ny){if(n.isGuard&&gameState.allGatesCleared)continue;return;}}
+  for(const n of BUBBLE_NPCS)if(n.tx===nx&&n.ty===ny)return;
+  player.tx=nx;player.ty=ny;
+  player.startPx=-dx*TS;player.startPy=-dy*TS;
+  player.px=player.startPx;player.py=player.startPy;
+  player.moving=true;player.moveProgress=0;
+}
+
+// ═══════════════════════════════════════════════════════
+// 대화 — stage2와 동일
+// ═══════════════════════════════════════════════════════
+let dialogActive=false,dialogOnClose=null;
+let currentSpeaker='',currentLines=[],dialogLineIdx=0;
+let twText='',twIdx=0,twDone=false;
+const TW_SPEED=2.5;
+const $db=document.getElementById('dialog-box');
+const $ds=document.getElementById('dialog-speaker');
+const $dt=document.getElementById('dialog-text');
+function openDialog(sp,lines,onClose=null){currentSpeaker=sp;currentLines=lines;dialogLineIdx=0;dialogActive=true;dialogOnClose=onClose;$db.style.display='block';startTW(lines[0]);}
+function startTW(line){twText=line;twIdx=0;twDone=false;$ds.textContent=currentSpeaker;$dt.textContent='';}
+function advanceDialog(){
+  if(!twDone){$dt.textContent=twText;twIdx=twText.length;twDone=true;return;}
+  dialogLineIdx++;
+  if(dialogLineIdx>=currentLines.length){$db.style.display='none';dialogActive=false;if(dialogOnClose){const fn=dialogOnClose;dialogOnClose=null;fn();}}
+  else startTW(currentLines[dialogLineIdx]);
+}
+
+// ═══════════════════════════════════════════════════════
+// 아이템 팝업
+// ═══════════════════════════════════════════════════════
+let itemPopupActive=false;
+const $ipop=document.getElementById('item-popup');
+function showItemPopup(item,onDone){
+  itemPopupActive=true;
+  document.getElementById('ip-icon').textContent=item.icon;
+  document.getElementById('ip-name').textContent=item.name;
+  document.getElementById('ip-desc').textContent=item.desc;
+  document.getElementById('ip-exp').textContent=`+${item.exp} EXP  /  +${item.coins} ⚡`;
+  $ipop.classList.add('show');
+  setTimeout(()=>{$ipop.classList.remove('show');setTimeout(()=>{itemPopupActive=false;if(onDone)onDone();},250);},2800);
+}
+function checkItemPickup(){
+  for(const item of ITEMS){
+    if(player.inventory.has(item.id))continue;
+    if(item.tx===player.tx&&item.ty===player.ty){
+      player.inventory.add(item.id);gainExp(item.exp);gainCoin(item.coins);showItemPopup(item);updateHUD();return;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// 상호작용
+// ═══════════════════════════════════════════════════════
+function interact(){
+  if(puzzleActive||itemPopupActive)return;
+  if(dialogActive){advanceDialog();return;}
+  const dx=player.facing==='right'?1:player.facing==='left'?-1:0;
+  const dy=player.facing==='down'?1:player.facing==='up'?-1:0;
+  const tx=player.tx+dx,ty=player.ty+dy;
+
+  for(const g of GATES){
+    if((g.tx===tx&&g.ty===ty)||(g.tx===player.tx&&g.ty===player.ty)){
+      if(gameState.gatesCleared.has(g.id)){openDialog('🔓 '+g.label,['이미 해제된 게이트야.']);return;}
+      openPuzzle(g.id);return;
+    }
+  }
+  for(const n of NPCS){
+    if(n.tx===tx&&n.ty===ty){
+      if(n.isGuard){
+        if(gameState.allGatesCleared){openDialog(n.name,['...어서 지나가.']);return;}
+        openDialog(n.name,['멈춰! 게이트 3개를 모두 해제 전까지 통과 불가!',`현재 ${gameState.gatesCleared.size}/3 해제됨.`]);return;
+      }
+      const dlg=n.getDialog();if(dlg.length)openDialog(n.name,dlg);return;
+    }
+  }
+  for(const s of SIGNS)if(s.tx===tx&&s.ty===ty){openDialog('📋 안내판',s.text);return;}
+  for(const ex of EXHIBITS){
+    if((ex.tx===tx&&ex.ty===ty)||(ex.tx===player.tx&&ex.ty===player.ty)){openDialog('🔍 '+ex.label,ex.dialog);return;}
+  }
+  if(player.tx===PORTAL.tx&&player.ty===PORTAL.ty){handlePortal();return;}
+  if(tx===PORTAL.tx&&ty===PORTAL.ty){handlePortal();return;}
+}
+
+// ═══════════════════════════════════════════════════════
+// 포털
+// ═══════════════════════════════════════════════════════
+function handlePortal(){
+  if(!gameState.allGatesCleared){openDialog('🌀 포털',[`게이트 ${gameState.gatesCleared.size}/3 해제됨.`,'모든 게이트를 해제해야 포털이 열린다.']);return;}
+  saveToLocalStorage();
+  openDialog('🌀 포털',[
+    '게이트가 모두 해제됐다.',
+    '블랙하트가 코어 안에서 기다리고 있다.',
+    '지금까지 배운 에너지 지식을 총동원해!',
+    '...가자.',
+  ],()=>{
+    const ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;background:#06020e;opacity:0;z-index:999;transition:opacity 1.5s;';
+    document.body.appendChild(ov);
+    setTimeout(()=>{ov.style.opacity='1';},50);
+    setTimeout(()=>{window.location.href='stage6_boss_battle_v4.html';},1800);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// 자물쇠 퍼즐
+// ═══════════════════════════════════════════════════════
+let currentPuzzleId=null,puzzleSlotData=[];
+function openPuzzle(gateId){
+  currentPuzzleId=gateId;puzzleActive=true;
+  const p=PUZZLES[gateId];
+  document.getElementById('puzzle-gate-tag').textContent=p.gateLabel;
+  document.getElementById('puzzle-desc').textContent=p.desc;
+  document.getElementById('puzzle-feedback').textContent='힌트: '+p.hint;
+  document.getElementById('puzzle-feedback').className='';
+  document.getElementById('puzzle-submit').disabled=true;
+  puzzleSlotData=new Array(p.slots.length).fill(null);
+  renderPuzzleSlots(p);renderPuzzleCards(p);
+  document.getElementById('puzzle-overlay').classList.add('active');
+}
+function renderPuzzleSlots(p){
+  const wrap=document.getElementById('puzzle-slots');wrap.innerHTML='';
+  p.slots.forEach((label,i)=>{
+    const slot=document.createElement('div');
+    slot.className='pz-slot'+(puzzleSlotData[i]?' filled':'');
+    slot.innerHTML=`<span class="slot-label">${label}</span><span class="slot-content">${puzzleSlotData[i]||'[ 비어있음 ]'}</span>`;
+    slot.addEventListener('click',()=>{if(puzzleSlotData[i]){puzzleSlotData[i]=null;renderPuzzleSlots(p);renderPuzzleCards(p);checkPuzzleReady(p);}});
+    slot.addEventListener('dragover',e=>{e.preventDefault();slot.classList.add('highlight');});
+    slot.addEventListener('dragleave',()=>slot.classList.remove('highlight'));
+    slot.addEventListener('drop',e=>{
+      e.preventDefault();slot.classList.remove('highlight');
+      const text=e.dataTransfer.getData('text/plain');
+      puzzleSlotData=puzzleSlotData.map(v=>v===text?null:v);
+      puzzleSlotData[i]=text;renderPuzzleSlots(p);renderPuzzleCards(p);checkPuzzleReady(p);
+    });
+    wrap.appendChild(slot);
+  });
+}
+function renderPuzzleCards(p){
+  const wrap=document.getElementById('puzzle-cards');wrap.innerHTML='';
+  p.cards.forEach(text=>{
+    const used=puzzleSlotData.includes(text);
+    const card=document.createElement('div');
+    card.className='pz-card'+(used?' used':'');card.textContent=text;card.draggable=true;
+    card.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',text));
+    card.addEventListener('click',()=>{
+      if(used)return;const idx=puzzleSlotData.indexOf(null);if(idx===-1)return;
+      puzzleSlotData[idx]=text;renderPuzzleSlots(p);renderPuzzleCards(p);checkPuzzleReady(p);
+    });
+    wrap.appendChild(card);
+  });
+}
+function checkPuzzleReady(p){document.getElementById('puzzle-submit').disabled=puzzleSlotData.some(v=>v===null);}
+document.getElementById('puzzle-submit').addEventListener('click',()=>{
+  const p=PUZZLES[currentPuzzleId];
+  const ok=p.answer.every((a,i)=>puzzleSlotData[i]===a);
+  const fb=document.getElementById('puzzle-feedback');
+  if(ok){
+    fb.textContent='✓ 시퀀스 일치! 게이트 해제!';fb.className='ok';
+    document.getElementById('puzzle-submit').disabled=true;
+    const ro=document.getElementById('restore-overlay');
+    ro.classList.add('flash');setTimeout(()=>ro.classList.remove('flash'),400);
+    setTimeout(()=>{
+      closePuzzle();
+      gameState.gatesCleared.add(currentPuzzleId);
+      gainExp(p.exp);gainCoin(p.coins);
+      spawnFloat(`+${p.exp} EXP`,'#cc44ff',W/2-30,H/2-80);
+      if(gameState.gatesCleared.size>=3){gameState.allGatesCleared=true;gameState.stageComplete=true;}
+      updateHUD();
+      openDialog('🔓 게이트 해제',[
+        `${p.gateLabel.split('—')[0].trim()} 해제! (${gameState.gatesCleared.size}/3)`,
+        gameState.allGatesCleared?'모든 게이트가 열렸다! 포털로 가자!':'남은 게이트를 계속 해제해!',
+      ]);
+    },700);
+  } else {
+    fb.textContent='✗ 시퀀스 오류. 재입력하라.';fb.className='ng';
+    setTimeout(()=>{
+      puzzleSlotData=new Array(p.slots.length).fill(null);
+      renderPuzzleSlots(p);renderPuzzleCards(p);
+      fb.textContent='힌트: '+p.hint;fb.className='';
+      document.getElementById('puzzle-submit').disabled=true;
+    },1000);
+  }
+});
+function closePuzzle(){puzzleActive=false;document.getElementById('puzzle-overlay').classList.remove('active');}
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&puzzleActive)closePuzzle();});
+
+// ═══════════════════════════════════════════════════════
+// EXP / LEVEL / COIN
+// ═══════════════════════════════════════════════════════
+function gainExp(n){
+  player.exp+=n;
+  while(player.exp>=player.expMax){player.exp-=player.expMax;player.lv++;player.expMax=Math.floor(player.expMax*1.4);showLvUp();}
+  updateHUD();
+}
+function gainCoin(n){player.coins+=n;updateHUD();}
+function showLvUp(){
+  const p=document.getElementById('levelup-popup');
+  document.getElementById('lu-lv-num').textContent=player.lv;
+  document.getElementById('lu-sub-text').textContent=LV_UNLOCK[player.lv]||'능력치 상승!';
+  p.classList.add('show');setTimeout(()=>p.classList.remove('show'),2800);
+}
+function spawnFloat(txt,col,x,y){
+  const el=document.createElement('div');el.textContent=txt;
+  el.style.cssText=`position:absolute;left:${x}px;top:${y}px;color:${col};font-size:13px;font-family:'Courier New',monospace;font-weight:bold;pointer-events:none;z-index:30;animation:expFloat 1.2s forwards;`;
+  document.getElementById('game-wrapper').appendChild(el);setTimeout(()=>el.remove(),1200);
+}
+
+// ═══════════════════════════════════════════════════════
+// HUD
+// ═══════════════════════════════════════════════════════
+function getZoneName(tx,ty){
+  if(tx<=4)return '포로 감금 구역';
+  if(tx>=15)return 'DEC 동쪽 연구동';
+  if(ty>=10)return '포털 구역';
+  return '코어 중앙 복도';
+}
+function updateHUD(){
+  document.getElementById('hud-lv').textContent=player.lv;
+  document.getElementById('hud-exp').textContent=player.exp;
+  document.getElementById('hud-expmax').textContent=player.expMax;
+  document.getElementById('exp-bar').style.width=(player.exp/player.expMax*100)+'%';
+  document.getElementById('hud-coin').textContent=player.coins;
+  document.getElementById('hud-coords').textContent=`x:${player.tx} y:${player.ty}`;
+  document.getElementById('hud-zone').textContent=getZoneName(player.tx,player.ty);
+  document.getElementById('hud-gate-count').textContent=gameState.gatesCleared.size;
+  const cs=document.getElementById('hud-core-status');
+  cs.textContent=gameState.allGatesCleared?'봉인 해제 ✓':'봉인됨';
+  cs.style.color=gameState.allGatesCleared?'#cc44ff':'#444';
+}
+
+// ═══════════════════════════════════════════════════════
+// 퀘스트 로그
+// ═══════════════════════════════════════════════════════
+function showQuestLog(){
+  const lines=['📋 [DEC 최심부 퀘스트]\n'];
+  lines.push('▶ 보안 게이트:');
+  GATES.forEach(g=>lines.push(`  ${gameState.gatesCleared.has(g.id)?'✅':'⬜'} ${g.label}`));
+  lines.push('\n▶ 에너지 결정체:');
+  ITEMS.forEach(it=>lines.push(`  ${player.inventory.has(it.id)?'✅':'⬜'} ${it.icon} ${it.name}`));
+  if(gameState.allGatesCleared)lines.push('\n⚡ 코어 봉인 해제! 포털로 이동!');
+  openDialog('📋 퀘스트 로그',lines);
+}
+
+// ═══════════════════════════════════════════════════════
+// localStorage
+// ═══════════════════════════════════════════════════════
+function saveToLocalStorage(){
+  localStorage.setItem('eq_level',player.lv);
+  localStorage.setItem('eq_exp',player.exp);
+  localStorage.setItem('eq_coins',player.coins);
+  localStorage.setItem('eq_stage6_map_cleared','1');
+  localStorage.setItem('eq_char_id',player.charId||'haetsal');
+  localStorage.setItem('eq_char_name',player.charName||'공학자');
+  localStorage.setItem('eq_char_job',player.charJob||'에너지 공학자');
+  if(player.charPal)localStorage.setItem('eq_char_pal',JSON.stringify(player.charPal));
+}
+function loadFromLocalStorage(){
+  const lv=parseInt(localStorage.getItem('eq_level'))||1;
+  const exp=parseInt(localStorage.getItem('eq_exp'))||0;
+  const coins=parseInt(localStorage.getItem('eq_coins'))||0;
+  player.lv=lv;player.exp=exp;player.coins=coins;
+  player.expMax=120;for(let i=1;i<lv;i++)player.expMax=Math.floor(player.expMax*1.4);
+  player.charId  =localStorage.getItem('eq_char_id')  ||'haetsal';
+  player.charName=localStorage.getItem('eq_char_name')||'공학자';
+  player.charJob =localStorage.getItem('eq_char_job') ||'에너지 공학자';
+  try{player.charPal=JSON.parse(localStorage.getItem('eq_char_pal'));}catch(e){player.charPal=null;}
+  const nameEl=document.querySelector('#hud-left .name');
+  if(nameEl)nameEl.textContent=player.charName;
+}
+
+// ═══════════════════════════════════════════════════════
+// 캔버스
+// ═══════════════════════════════════════════════════════
+const canvas=document.getElementById('game-canvas');
+const ctx=canvas.getContext('2d');
+canvas.width=W;canvas.height=H;
+ctx.imageSmoothingEnabled=false;
+
+// ═══════════════════════════════════════════════════════
+// 타일 드로잉 — DEC 최심부 보라/붉은 팔레트
+// ═══════════════════════════════════════════════════════
+function drawTile(type,sx,sy){
+  const s=TS;ctx.save();ctx.translate(sx,sy);
+  const t=Date.now();
+  switch(type){
+    case T.VOID:{
+      ctx.fillStyle='#020008';ctx.fillRect(0,0,s,s);
+      break;}
+    case T.FLOOR:{
+      ctx.fillStyle='#0c0818';ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#120e22';ctx.fillRect(2,2,s-4,s-4);
+      ctx.strokeStyle='rgba(120,50,200,0.09)';ctx.lineWidth=1;ctx.strokeRect(5,5,s-10,s-10);
+      break;}
+    case T.PATH:{
+      // 에너지 복도 — 흐르는 보라빛 라인
+      ctx.fillStyle='#080614';ctx.fillRect(0,0,s,s);
+      const flow=(t/800+sx*0.002)%1;
+      ctx.fillStyle=`rgba(160,60,240,${0.1+0.06*Math.sin(t/400)})`;ctx.fillRect(s/2-3,0,6,s);
+      ctx.fillStyle=`rgba(200,100,255,${0.5+0.3*Math.sin(t/300)})`;
+      ctx.fillRect(s/2-1,(flow*s*2)%s,2,8);
+      // 바닥 격자선
+      ctx.strokeStyle='rgba(80,20,140,0.18)';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(0,s/2);ctx.lineTo(s,s/2);ctx.stroke();
+      break;}
+    case T.WALL:{
+      ctx.fillStyle='#060410';ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#0c0820';
+      for(let r=0;r<4;r++) for(let c=0;c<4;c++) if((r+c)%2===0)ctx.fillRect(c*14+1,r*14+1,12,12);
+      const gw=ctx.createLinearGradient(0,s-8,0,s);
+      gw.addColorStop(0,'rgba(120,20,200,0)');gw.addColorStop(1,'rgba(120,20,200,0.14)');
+      ctx.fillStyle=gw;ctx.fillRect(0,s-8,s,8);
+      break;}
+    case T.CORE:{
+      // 다크 에너지 코어 — 고동치는 빛의 근원
+      const p=Math.sin(t/280)*0.5+0.5;
+      ctx.fillStyle='#060210';ctx.fillRect(0,0,s,s);
+      const g=ctx.createRadialGradient(s/2,s/2,3,s/2,s/2,s/2+4);
+      g.addColorStop(0,`rgba(200,0,255,${0.55+0.3*p})`);
+      g.addColorStop(0.4,`rgba(120,0,200,${0.3+0.15*p})`);
+      g.addColorStop(1,'rgba(30,0,60,0)');
+      ctx.fillStyle=g;ctx.fillRect(0,0,s,s);
+      // 코어 라인
+      ctx.strokeStyle=`rgba(200,60,255,${0.25+0.2*p})`;ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(s/2,0);ctx.lineTo(s/2,s);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(0,s/2);ctx.lineTo(s,s/2);ctx.stroke();
+      ctx.beginPath();ctx.arc(s/2,s/2,s/3,0,Math.PI*2);ctx.stroke();
+      // 반짝이는 파티클
+      const ang=(t/400)%Math.PI*2;
+      ctx.fillStyle=`rgba(255,180,255,${0.6+0.4*p})`;
+      for(let i=0;i<3;i++){const a=ang+i*(Math.PI*2/3),r=s/4;ctx.fillRect(s/2+Math.cos(a)*r-2,s/2+Math.sin(a)*r-2,4,4);}
+      break;}
+    case T.GATE:{
+      const g=GATES.find(g=>{
+        const{cx,cy}=getCam();
+        return Math.abs(g.tx-(Math.round((sx+cx)/TS)))<1&&Math.abs(g.ty-(Math.round((sy+cy)/TS)))<1;
+      });
+      const cleared=g&&gameState.gatesCleared.has(g.id);
+      const p=Math.sin(t/350)*0.5+0.5;
+      ctx.fillStyle='#080414';ctx.fillRect(0,0,s,s);
+      if(cleared){
+        ctx.strokeStyle=`rgba(100,255,150,${0.4+0.3*p})`;ctx.lineWidth=2;ctx.strokeRect(4,0,s-8,s);
+        ctx.fillStyle=`rgba(100,255,150,${0.07+0.05*p})`;ctx.fillRect(4,0,s-8,s);
+        ctx.font='20px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🔓',s/2,s/2);
+      } else {
+        ctx.strokeStyle=`rgba(200,0,255,${0.5+0.35*p})`;ctx.lineWidth=2;ctx.strokeRect(4,0,s-8,s);
+        ctx.fillStyle=`rgba(180,0,240,${0.1+0.08*p})`;ctx.fillRect(4,0,s-8,s);
+        ctx.font='20px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🔒',s/2,s/2);
+      }
+      break;}
+    case T.SIGN:{
+      ctx.fillStyle='#0c0820';ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#1a0a30';ctx.fillRect(s/2-3,s/2+4,6,s/2-4);
+      ctx.fillStyle='#160828';ctx.fillRect(8,10,s-16,28);
+      ctx.strokeStyle='rgba(160,60,240,0.5)';ctx.lineWidth=1;ctx.strokeRect(8,10,s-16,28);
+      for(let i=0;i<3;i++){ctx.fillStyle=`rgba(190,90,255,${0.12+i*0.04})`;ctx.fillRect(12,16+i*8,s-24,2);}
+      break;}
+    case T.PORTAL:{
+      const pp=Math.sin(t/380)*0.5+0.5;
+      const g=ctx.createRadialGradient(s/2,s/2,4,s/2,s/2,26);
+      if(gameState.allGatesCleared){
+        g.addColorStop(0,'#f0ccff');g.addColorStop(0.4,`rgba(210,80,255,${0.75+0.25*pp})`);g.addColorStop(1,'rgba(60,0,100,0)');
+      } else {
+        g.addColorStop(0,'#2a0840');g.addColorStop(0.4,'rgba(80,20,120,0.35)');g.addColorStop(1,'rgba(20,0,40,0)');
+      }
+      ctx.fillStyle='#06020e';ctx.fillRect(0,0,s,s);
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(s/2,s/2,20+Math.sin(t/480)*3,0,Math.PI*2);ctx.fill();
+      const ptc=gameState.allGatesCleared?'#f0ccff':'#5a1a8a';
+      ctx.fillStyle=ptc;
+      const t2=(t/480)%1;
+      for(let i=0;i<6;i++){const a=(i/6+t2)*Math.PI*2,r=15;ctx.fillRect(s/2+Math.cos(a)*r-2,s/2+Math.sin(a)*r-2,4,4);}
+      ctx.font='bold 9px "Courier New"';ctx.textAlign='center';ctx.fillStyle=ptc;
+      ctx.fillText(gameState.allGatesCleared?'BOSS ▶':'BOSS',s/2,s-3);
+      break;}
+    case T.PIPE:{
+      // 에너지 파이프 (동쪽 장식)
+      ctx.fillStyle='#0a0818';ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#180a28';ctx.fillRect(s/2-5,0,10,s);
+      ctx.strokeStyle='rgba(140,40,220,0.45)';ctx.lineWidth=1.5;ctx.strokeRect(s/2-5,0,10,s);
+      const fl=(t/550)%1;
+      ctx.fillStyle=`rgba(190,80,255,${0.45+0.3*Math.sin(t/280)})`;
+      ctx.fillRect(s/2-3,(fl*s)%s,6,10);
+      break;}
+    case T.ALARM:{
+      // 경보 구역 바닥 (동쪽)
+      ctx.fillStyle='#0e0810';ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#160a18';ctx.fillRect(2,2,s-4,s-4);
+      const ap=Math.sin(t/480)*0.5+0.5;
+      ctx.strokeStyle=`rgba(220,30,80,${0.07+0.05*ap})`;ctx.lineWidth=1;ctx.strokeRect(5,5,s-10,s-10);
+      break;}
+    case T.TERM:{
+      // 터미널 전시물
+      ctx.fillStyle='#080414';ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#100820';ctx.fillRect(4,4,s-8,s-8);
+      ctx.strokeStyle='rgba(160,60,240,0.55)';ctx.lineWidth=1.5;ctx.strokeRect(4,4,s-8,s-8);
+      for(let r=0;r<3;r++) for(let c=0;c<3;c++){
+        const on=((t/680+r*0.42+c*0.28)%1)<0.58;
+        ctx.fillStyle=on?'rgba(190,80,255,0.85)':'rgba(60,10,100,0.2)';
+        ctx.fillRect(10+c*13,10+r*13,10,10);
+      }
+      ctx.fillStyle='rgba(0,0,0,0.82)';ctx.fillRect(0,0,s,12);
+      ctx.fillStyle='#cc88ff';ctx.font='8px "Courier New"';ctx.textAlign='center';ctx.fillText('터미널',s/2,9);
+      break;}
+    case T.CAGE:{
+      // 포로 감금 구역
+      ctx.fillStyle='#0a0808';ctx.fillRect(0,0,s,s);
+      ctx.fillStyle='#120e0e';ctx.fillRect(2,2,s-4,s-4);
+      ctx.strokeStyle='rgba(180,100,100,0.14)';ctx.lineWidth=1;
+      for(let i=1;i<4;i++){
+        ctx.beginPath();ctx.moveTo(i*14,0);ctx.lineTo(i*14,s);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(0,i*14);ctx.lineTo(s,i*14);ctx.stroke();
+      }
+      break;}
+    default:{ctx.fillStyle='#06020e';ctx.fillRect(0,0,s,s);}
+  }
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════
+// 아이템 글로우
+// ═══════════════════════════════════════════════════════
+function drawItemGlow(item,sx,sy){
+  if(player.inventory.has(item.id))return;
+  const s=TS,pulse=(Math.sin(Date.now()/300)+1)/2;
+  ctx.save();ctx.translate(sx,sy);
+  const g=ctx.createRadialGradient(s/2,s/2,2,s/2,s/2,22);
+  g.addColorStop(0,item.color+'cc');g.addColorStop(1,item.color+'00');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(s/2,s/2,16+pulse*4,0,Math.PI*2);ctx.fill();
+  ctx.font=`${16+Math.floor(pulse*3)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(item.icon,s/2,s/2+1);
+  for(let i=0;i<4;i++){const a=(Date.now()/600+i/4)*Math.PI*2,r=12+pulse*6;ctx.fillStyle=item.color+'88';ctx.fillRect(s/2+Math.cos(a)*r-2,s/2+Math.sin(a)*r-2,4,4);}
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════
+// 플레이어 스프라이트 — stage2 drawPlayer 그대로
+// ═══════════════════════════════════════════════════════
+function drawPlayer(sx,sy){
+  const s=TS;ctx.save();ctx.translate(sx,sy);
+  const f=player.facing;
+  const fr=player.animFrame;
+  const PAL=player.charPal||{
+    cloth:'#3a8aff',cloth2:'#2060cc',hair:'#3d2200',skin:'#f5c49a',
+    pants:'#1a3a80',shoe:'#22223e',goggle:'#1a3fa0',goggle2:'#4488ff',
+    antenna:'#ff8800',antenna2:'#ffcc00',badge:'#ffcc00',badge2:'#ff8800',eyeColor:'#1a1a8a',
+  };
+  const charId=player.charId||'haetsal';
+  const bx=s/2,by=s-8;
+  const legAnim=player.moving?(fr%2===0?3:-3):0;
+  const legL=legAnim,legR=-legAnim;
+  const armSwing=player.moving?(fr%2===0?4:-4):0;
+
+  function px(x,y,w,h,col,outline='#1a1a1a'){ctx.fillStyle=outline;ctx.fillRect(x-1,y-1,w+2,h+2);ctx.fillStyle=col;ctx.fillRect(x,y,w,h);}
+  function fill(x,y,w,h,col){ctx.fillStyle=col;ctx.fillRect(x,y,w,h);}
+
+  // 보라빛 그림자
+  ctx.fillStyle='rgba(160,0,255,0.18)';
+  ctx.beginPath();ctx.ellipse(bx,by+2,11,4,0,0,Math.PI*2);ctx.fill();
+
+  function drawFaceDown(bx,by,PAL){
+    fill(bx-6,by-44,4,6,'#fff');fill(bx+2,by-44,4,6,'#fff');
+    fill(bx-5,by-42,3,3,PAL.eyeColor||'#1a1a8a');fill(bx+3,by-42,3,3,PAL.eyeColor||'#1a1a8a');
+    fill(bx-5,by-42,1,1,'#fff');fill(bx+3,by-42,1,1,'#fff');
+    fill(bx-6,by-45,4,2,PAL.hair);fill(bx+2,by-45,4,2,PAL.hair);
+    fill(bx-9,by-53,5,2,PAL.hair);fill(bx+4,by-53,5,2,PAL.hair);
+    fill(bx-1,by-46,2,2,'#e0a070');
+    fill(bx-5,by-40,3,2,'#c06060');fill(bx-2,by-39,6,2,'#c06060');fill(bx+4,by-40,3,2,'#c06060');
+  }
+  function drawFaceLeft(bx,by,PAL){
+    fill(bx-12,by-52,5,6,'#fff');fill(bx-11,by-50,3,4,PAL.eyeColor||'#1a1a8a');fill(bx-11,by-50,2,2,'#fff');
+    fill(bx-12,by-53,4,2,PAL.hair);fill(bx-15,by-46,2,2,'#e0a070');
+    fill(bx-15,by-40,2,2,'#c06060');fill(bx-14,by-39,4,2,'#c06060');
+  }
+  function drawFaceRight(bx,by,PAL){
+    fill(bx+7,by-52,5,6,'#fff');fill(bx+8,by-50,3,4,PAL.eyeColor||'#1a1a8a');fill(bx+8,by-50,2,2,'#fff');
+    fill(bx+8,by-53,4,2,PAL.hair);fill(bx+13,by-46,2,2,'#e0a070');
+    fill(bx+13,by-40,2,2,'#c06060');fill(bx+10,by-39,4,2,'#c06060');
+  }
+
+  if(charId==='haetsal'){
+    if(f==='down'){
+      px(bx-11,by-7+legL,9,5,PAL.shoe);px(bx+2,by-7+legR,9,5,PAL.shoe);
+      px(bx-10,by-18+legL,8,12,PAL.pants);px(bx+2,by-18+legR,8,12,PAL.pants);
+      px(bx-12,by-36,24,18,PAL.cloth);fill(bx-4,by-32,8,6,PAL.badge);fill(bx-3,by-31,6,4,PAL.badge2);
+      px(bx-18,by-34+armSwing,6,13,PAL.cloth);px(bx+12,by-34-armSwing,6,13,PAL.cloth);
+      fill(bx-18,by-22+armSwing,6,4,PAL.skin||'#f5c49a');fill(bx+12,by-22-armSwing,6,4,PAL.skin||'#f5c49a');
+      px(bx-12,by-58,24,22,PAL.skin||'#f5c49a');fill(bx-14,by-54,4,8,PAL.skin||'#f5c49a');fill(bx+10,by-54,4,8,PAL.skin||'#f5c49a');
+      drawFaceDown(bx,by,PAL);
+      px(bx-13,by-68,26,14,PAL.hair);fill(bx-14,by-62,4,10,PAL.hair);fill(bx+10,by-62,4,10,PAL.hair);
+      px(bx-13,by-70,26,6,PAL.goggle);fill(bx-10,by-69,8,4,PAL.goggle2);fill(bx+2,by-69,8,4,PAL.goggle2);fill(bx-1,by-69,2,4,'#1a1a2e');
+      fill(bx-10,by-74,20,6,PAL.goggle);fill(bx-8,by-76,16,4,PAL.goggle2);
+      fill(bx+6,by-80,4,6,PAL.antenna);fill(bx+7,by-82,2,3,PAL.antenna2);
+    } else if(f==='up'){
+      px(bx-11,by-7+legL,9,5,PAL.shoe);px(bx+2,by-7+legR,9,5,PAL.shoe);
+      px(bx-10,by-18+legL,8,12,PAL.pants);px(bx+2,by-18+legR,8,12,PAL.pants);
+      px(bx-12,by-36,24,18,PAL.cloth);
+      px(bx-8,by-35,16,14,'#cc6600');fill(bx-6,by-33,12,10,'#ee8800');fill(bx-4,by-31,8,6,'#ffaa22');
+      px(bx-18,by-34-armSwing,6,13,PAL.cloth);px(bx+12,by-34+armSwing,6,13,PAL.cloth);
+      px(bx-12,by-58,24,22,PAL.skin||'#f5c49a');fill(bx-14,by-54,4,8,PAL.skin||'#f5c49a');fill(bx+10,by-54,4,8,PAL.skin||'#f5c49a');
+      px(bx-13,by-68,26,12,PAL.hair);fill(bx-14,by-62,4,8,PAL.hair);fill(bx+10,by-62,4,8,PAL.hair);
+      px(bx-13,by-70,26,6,PAL.goggle);fill(bx-10,by-74,20,6,PAL.goggle);fill(bx-8,by-76,16,4,PAL.goggle2);
+      fill(bx+6,by-80,4,6,PAL.antenna);fill(bx+7,by-82,2,3,PAL.antenna2);
+    } else if(f==='left'){
+      px(bx-8,by-7+legR,10,5,PAL.shoe);px(bx-4,by-7+legL,8,5,PAL.shoe,'#111');
+      px(bx-8,by-18+legR,8,12,PAL.pants);px(bx-5,by-18+legL,6,12,PAL.pants);
+      px(bx-10,by-36,20,18,PAL.cloth);fill(bx-6,by-32,6,5,PAL.badge);
+      px(bx+8,by-34+armSwing,5,13,PAL.cloth2||PAL.cloth);fill(bx+8,by-22+armSwing,5,4,PAL.skin||'#f5c49a');
+      px(bx-14,by-34-armSwing,5,13,PAL.cloth);fill(bx-14,by-22-armSwing,5,4,PAL.skin||'#f5c49a');
+      px(bx-14,by-58,20,22,PAL.skin||'#f5c49a');fill(bx-15,by-54,4,8,PAL.skin||'#f5c49a');
+      drawFaceLeft(bx,by,PAL);
+      px(bx-16,by-68,22,14,PAL.hair);fill(bx-17,by-62,4,12,PAL.hair);fill(bx+4,by-66,4,10,PAL.hair);
+      px(bx-16,by-70,22,6,PAL.goggle);fill(bx-14,by-74,18,6,PAL.goggle);fill(bx-12,by-76,14,4,PAL.goggle2);
+      fill(bx-15,by-69,6,4,PAL.goggle2);fill(bx+4,by-78,3,6,PAL.antenna);fill(bx+4,by-80,3,3,PAL.antenna2);
+    } else {
+      px(bx-2,by-7+legL,10,5,PAL.shoe);px(bx-6,by-7+legR,8,5,PAL.shoe,'#111');
+      px(bx,by-18+legL,8,12,PAL.pants);px(bx-1,by-18+legR,6,12,PAL.pants);
+      px(bx-10,by-36,20,18,PAL.cloth);fill(bx,by-32,6,5,PAL.badge);
+      px(bx-13,by-34-armSwing,5,13,PAL.cloth2||PAL.cloth);fill(bx-13,by-22-armSwing,5,4,PAL.skin||'#f5c49a');
+      px(bx+9,by-34+armSwing,5,13,PAL.cloth);fill(bx+9,by-22+armSwing,5,4,PAL.skin||'#f5c49a');
+      px(bx-6,by-58,20,22,PAL.skin||'#f5c49a');fill(bx+11,by-54,4,8,PAL.skin||'#f5c49a');
+      drawFaceRight(bx,by,PAL);
+      px(bx-6,by-68,22,14,PAL.hair);fill(bx+13,by-62,4,12,PAL.hair);fill(bx-10,by-66,4,10,PAL.hair);
+      px(bx-6,by-70,22,6,PAL.goggle);fill(bx-4,by-74,18,6,PAL.goggle);fill(bx-2,by-76,14,4,PAL.goggle2);
+      fill(bx+9,by-69,6,4,PAL.goggle2);fill(bx-7,by-78,3,6,PAL.antenna);fill(bx-7,by-80,3,3,PAL.antenna2);
+    }
+  } else {
+    // 기본 폴백
+    ctx.fillStyle='rgba(160,0,255,0.15)';ctx.beginPath();ctx.ellipse(bx,by+1,9,3,0,0,Math.PI*2);ctx.fill();
+    px(bx-9,by-5,7,4,PAL.shoe||'#22223e');px(bx+2,by-5,7,4,PAL.shoe||'#22223e');
+    px(bx-8,by-14,6,10,PAL.pants||'#1a3a80');px(bx+2,by-14,6,10,PAL.pants||'#1a3a80');
+    px(bx-10,by-30,20,16,PAL.cloth||'#3a8aff');
+    fill(bx-8,by-28,16,2,PAL.cloth2||'#2060cc');fill(bx-8,by-24,16,2,PAL.cloth2||'#2060cc');
+    px(bx-15,by-28,5,12,PAL.cloth||'#3a8aff');px(bx+10,by-28,5,12,PAL.cloth||'#3a8aff');
+    fill(bx-15,by-17,5,4,PAL.skin||'#f5c49a');fill(bx+10,by-17,5,4,PAL.skin||'#f5c49a');
+    px(bx-10,by-48,20,18,PAL.skin||'#f5c49a');
+    fill(bx-11,by-44,3,7,PAL.skin||'#f5c49a');fill(bx+8,by-44,3,7,PAL.skin||'#f5c49a');
+    fill(bx-8,by-43,5,6,'#fff');fill(bx+3,by-43,5,6,'#fff');
+    fill(bx-7,by-41,3,3,PAL.eyeColor||'#2a2a8a');fill(bx+4,by-41,3,3,PAL.eyeColor||'#2a2a8a');
+    fill(bx-7,by-41,1,1,'#fff');fill(bx+4,by-41,1,1,'#fff');
+    fill(bx-8,by-44,4,2,PAL.hair||'#3d2200');fill(bx+4,by-44,4,2,PAL.hair||'#3d2200');
+    fill(bx-4,by-35,2,2,'#c06060');fill(bx-2,by-34,5,2,'#c06060');fill(bx+3,by-35,2,2,'#c06060');
+    px(bx-11,by-58,22,12,PAL.hair||'#3d2200');
+    fill(bx-12,by-52,3,8,PAL.hair||'#3d2200');fill(bx+9,by-52,3,8,PAL.hair||'#3d2200');
+  }
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════
+// NPC 스프라이트 — stage2 drawNPCSprite 그대로
+// ═══════════════════════════════════════════════════════
+function shadeColor(hex,pct){
+  let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  r=Math.min(255,Math.max(0,r+pct));g=Math.min(255,Math.max(0,g+pct));b=Math.min(255,Math.max(0,b+pct));
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+function drawNPCSprite(bx,by,clothColor,hairColor,skinColor,opts={}){
+  const cloth=clothColor||'#888';
+  const cloth2=opts.cloth2||shadeColor(cloth,-30);
+  const hair=hairColor||'#3d2200';
+  const skin=skinColor||'#f5c49a';
+  const pants=opts.pants||'#334';
+  const shoe=opts.shoe||'#2a2a2e';
+  function px(x,y,w,h,col,outline='#1a1a1a'){ctx.fillStyle=outline;ctx.fillRect(x-1,y-1,w+2,h+2);ctx.fillStyle=col;ctx.fillRect(x,y,w,h);}
+  function fill(x,y,w,h,col){ctx.fillStyle=col;ctx.fillRect(x,y,w,h);}
+  ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(bx,by+1,9,3,0,0,Math.PI*2);ctx.fill();
+  px(bx-9,by-5,7,4,shoe);px(bx+2,by-5,7,4,shoe);
+  px(bx-8,by-14,6,10,pants);px(bx+2,by-14,6,10,pants);
+  px(bx-10,by-30,20,16,cloth);
+  fill(bx-8,by-28,16,2,cloth2);fill(bx-8,by-24,16,2,cloth2);
+  px(bx-15,by-28,5,12,cloth);px(bx+10,by-28,5,12,cloth);
+  fill(bx-15,by-17,5,4,skin);fill(bx+10,by-17,5,4,skin);
+  px(bx-10,by-48,20,18,skin);
+  fill(bx-11,by-44,3,7,skin);fill(bx+8,by-44,3,7,skin);
+  fill(bx-8,by-43,5,6,'#fff');fill(bx+3,by-43,5,6,'#fff');
+  fill(bx-7,by-41,3,3,opts.eyeColor||'#2a2a8a');fill(bx+4,by-41,3,3,opts.eyeColor||'#2a2a8a');
+  fill(bx-7,by-41,1,1,'#fff');fill(bx+4,by-41,1,1,'#fff');
+  fill(bx-8,by-44,4,2,hair);fill(bx+4,by-44,4,2,hair);
+  if(opts.smile!==false){fill(bx-4,by-35,2,2,'#c06060');fill(bx-2,by-34,5,2,'#c06060');fill(bx+3,by-35,2,2,'#c06060');}
+  px(bx-11,by-58,22,12,hair);
+  fill(bx-12,by-52,3,8,hair);fill(bx+9,by-52,3,8,hair);
+  if(opts.hat){px(bx-12,by-60,24,5,opts.hat);fill(bx-10,by-64,20,6,opts.hat);}
+  else{fill(bx-8,by-60,8,3,shadeColor(hair,20));}
+}
+function drawNPC(npc,sx,sy){
+  const s=TS;ctx.save();ctx.translate(sx,sy);
+  const bx=s/2,by=s-8;
+  const profiles={
+    '포로 박사':    {cloth:'#2a5a8a',hair:'#cccccc',pants:'#1a3a5a',eyeColor:'#2a6a8a',smile:true},
+    '포로 기술자':  {cloth:'#4a6a2a',hair:'#4a3a1a',pants:'#2a3a1a',eyeColor:'#4a6a1a'},
+    'DEC 기술자':   {cloth:'#8a3a1a',hair:'#1a1a1a',pants:'#3a1a08',eyeColor:'#8a3a1a'},
+    'DEC 경비대장': {cloth:'#cc1111',hair:'#111111',pants:'#440000',hat:'#880000',eyeColor:'#880000',smile:false},
+  };
+  const prof=profiles[npc.name]||{};
+  drawNPCSprite(bx,by,prof.cloth||npc.color,prof.hair,null,prof);
+  if(npc.isGuard&&!gameState.allGatesCleared){
+    function fill(x,y,w,h,col){ctx.fillStyle=col;ctx.fillRect(x,y,w,h);}
+    fill(bx-16,by-32,5,8,'#1a1a1a');fill(bx+11,by-32,5,8,'#1a1a1a');
+    fill(bx-15,by-31,4,6,'#cc1111');fill(bx+12,by-31,4,6,'#cc1111');
+    fill(bx-5,by-28,10,8,'#1a0a0a');fill(bx-4,by-27,8,6,'#cc0000');fill(bx-2,by-26,4,4,'#ff4400');
+  }
+  ctx.restore();
+}
+function drawBubbleNPC(npc,sx,sy){
+  const s=TS;ctx.save();ctx.translate(sx,sy);
+  drawNPCSprite(s/2,s-8,npc.color,'#554433','#f5c49a',{pants:'#3a3040'});
+  ctx.restore();
+  const lines=npc.bubble.split('\n');
+  const maxW=Math.max(...lines.map(l=>l.length))*5.5+16;
+  const bh=lines.length*14+14;
+  const bx=sx+s/2,by=sy-bh-12;
+  ctx.save();
+  ctx.fillStyle='rgba(6,2,14,0.92)';ctx.strokeStyle='#9944cc88';ctx.lineWidth=1;
+  roundRect(ctx,bx-maxW/2,by,maxW,bh,6);ctx.fill();ctx.stroke();
+  ctx.fillStyle='rgba(6,2,14,0.92)';
+  ctx.beginPath();ctx.moveTo(bx-6,by+bh);ctx.lineTo(bx+6,by+bh);ctx.lineTo(bx,by+bh+10);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#ddaaff';ctx.font='9px "Courier New"';ctx.textAlign='center';
+  lines.forEach((line,i)=>ctx.fillText(line,bx,by+14+i*14));
+  ctx.restore();
+}
+function roundRect(c,x,y,w,h,r){
+  c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r);
+  c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);c.lineTo(x+r,y+h);
+  c.arcTo(x,y+h,x,y+h-r,r);c.lineTo(x,y+r);c.arcTo(x,y,x+r,y,r);c.closePath();
+}
+
+// ═══════════════════════════════════════════════════════
+// 코어 글로우 오버레이
+// ═══════════════════════════════════════════════════════
+function drawCoreGlow(cx,cy){
+  const coreWX=(6+13)/2*TS,coreWY=(2+9)/2*TS;
+  const sx=coreWX-cx,sy=coreWY-cy;
+  const t=Date.now();
+  const pulse=Math.sin(t/280)*0.5+0.5;
+  const g=ctx.createRadialGradient(sx,sy,30,sx,sy,220);
+  g.addColorStop(0,`rgba(200,0,255,${0.10+0.07*pulse})`);
+  g.addColorStop(0.5,`rgba(120,0,200,${0.05+0.04*pulse})`);
+  g.addColorStop(1,'rgba(40,0,80,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+}
+
+// ═══════════════════════════════════════════════════════
+// 카메라 — stage2와 동일
+// ═══════════════════════════════════════════════════════
+function getCam(){
+  const px=player.tx*TS+player.px+TS/2,py=player.ty*TS+player.py+TS/2;
+  let cx=px-W/2,cy=py-H/2;
+  cx=Math.max(0,Math.min(MAP_W*TS-W,cx));cy=Math.max(0,Math.min(MAP_H*TS-H,cy));
+  return{cx,cy};
+}
+
+// ═══════════════════════════════════════════════════════
+// 게임 루프 — stage2와 동일 구조
+// ═══════════════════════════════════════════════════════
+function gameLoop(){
+  if(player.moving){
+    player.moveProgress+=1/STEP_FRAMES;
+    // 이동 중 실시간 animFrame 업데이트 (보행 사이클)
+    player.animFrame=Math.floor(player.moveProgress*4)%2;
+    if(player.moveProgress>=1){
+      player.moving=false;player.px=0;player.py=0;
+      player.animFrame=0;
+      checkItemPickup();processMovementInput();
+    } else {
+      player.px=player.startPx*(1-player.moveProgress);
+      player.py=player.startPy*(1-player.moveProgress);
+    }
+  } else {player.animFrame=0;processMovementInput();}
+  if(confirmPressed){confirmPressed=false;interact();}
+  if(dialogActive&&!twDone){twIdx+=TW_SPEED;if(twIdx>=twText.length){twIdx=twText.length;twDone=true;}$dt.textContent=twText.slice(0,Math.floor(twIdx));}
+
+  const{cx,cy}=getCam();
+  ctx.fillStyle='#06020e';ctx.fillRect(0,0,W,H);
+
+  const sc=Math.floor(cx/TS),sr=Math.floor(cy/TS);
+  const ec=Math.min(MAP_W,sc+VIEW_COLS+2),er=Math.min(MAP_H,sr+VIEW_ROWS+2);
+  for(let r=sr;r<er;r++) for(let c=sc;c<ec;c++) drawTile(MAP[r*MAP_W+c],c*TS-cx,r*TS-cy);
+
+  drawCoreGlow(cx,cy);
+
+  for(const item of ITEMS){const sx=item.tx*TS-cx,sy=item.ty*TS-cy;if(sx>-TS&&sx<W&&sy>-TS&&sy<H)drawItemGlow(item,sx,sy);}
+  for(const n of BUBBLE_NPCS){const sx=n.tx*TS-cx,sy=n.ty*TS-cy;if(sx>-TS-80&&sx<W&&sy>-TS-80&&sy<H)drawBubbleNPC(n,sx,sy);}
+  for(const n of NPCS){
+    if(n.isGuard&&gameState.allGatesCleared)continue;
+    const sx=n.tx*TS-cx,sy=n.ty*TS-cy;
+    if(sx>-TS&&sx<W&&sy>-TS&&sy<H)drawNPC(n,sx,sy);
+  }
+  drawPlayer(player.tx*TS+player.px-cx,player.ty*TS+player.py-cy);
+
+  ctx.font='bold 9px "Courier New"';ctx.textAlign='center';
+  for(const n of NPCS){
+    if(n.isGuard&&gameState.allGatesCleared)continue;
+    const sx=n.tx*TS-cx+TS/2,sy=n.ty*TS-cy-6;
+    if(sx>0&&sx<W&&sy>0&&sy<H){
+      const tw=ctx.measureText(n.name).width;
+      ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(sx-tw/2-4,sy-11,tw+8,13);
+      ctx.fillStyle='#cc88ff';ctx.fillText(n.name,sx,sy);
+    }
+  }
+  for(const n of BUBBLE_NPCS){
+    const sx=n.tx*TS-cx+TS/2,sy=n.ty*TS-cy-6;
+    if(sx>0&&sx<W&&sy>0&&sy<H){
+      ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(sx-14,sy-11,28,13);
+      ctx.fillStyle='#ddaaff';ctx.fillText('포로',sx,sy);
+    }
+  }
+  {
+    const sx=PORTAL.tx*TS-cx+TS/2,sy=PORTAL.ty*TS-cy-6;
+    if(sx>0&&sx<W&&sy>0&&sy<H){
+      ctx.textAlign='center';
+      ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(sx-24,sy-11,48,13);
+      ctx.fillStyle=gameState.allGatesCleared?'#f0ccff':'#5a1a8a';
+      ctx.fillText('🌀 BOSS',sx,sy);ctx.textAlign='left';
+    }
+  }
+  for(const g of GATES){
+    if(gameState.gatesCleared.has(g.id))continue;
+    const sx=g.tx*TS-cx+TS/2,sy=g.ty*TS-cy-6;
+    if(sx>0&&sx<W&&sy>0&&sy<H){
+      const tw=ctx.measureText(g.label).width;
+      ctx.textAlign='center';
+      ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(sx-tw/2-4,sy-11,tw+8,13);
+      ctx.fillStyle='#cc66ff';ctx.fillText(g.label,sx,sy);ctx.textAlign='left';
+    }
+  }
+  updateHUD();
+  requestAnimationFrame(gameLoop);
+}
+
+loadFromLocalStorage();
+updateHUD();
+setTimeout(()=>{
+  openDialog('시스템',[
+    `${player.charName}... 드디어 DEC 최심부에 도달했다.`,
+    '저 중앙의 다크 에너지 코어가 전국 전력망을 독점 통제하고 있어.',
+    '세 개의 보안 게이트를 해제해야 코어 포털이 열려.',
+    '각 게이트엔 에너지 지식 퍼즐이 있어. 지금까지 배운 걸 써봐.',
+    '블랙하트가 기다린다. 가자.',
+  ]);
+},500);
+requestAnimationFrame(gameLoop);
+
+// ═══════════════════════════════════════════════════════
+// 반응형 스케일링 — stage2와 동일
+// ═══════════════════════════════════════════════════════
+(function initResponsive(){
+  function fitCanvas(){
+    const wrapper=document.getElementById('game-wrapper');if(!wrapper)return;
+    const cvs=wrapper.querySelector('canvas');if(!cvs)return;
+    const gameW=cvs.width,gameH=cvs.height;
+    const CHROME=90,maxW=window.innerWidth-16,maxH=window.innerHeight-CHROME;
+    const scaleRaw=Math.min(maxW/gameW,maxH/gameH);
+    const scale=Math.max(0.5,Math.round(scaleRaw*2)/2);
+    wrapper.style.transform='scale('+scale+')';
+    wrapper.style.transformOrigin='top center';
+    wrapper.style.marginBottom=((gameH*scale)-gameH)+'px';
+    document.body.style.overflow='hidden';
+  }
+  fitCanvas();window.addEventListener('resize',fitCanvas);
+})();
+</script>
+</body>
+</html>
