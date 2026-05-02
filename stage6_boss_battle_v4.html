@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Stage 6 — DEC 본부 최종 보스전</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #0a0a12;
+  --panel:  #0f0f1e;
+  --panel2: #161628;
+  --border: #2a2a4a;
+  --red:    #e63946;
+  --cyan:   #4cc9f0;
+  --amber:  #f4a261;
+  --green:  #2ec4b6;
+  --purple: #a855f7;
+  --text:   #e8e8f0;
+  --muted:  #6b6b8a;
+  --pixel:  'Press Start 2P', monospace;
+  --body:   'Noto Sans KR', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden;touch-action:pan-y;-webkit-tap-highlight-color:transparent;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);pointer-events:none;z-index:0;}
+#wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:clamp(10px,3vw,18px);padding-bottom:max(clamp(10px,3vw,18px),env(safe-area-inset-bottom));}
+
+/* HUD */
+#hud{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:10px 14px;margin-bottom:12px;}
+.hp-block{display:flex;flex-direction:column;gap:5px;}
+.hp-block.right{align-items:flex-end;}
+.hp-label{font-family:var(--body);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;}
+.hp-bar-outer{width:clamp(110px,22vw,200px);height:12px;background:#1a1a2e;border:1px solid var(--border);border-radius:2px;overflow:hidden;}
+.hp-fill{height:100%;border-radius:2px;transition:width 0.5s ease;}
+#boss-fill{background:var(--red);width:100%;}
+#player-fill{background:var(--green);width:100%;}
+.hp-num{font-family:var(--pixel);font-size:7px;}
+#vs{font-family:var(--pixel);font-size:10px;color:var(--amber);}
+
+/* 컷씬 */
+#cutscene{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:18px 20px;margin-bottom:10px;display:flex;gap:18px;align-items:flex-start;min-height:130px;position:relative;overflow:hidden;}
+#cutscene::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(230,57,70,0.05) 0%,transparent 55%);pointer-events:none;}
+#boss-svg{width:80px;height:80px;image-rendering:pixelated;animation:idle 1.4s steps(2) infinite;}
+@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes attack{0%{transform:translateX(0) scale(1)}25%{transform:translateX(14px) scale(1.09)}70%{transform:translateX(-3px)}100%{transform:translateX(0) scale(1)}}
+@keyframes hurt{0%{filter:brightness(1)}25%{filter:brightness(4) saturate(0);transform:translateX(-7px)}75%{filter:brightness(.5)}100%{filter:brightness(1);transform:translateX(0)}}
+.do-attack{animation:attack .55s ease forwards!important;}
+.do-hurt{animation:hurt .65s ease forwards!important;}
+#dialogue-area{flex:1;}
+#speaker{font-family:var(--body);font-size:11px;font-weight:700;color:var(--text);background:var(--red);display:inline-block;padding:3px 10px;border-radius:2px;margin-bottom:10px;letter-spacing:1px;}
+#dialogue{font-size:14px;line-height:2;color:var(--text);border-left:2px solid var(--red);padding-left:14px;min-height:72px;}
+#round-tag{position:absolute;top:14px;right:14px;font-family:var(--pixel);font-size:6px;background:var(--red);color:white;padding:4px 10px;border-radius:2px;}
+
+/* 조건 칩 */
+#cond-wrap{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:12px 14px;margin-bottom:10px;}
+#cond-label{font-family:var(--body);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:8px;}
+#cond-list{display:flex;flex-wrap:wrap;gap:7px;}
+.chip{font-size:12px;padding:4px 11px;border-radius:2px;border:1px solid var(--red);color:var(--red);background:rgba(230,57,70,0.08);animation:chip-in .35s cubic-bezier(.34,1.56,.64,1);}
+@keyframes chip-in{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* 카드 선택 */
+#card-section{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:16px;margin-bottom:10px;}
+#card-section-title{font-family:var(--body);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:4px;}
+#card-hint{font-size:12px;color:var(--muted);margin-bottom:14px;}
+#slot-wrap{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.slot{flex:1;height:68px;border:1px dashed var(--border);border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:border-color .2s;position:relative;}
+.slot.filled{border-style:solid;border-color:var(--cyan);}
+.slot-num{position:absolute;top:4px;left:7px;font-family:var(--body);font-size:9px;color:var(--muted);}
+.slot-empty{font-family:var(--body);font-size:10px;color:var(--muted);}
+.slot-icon{font-size:18px;line-height:1;}
+.slot-name{font-size:10px;color:var(--cyan);font-weight:700;text-align:center;padding:0 4px;}
+#card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(120px,26vw,148px),1fr));gap:8px;}
+.card{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:12px 10px;cursor:pointer;transition:transform .15s,border-color .15s,background .15s;user-select:none;}
+.card:hover{transform:translateY(-3px);border-color:var(--cyan);}.card:active{transform:scale(0.97);border-color:var(--cyan);}
+.card.selected{border-color:var(--cyan);background:rgba(76,201,240,0.08);}
+.card.disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
+.card-icon{font-size:24px;margin-bottom:5px;display:block;}
+.card-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.card-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+.card-tag{display:inline-block;margin-top:6px;font-size:10px;padding:2px 7px;border-radius:2px;}
+
+/* 제출 버튼 */
+#btn-wrap{display:flex;justify-content:center;gap:12px;margin-top:14px;}
+#btn-submit{font-family:var(--pixel);font-size:8px;letter-spacing:1px;padding:13px 36px;background:transparent;border:2px solid var(--cyan);color:var(--cyan);border-radius:2px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;min-height:48px;}
+#btn-submit::before{content:'';position:absolute;inset:0;background:var(--cyan);transform:translateX(-100%);transition:transform .2s ease;z-index:-1;}
+#btn-submit:hover{color:var(--bg);}
+#btn-submit:hover::before{transform:translateX(0);}
+#btn-submit:disabled{opacity:.3;cursor:not-allowed;}
+#btn-submit:disabled::before{display:none;}
+
+/* 결과 오버레이 */
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center;padding:12px;overflow-y:auto;}
+#overlay.show{display:flex;}
+#result-box{background:var(--panel);border:2px solid var(--border);border-radius:6px;padding:clamp(16px,4vw,28px) clamp(14px,5vw,32px);text-align:center;max-width:420px;width:95%;animation:pop .4s cubic-bezier(.34,1.56,.64,1);}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+#res-icon{font-family:var(--pixel);font-size:28px;margin-bottom:12px;}
+#res-title{font-family:var(--pixel);font-size:10px;margin-bottom:8px;letter-spacing:1px;}
+#res-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:10px;}
+#res-why{font-size:12px;color:var(--text);line-height:1.75;background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:10px 14px;margin-bottom:20px;text-align:left;}
+#res-why strong{color:var(--cyan);}
+#btn-next{font-family:var(--pixel);font-size:7px;padding:11px 26px;background:transparent;border:2px solid var(--amber);color:var(--amber);border-radius:2px;cursor:pointer;letter-spacing:1px;transition:all .15s;min-height:44px;}
+#btn-next:hover{background:var(--amber);color:var(--bg);}
+
+/* 데미지 팝업 */
+.dmg{position:fixed;font-family:var(--pixel);font-size:20px;pointer-events:none;z-index:200;animation:dmg-fly 1.2s ease-out forwards;}
+@keyframes dmg-fly{0%{transform:translateY(0) scale(1);opacity:1}80%{transform:translateY(-55px) scale(1.1);opacity:1}100%{transform:translateY(-75px) scale(.7);opacity:0}}
+
+/* 엔딩 */
+#ending{display:none;text-align:center;padding:60px 20px;animation:fadein 1.2s ease;}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+#ending.show{display:block;}
+#end-grade{font-family:var(--pixel);font-size:52px;margin-bottom:16px;animation:grade-pop .7s cubic-bezier(.34,1.56,.64,1);}
+@keyframes grade-pop{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+#end-title{font-family:var(--body);font-size:16px;font-weight:700;margin-bottom:20px;}
+#end-story{font-size:14px;color:var(--muted);line-height:2.1;white-space:pre-line;max-width:480px;margin:0 auto 28px;}
+#btn-retry{font-family:var(--pixel);font-size:7px;padding:12px 28px;background:transparent;border:2px solid var(--cyan);color:var(--cyan);border-radius:2px;cursor:pointer;letter-spacing:1px;transition:all .15s;}
+#btn-retry:hover{background:var(--cyan);color:var(--bg);}
+
+/* 플래시 */
+@keyframes flash-red{0%{outline:0px solid transparent}30%{outline:6px solid var(--red)}100%{outline:0px solid transparent}}
+.flash{animation:flash-red .3s ease;}
+
+/* 문제 번호 인디케이터 */
+#progress{display:flex;gap:6px;justify-content:center;margin-bottom:12px;}
+.prog-dot{width:28px;height:6px;border-radius:3px;background:var(--border);transition:background .3s;}
+.prog-dot.done{background:var(--green);}
+.prog-dot.current{background:var(--cyan);}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <!-- 진행 표시 -->
+  <div id="progress"></div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hp-block">
+      <span class="hp-label">BOSS — CEO 블랙하트</span>
+      <div class="hp-bar-outer"><div class="hp-fill" id="boss-fill"></div></div>
+      <span class="hp-num" id="boss-num">HP 300 / 300</span>
+    </div>
+    <div id="vs">VS</div>
+    <div class="hp-block right">
+      <span class="hp-label">PLAYER — 공학자</span>
+      <div class="hp-bar-outer" style="direction:rtl"><div class="hp-fill" id="player-fill"></div></div>
+      <span class="hp-num" id="player-num">HP 100 / 100</span>
+    </div>
+  </div>
+
+  <!-- 컷씬 -->
+  <div id="cutscene">
+    <div id="boss-art">
+      <svg id="boss-svg" width="80" height="80" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+        <rect x="4" y="2" width="8" height="5" fill="#c9a870"/>
+        <rect x="5" y="4" width="2" height="1" fill="#e63946"/>
+        <rect x="9" y="4" width="2" height="1" fill="#e63946"/>
+        <rect x="6" y="6" width="4" height="1" fill="#3a2a1a"/>
+        <rect x="4" y="6" width="8" height="7" fill="#1a1a2e"/>
+        <rect x="5" y="7" width="6" height="5" fill="#2a2a4a"/>
+        <rect x="7" y="7" width="2" height="4" fill="#e63946"/>
+        <rect x="2" y="7" width="2" height="2" fill="#e63946"/>
+        <rect x="12" y="7" width="2" height="2" fill="#e63946"/>
+        <rect x="5" y="13" width="2" height="3" fill="#1a1a2e"/>
+        <rect x="9" y="13" width="2" height="3" fill="#1a1a2e"/>
+      </svg>
+    </div>
+    <div id="dialogue-area">
+      <div id="speaker">CEO 블랙하트</div>
+      <div id="dialogue"></div>
+    </div>
+    <div id="round-tag">ROUND 1</div>
+  </div>
+
+  <!-- 조건 -->
+  <div id="cond-wrap">
+    <div id="cond-label">▸ 도시 상황</div>
+    <div id="cond-list"></div>
+  </div>
+
+  <!-- 카드 선택 -->
+  <div id="card-section">
+    <div id="card-section-title">▸ 에너지 대응 카드 선택</div>
+    <div id="card-hint"></div>
+    <div id="slot-wrap"></div>
+    <div id="card-grid"></div>
+    <div id="btn-wrap">
+      <button id="btn-submit" disabled>▸ 반격 실행</button>
+    </div>
+  </div>
+
+  <div id="ending">
+    <div id="end-grade"></div>
+    <div id="end-title"></div>
+    <div id="end-story"></div>
+    <button id="btn-retry">▸ 다시 도전</button>
+  </div>
+</div>
+
+<!-- 결과 팝업 -->
+<div id="overlay">
+  <div id="result-box">
+    <div id="res-icon"></div>
+    <div id="res-title"></div>
+    <div id="res-desc"></div>
+    <div id="res-why"></div>
+    <button id="btn-next">다음으로 ▸</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   카드 풀 (8종)
+═══════════════════════════════════════ */
+const CARDS = {
+  // ── 발전 (주황)
+  solar:    { icon:'☀',  name:'태양광 발전',        tag:'발전', tc:'#f4a261', desc:'햇빛을 직접 전기로 변환. 낮 시간·날씨의 영향을 받음.' },
+  solar_th: { icon:'🪞', name:'태양열 발전',         tag:'발전', tc:'#f4a261', desc:'햇빛으로 물을 가열해 증기 터빈 구동. 대규모 사막 발전소에 적합.' },
+  wind:     { icon:'💨', name:'풍력 터빈',           tag:'발전', tc:'#f4a261', desc:'바람으로 밤낮 발전 가능. 해안·산간 지역에 효과적.' },
+  hydro:    { icon:'💧', name:'수력 발전',           tag:'발전', tc:'#f4a261', desc:'강·댐의 물 흐름으로 안정적으로 전기 생산. 저수지 필요.' },
+  micro_h:  { icon:'🌊', name:'소수력 발전',         tag:'발전', tc:'#f4a261', desc:'소규모 하천·계곡에 설치. 댐 없이 자연 유속만으로 발전.' },
+  tidal:    { icon:'🌙', name:'조력 발전',           tag:'발전', tc:'#f4a261', desc:'밀물·썰물의 수위 차로 발전. 조수간만차가 큰 해안 필요.' },
+  current:  { icon:'🌀', name:'조류 발전',           tag:'발전', tc:'#f4a261', desc:'바닷속 해류 흐름으로 터빈 구동. 날씨 무관, 예측 가능.' },
+  wave:     { icon:'〰', name:'파력 발전',           tag:'발전', tc:'#f4a261', desc:'파도의 상하 운동으로 전기 생산. 섬·해안에 분산 설치 가능.' },
+  geo:      { icon:'🌋', name:'지열 발전',           tag:'발전', tc:'#f4a261', desc:'지구 내부 열 이용. 날씨·시간 무관 24시간 안정 발전.' },
+  biomass:  { icon:'🌿', name:'바이오매스 발전',     tag:'발전', tc:'#f4a261', desc:'농업·산림 폐기물 등 유기물 연소. 24시간 조절 가능한 발전.' },
+  // ── 저장 (보라)
+  ess:      { icon:'🔋', name:'ESS (에너지 저장)',   tag:'저장', tc:'#a855f7', desc:'남는 전력을 저장해뒀다가 필요할 때 방출. 간헐적 발전의 보완재.' },
+  // ── 관리 (하늘)
+  smart:    { icon:'🌐', name:'스마트 그리드',       tag:'관리', tc:'#4cc9f0', desc:'전력 수요·공급을 실시간으로 조절하는 지능형 전력망.' },
+  demand:   { icon:'📉', name:'수요 관리 시스템',    tag:'관리', tc:'#4cc9f0', desc:'피크 시간대 전력 소비를 분산·절감.' },
+  micro:    { icon:'⚡', name:'마이크로그리드',      tag:'관리', tc:'#4cc9f0', desc:'지역별 독립 전력망. 한 곳 고장이 전체에 영향 없음.' },
+};
+
+/* ═══════════════════════════════════════
+   문제 풀 (10개)
+═══════════════════════════════════════ */
+const ALL_ROUNDS = [
+  // ══ EASY ══
+  {
+    difficulty: 1, pick: 3,
+    dialogue: ['이 도시는 낮에만 전력 수요가 높아.', '태양이 쨍쨍한데... 어떻게 쓸 거야?'],
+    conditions: ['낮 시간 전력 집중 도시', '맑은 날씨 지속', '야간 수요 거의 없음'],
+    hint: '카드 3장 선택. 낮에 잘 발전하고, 수요에 맞게 조절하면 돼요. 저장은 필요 없어요.',
+    answer: ['solar','solar_th','smart'],
+    why: '낮에만 수요가 있으니 <strong>태양광</strong>과 <strong>태양열</strong>을 함께 써서 발전량을 최대화하고, <strong>스마트 그리드</strong>로 수요에 맞게 조절하면 충분해요. 야간 수요가 없으니 ESS는 필요 없습니다.',
+    successMsg: '...쓸만하군. 하지만 이건 시작일 뿐이야.',
+    failMsg: '낮 전력을 제대로 못 썼잖아!',
+  },
+  {
+    difficulty: 1, pick: 3,
+    dialogue: ['해안 도시야. 바람도 강하고 파도도 세지.', '이 두 가지를 동시에 활용할 수 있겠어?'],
+    conditions: ['해안 도시', '강한 바람 상시', '높은 파도 지속'],
+    hint: '카드 3장 선택. 해안의 두 가지 자원을 모두 활용하고, 전력망을 연결하면 돼요.',
+    answer: ['wind','wave','smart'],
+    why: '<strong>풍력</strong>으로 상시 발전하고 <strong>파력</strong>으로 파도 에너지까지 활용하면 발전량이 안정적으로 유지돼요. <strong>스마트 그리드</strong>로 두 발전원을 통합 관리하면 됩니다.',
+    successMsg: '해안 자원을 낭비하지 않는군. 꽤 하는데.',
+    failMsg: '바람과 파도를 그냥 흘려보냈잖아!',
+  },
+  {
+    difficulty: 1, pick: 3,
+    dialogue: ['강이 많은 내륙 농촌 마을이야.', '소규모지만 안정적인 전력이 필요해.'],
+    conditions: ['내륙 농촌 마을', '소규모 하천 다수', '대규모 설비 설치 불가'],
+    hint: '카드 3장 선택. 대형 댐 없이 소규모 하천을 활용하는 방법이 있어요.',
+    answer: ['micro_h','biomass','micro'],
+    why: '<strong>소수력 발전</strong>은 댐 없이 작은 하천으로 발전할 수 있어요. 농촌 폐기물로 <strong>바이오매스</strong> 발전을 추가하면 야간도 커버되고, <strong>마이크로그리드</strong>로 독립 운영하면 안정적입니다.',
+    successMsg: '농촌 자원을 빠짐없이 활용하다니.',
+    failMsg: '소규모 마을에 맞는 해법을 찾지 못했어!',
+  },
+
+  // ══ NORMAL ══
+  {
+    difficulty: 2, pick: 3,
+    dialogue: ['조수간만의 차가 엄청난 서해안 도시야.', '하루 두 번 밀물과 썰물이 반복돼.', '이 자원을 제대로 쓸 수 있겠어?'],
+    conditions: ['서해안 도시', '조수간만차 최대 8m', '해상풍력 설치 가능'],
+    hint: '카드 3장 선택. 조석 현상을 직접 에너지로 바꾸는 방법이 있어요.',
+    answer: ['tidal','wind','smart'],
+    why: '<strong>조력 발전</strong>은 밀물·썰물로 하루 두 번 예측 가능하게 발전해요. 풍력이 약한 시간대엔 <strong>풍력</strong>으로 보완하고, <strong>스마트 그리드</strong>로 두 발전원을 통합 운영하면 됩니다.',
+    successMsg: '조력이라니... 조수를 무기로 삼다니 영리하군.',
+    failMsg: '밀물썰물을 그냥 흘려보냈잖아!',
+  },
+  {
+    difficulty: 2, pick: 3,
+    dialogue: ['사막 한가운데 도시야. 일조량은 세계 최고지.', '하지만 밤에는 기온이 급락해서 난방이 필요해.'],
+    conditions: ['사막 도시', '일조량 세계 최고', '야간 기온 급락 — 난방 수요 폭증'],
+    hint: '카드 3장 선택. 낮에 열을 모아서 밤까지 쓸 수 있는 방법이 있어요.',
+    answer: ['solar_th','solar','ess'],
+    why: '<strong>태양열 발전</strong>은 열을 저장했다가 밤에도 증기 터빈을 돌릴 수 있어요. <strong>태양광</strong>으로 낮 전력을 최대화하고, <strong>ESS</strong>로 야간 난방 수요까지 대비하면 됩니다.',
+    successMsg: '열 저장이라... 태양열의 강점을 정확히 꿰뚫었군.',
+    failMsg: '밤이 되자 도시가 얼어붙었어!',
+  },
+  {
+    difficulty: 2, pick: 4,
+    dialogue: ['탄소세가 도입됐어. 화석연료 비용이 3배로 폭등했지.', '이 도시는 낮밤 가리지 않고 전력 수요가 많아.', '탄소 배출 없이 24시간 버틸 수 있겠어?'],
+    conditions: ['탄소세 도입', '화석연료 비용 3배', '24시간 전력 수요 지속'],
+    hint: '카드 4장 선택. 낮밤 모두 탄소 없이 커버할 조합이 필요해요.',
+    answer: ['solar','wind','biomass','smart'],
+    why: '<strong>태양광</strong>은 낮을, <strong>풍력</strong>은 밤도 커버해요. 바람이 없는 시간엔 <strong>바이오매스</strong>가 안정적으로 보완하고, <strong>스마트 그리드</strong>로 세 발전원을 최적 조합하면 24시간 무탄소 공급이 가능합니다.',
+    successMsg: '탄소세 앞에서도 흔들리지 않는군... 골치 아프게.',
+    failMsg: '비용 관리 실패! 도시 재정이 바닥났어!',
+  },
+
+  // ══ HARD ══
+  {
+    difficulty: 3, pick: 3,
+    dialogue: ['깊은 산 속 외딴 마을이야. 전력망이 닿지 않아.', '강도 흐르고 산림 폐기물도 많아.', '외부 도움 없이 스스로 살아남을 수 있어?'],
+    conditions: ['산간 오지 마을', '기존 전력망 없음', '소규모 하천·산림 자원 풍부'],
+    hint: '카드 3장 선택. 있는 자원만으로 독립 전력 시스템을 만들어야 해요.',
+    answer: ['micro_h','biomass','micro'],
+    why: '<strong>소수력</strong>으로 하천에서 상시 발전하고, <strong>바이오매스</strong>로 산림 폐기물을 활용해 야간·흐린 날도 버텨요. <strong>마이크로그리드</strong>로 외부 망 없이 독립 운영하면 완벽합니다.',
+    successMsg: '산속에서 스스로 살아남다니. 진짜 공학자군.',
+    failMsg: '독립 전력 구축 실패! 마을이 암흑 속에 잠겼어!',
+  },
+  {
+    difficulty: 3, pick: 3,
+    dialogue: ['화산 지대야. 지반이 불안해서 지상 설치가 어려워.', '하지만 바다가 바로 옆에 있지.', '해저 자원을 활용할 수 있겠어?'],
+    conditions: ['화산 섬 지대', '지상 대형 설비 불가', '강한 해류 상시', '화산 지열 활용 가능'],
+    hint: '카드 3장 선택. 지상이 아닌 바다와 지하를 동시에 공략하세요.',
+    answer: ['current','geo','smart'],
+    why: '<strong>조류 발전</strong>은 해저 해류로 날씨·지반 무관하게 발전해요. <strong>지열 발전</strong>은 화산 지대에서 최고 효율을 냅니다. <strong>스마트 그리드</strong>로 두 안정 발전원을 연결하면 흔들림 없는 공급이 가능합니다.',
+    successMsg: '바다와 땅속을 동시에 공략하다니. 발상이 남달라.',
+    failMsg: '화산 지대 극복 실패! 섬 전체가 정전됐어!',
+  },
+  {
+    difficulty: 3, pick: 4,
+    dialogue: ['초대형 항구 도시야. 수백만 명이 살고 있어.', '피크 시간엔 수요가 평소의 세 배야!', '바다 자원도 쓰면서 수요도 잡을 수 있겠어?'],
+    conditions: ['초대형 항구 도시', '피크 수요 평소의 3배', '해안·해양 자원 풍부'],
+    hint: '카드 4장 선택. 다양한 해양 발전원과 수요 억제를 함께 써야 해요.',
+    answer: ['wind','tidal','current','demand'],
+    why: '<strong>풍력·조력·조류</strong> 세 가지 해양 에너지를 조합하면 서로 약한 시간대를 보완해요. 공급만으로는 한계가 있으니 <strong>수요 관리 시스템</strong>으로 피크 수요 자체를 줄이는 것이 핵심입니다.',
+    successMsg: '바다를 전부 전력으로 바꾸다니. 인정해.',
+    failMsg: '피크 수요 폭발! 항구 전체가 마비됐어!',
+  },
+  {
+    difficulty: 3, pick: 5,
+    dialogue: ['최후의 조건이야.', '지진, 폭염, 태풍이 동시에 닥쳤어!', '지상 설비는 반파됐고, 전력망은 마비됐어.', '냉방 수요는 폭증하고 있어. 마지막 기회야.'],
+    conditions: ['복합 재난', '지상 설비 50% 파손', '주 전력망 마비', '폭염 — 냉방 수요 폭증', '강풍·강한 해류 지속'],
+    hint: '카드 5장 선택. 재난에 영향받지 않는 발전원과 분산·저장·관리를 총동원하세요.',
+    answer: ['geo','current','ess','micro','demand'],
+    why: '<strong>지열</strong>과 <strong>조류</strong>는 지진·폭염·태풍에도 끄떡없어요. <strong>ESS</strong>로 냉방 수요 폭증을 버티고, <strong>마이크로그리드</strong>로 전력망 마비 지역을 독립 운영, <strong>수요 관리</strong>로 폭증 수요까지 억제해야 합니다.',
+    successMsg: '...불가능하다고 생각했어. 당신이 이겼어.',
+    failMsg: '복합 재난 앞에 속수무책! 도시가 무너졌어!',
+  },
+];
+
+/* ═══════════════════════════════════════
+   게임 상태
+═══════════════════════════════════════ */
+const S = {
+  bossHp: 300, playerHp: 100,
+  roundIdx: 0,   // 현재 진행 중인 라운드 인덱스 (selectedRounds 기준)
+  selected: [],  // 선택된 카드 ids
+  dialogueDone: false,
+  typing: null,
+  selectedRounds: [], // 이번 판에 뽑힌 3문제
+  results: [],        // 각 라운드 결과 (true/false)
+};
+
+/* ═══════════════════════════════════════
+   유틸
+═══════════════════════════════════════ */
+function $(id){ return document.getElementById(id); }
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+// 난이도별 1개씩 + 나머지 1개 랜덤으로 3문제 선택
+function pickRounds(){
+  const d1 = shuffle(ALL_ROUNDS.filter(r=>r.difficulty===1));
+  const d2 = shuffle(ALL_ROUNDS.filter(r=>r.difficulty===2));
+  const d3 = shuffle(ALL_ROUNDS.filter(r=>r.difficulty===3));
+  return [d1[0], d2[0], d3[0]];
+}
+
+function typeText(lines, idx, ci, onDone){
+  if(idx >= lines.length){
+    S.dialogueDone = true;
+    checkSubmit();
+    onDone && onDone();
+    return;
+  }
+  const el = $('dialogue');
+  // 첫 줄이면 기존 내용 초기화, 이후 줄은 새 <p> 추가
+  let currentLine;
+  if(ci === 0){
+    if(idx === 0) el.innerHTML = '';
+    const p = document.createElement('p');
+    p.style.cssText = 'margin:0;opacity:0.4;transition:opacity 0.3s;';
+    el.appendChild(p);
+    // 이전 줄들은 흐리게
+    [...el.querySelectorAll('p')].forEach((p,i,arr)=>{ p.style.opacity = i===arr.length-1?'1':'0.55'; });
+    currentLine = p;
+  } else {
+    currentLine = el.querySelector('p:last-child');
+  }
+  currentLine.textContent = lines[idx].slice(0, ci+1) + (ci < lines[idx].length-1 ? '▮':'');
+  currentLine.style.opacity = '1';
+
+  if(ci < lines[idx].length-1){
+    S.typing = setTimeout(()=>typeText(lines,idx,ci+1,onDone), 38);
+  } else {
+    S.typing = setTimeout(()=>typeText(lines,idx+1,0,onDone), 700);
+  }
+}
+
+function spawnDmg(txt, color, anchorId){
+  const el=$(anchorId), r=el.getBoundingClientRect();
+  const d=document.createElement('div');
+  d.className='dmg'; d.style.color=color;
+  d.style.left=(r.left+r.width/2-24)+'px';
+  d.style.top=(r.top+r.height/2)+'px';
+  d.textContent=txt;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),1300);
+}
+
+function setHP(bHp, pHp){
+  S.bossHp   = Math.max(0,bHp);
+  S.playerHp = Math.max(0,pHp);
+  $('boss-fill').style.width   = (S.bossHp/300*100)+'%';
+  $('player-fill').style.width = (S.playerHp/100*100)+'%';
+  $('boss-num').textContent = 'HP '+S.bossHp+' / 300';
+  $('player-num').textContent = 'HP '+S.playerHp+' / 100';
+}
+
+function bossAnimate(cls){
+  const svg=$('boss-svg');
+  svg.style.animation='none';
+  svg.classList.remove('do-attack','do-hurt');
+  void svg.offsetWidth;
+  svg.classList.add(cls);
+  setTimeout(()=>{ svg.classList.remove(cls); svg.style.animation='idle 1.4s steps(2) infinite'; },700);
+}
+
+function checkSubmit(){
+  const pick = S.selectedRounds[S.roundIdx]?.pick ?? 3;
+  $('btn-submit').disabled = !(S.dialogueDone && S.selected.length===pick);
+}
+
+function updateProgress(){
+  const wrap=$('progress');
+  wrap.innerHTML='';
+  S.selectedRounds.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='prog-dot';
+    if(i < S.roundIdx) d.classList.add('done');
+    else if(i === S.roundIdx) d.classList.add('current');
+    wrap.appendChild(d);
+  });
+}
+
+/* ═══════════════════════════════════════
+   카드 렌더
+═══════════════════════════════════════ */
+function renderCards(round){
+  // 정답 카드 + 오답 카드(정답 수만큼) 섞어서 표시
+  const ans = round.answer;
+  const decoys = shuffle(Object.keys(CARDS).filter(k=>!ans.includes(k))).slice(0, ans.length);
+  const pool = shuffle([...ans, ...decoys]);
+
+  const grid=$('card-grid');
+  grid.innerHTML='';
+  pool.forEach(id=>{
+    const c=CARDS[id];
+    const div=document.createElement('div');
+    div.className='card'; div.dataset.id=id;
+    div.innerHTML=`<span class="card-icon">${c.icon}</span><div class="card-name">${c.name}</div><div class="card-desc">${c.desc}</div><span class="card-tag" style="background:${c.tc}22;color:${c.tc};border:1px solid ${c.tc}44">${c.tag}</span>`;
+    div.addEventListener('click',()=>onCardClick(id));
+    div.addEventListener('touchend',e=>{e.preventDefault();onCardClick(id);},{passive:false});
+    grid.appendChild(div);
+  });
+}
+
+function renderSlots(pick){
+  const wrap=$('slot-wrap');
+  wrap.innerHTML='';
+  for(let i=0;i<pick;i++){
+    const slot=document.createElement('div');
+    slot.className='slot'; slot.id='slot-'+i;
+    slot.innerHTML=`<span class="slot-num">${i+1}번째</span><span class="slot-empty">비어있음</span>`;
+    wrap.appendChild(slot);
+  }
+}
+
+function onCardClick(id){
+  const pick=S.selectedRounds[S.roundIdx].pick;
+  const idx=S.selected.indexOf(id);
+  if(idx !== -1){ S.selected.splice(idx,1); }
+  else { if(S.selected.length>=pick) return; S.selected.push(id); }
+  updateCardUI();
+  checkSubmit();
+}
+
+function updateCardUI(){
+  const pick=S.selectedRounds[S.roundIdx].pick;
+  document.querySelectorAll('.card').forEach(el=>{
+    const id=el.dataset.id, sel=S.selected.includes(id);
+    el.classList.toggle('selected',sel);
+    el.classList.toggle('disabled',!sel && S.selected.length>=pick);
+  });
+  for(let i=0;i<pick;i++){
+    const slot=$('slot-'+i), id=S.selected[i];
+    if(id){
+      const c=CARDS[id];
+      slot.classList.add('filled');
+      slot.innerHTML=`<span class="slot-num">${i+1}번째</span><span class="slot-icon">${c.icon}</span><span class="slot-name">${c.name}</span>`;
+    } else {
+      slot.classList.remove('filled');
+      slot.innerHTML=`<span class="slot-num">${i+1}번째</span><span class="slot-empty">비어있음</span>`;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════
+   라운드 시작
+═══════════════════════════════════════ */
+function startRound(ri){
+  S.roundIdx=ri; S.selected=[]; S.dialogueDone=false;
+  clearTimeout(S.typing);
+  const r=S.selectedRounds[ri];
+
+  $('round-tag').textContent='ROUND '+(ri+1)+' / 3';
+  $('dialogue').textContent='';
+  $('btn-submit').disabled=true;
+
+  // 난이도 표시
+  const diffColor = r.difficulty===1?'var(--green)':r.difficulty===2?'var(--amber)':'var(--red)';
+  const diffLabel = r.difficulty===1?'EASY':r.difficulty===2?'NORMAL':'HARD';
+  $('round-tag').style.background=diffColor;
+  $('round-tag').textContent=`ROUND ${ri+1}  [${diffLabel}]`;
+
+  // 조건 칩
+  const cl=$('cond-list'); cl.innerHTML='';
+  r.conditions.forEach((txt,i)=>{
+    const chip=document.createElement('span');
+    chip.className='chip'; chip.style.animationDelay=(i*0.07)+'s';
+    chip.textContent=txt; cl.appendChild(chip);
+  });
+
+  $('card-hint').textContent=r.hint;
+  $('card-section-title').innerHTML=`▸ 에너지 대응 카드 선택 &nbsp;<span style="font-family:var(--body);font-size:11px;background:var(--cyan);color:var(--bg);padding:2px 8px;border-radius:2px;font-weight:700;">${r.pick}장 선택</span>`;
+  renderSlots(r.pick);
+  renderCards(r);
+  updateCardUI();
+  updateProgress();
+  bossAnimate('do-attack');
+  setTimeout(()=>typeText(r.dialogue,0,0,null),300);
+}
+
+/* ═══════════════════════════════════════
+   제출
+═══════════════════════════════════════ */
+$('btn-submit').addEventListener('click',()=>{
+  const r = S.selectedRounds[S.roundIdx];
+  const ans = r.answer;
+
+  // 카드별 부분 점수 계산
+  const correctPicks = S.selected.filter(id => ans.includes(id)).length;
+  const wrongPicks   = S.selected.filter(id => !ans.includes(id)).length;
+  const pointPerCard = 50;
+  const netScore = (correctPicks * pointPerCard) - (wrongPicks * pointPerCard); // -150 ~ +250 등 가능
+  const allCorrect = correctPicks === ans.length && wrongPicks === 0;
+
+  $('btn-submit').disabled = true;
+  S.results.push({ correctPicks, wrongPicks, netScore, total: ans.length });
+
+  if(netScore > 0){
+    // 보스 HP 감소
+    bossAnimate('do-hurt');
+    setHP(S.bossHp - netScore, S.playerHp);
+    spawnDmg('-'+netScore, 'var(--red)', 'boss-art');
+  } else if(netScore < 0){
+    // 플레이어 HP 감소
+    $('wrap').classList.add('flash');
+    setTimeout(()=>$('wrap').classList.remove('flash'), 350);
+    setHP(S.bossHp, S.playerHp + netScore); // netScore가 음수이므로 +로 처리
+    spawnDmg(netScore.toString(), 'var(--green)', 'hud');
+  } else {
+    // 0점 — 무효
+    spawnDmg('±0', 'var(--muted)', 'hud');
+  }
+
+  setTimeout(()=>showResult(allCorrect, correctPicks, wrongPicks, netScore, r), 450);
+});
+
+/* ═══════════════════════════════════════
+   결과 팝업
+═══════════════════════════════════════ */
+function showResult(allCorrect, correctPicks, wrongPicks, netScore, r){
+  const total = r.answer.length;
+  // 아이콘·제목
+  if(allCorrect){
+    $('res-icon').textContent = '★';
+    $('res-icon').style.color = 'var(--green)';
+    $('res-title').textContent = 'PERFECT!';
+    $('res-title').style.color = 'var(--green)';
+    $('res-desc').textContent  = r.successMsg;
+  } else if(netScore > 0){
+    $('res-icon').textContent = '◎';
+    $('res-icon').style.color = 'var(--amber)';
+    $('res-title').textContent = 'PARTIAL HIT';
+    $('res-title').style.color = 'var(--amber)';
+    $('res-desc').textContent  = `${total}장 중 ${correctPicks}장 적중, ${wrongPicks}장 오답. 보스에게 ${netScore} 데미지!`;
+  } else if(netScore === 0){
+    $('res-icon').textContent = '△';
+    $('res-icon').style.color = 'var(--muted)';
+    $('res-title').textContent = 'NO EFFECT';
+    $('res-title').style.color = 'var(--muted)';
+    $('res-desc').textContent  = `정답 ${correctPicks}장, 오답 ${wrongPicks}장. 상쇄돼서 효과 없음.`;
+  } else {
+    $('res-icon').textContent = '✕';
+    $('res-icon').style.color = 'var(--red)';
+    $('res-title').textContent = 'BACKFIRE!';
+    $('res-title').style.color = 'var(--red)';
+    $('res-desc').textContent  = `${r.failMsg} (정답 ${correctPicks}장, 오답 ${wrongPicks}장 → ${netScore} 데미지)`;
+  }
+
+  // 점수 시각화
+  const scoreRows = r.answer.map(id => {
+    const hit = S.selected.includes(id);
+    return `<span style="display:inline-flex;align-items:center;gap:4px;margin:2px 4px;padding:3px 8px;border-radius:2px;font-size:11px;background:${hit?'rgba(46,196,182,0.15)':'rgba(230,57,70,0.10)'};border:1px solid ${hit?'var(--green)':'var(--border)'};">${hit?'✓':'—'} ${CARDS[id].icon} ${CARDS[id].name} <strong style="color:${hit?'var(--green)':'var(--muted)'}">${hit?'+50':''}</strong></span>`;
+  });
+  const wrongRows = S.selected.filter(id=>!r.answer.includes(id)).map(id =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;margin:2px 4px;padding:3px 8px;border-radius:2px;font-size:11px;background:rgba(230,57,70,0.15);border:1px solid var(--red);">✕ ${CARDS[id].icon} ${CARDS[id].name} <strong style="color:var(--red)">-50</strong></span>`
+  );
+
+  $('res-why').innerHTML =
+    '<strong style="display:block;margin-bottom:8px;font-size:11px;letter-spacing:1px;font-family:var(--body);font-weight:700;">결과 분석</strong>'
+    + '<div style="margin-bottom:10px;flex-wrap:wrap;display:flex;">' + scoreRows.join('') + wrongRows.join('') + '</div>'
+    + '<strong style="display:block;margin-bottom:6px;font-size:11px;letter-spacing:1px;font-family:var(--body);font-weight:700;">해설</strong>'
+    + r.why;
+
+  $('overlay').classList.add('show');
+}
+
+$('btn-next').addEventListener('touchend',e=>{e.preventDefault();$('btn-next').click();},{passive:false});
+$('btn-next').addEventListener('click',()=>{
+  $('overlay').classList.remove('show');
+  const next=S.roundIdx+1;
+  if(S.bossHp<=0 || next>=S.selectedRounds.length){
+    showEnding();
+  } else {
+    startRound(next);
+  }
+});
+
+/* ═══════════════════════════════════════
+   엔딩
+═══════════════════════════════════════ */
+function showEnding(){
+  // 결과를 localStorage에 저장 후 clear.html로 이동
+  localStorage.setItem('eq_boss_hp', S.playerHp);
+  // 기존 레벨/코인은 이미 저장돼 있음
+  const fade = document.createElement('div');
+  fade.style.cssText='position:fixed;inset:0;background:#000;opacity:0;z-index:999;transition:opacity 1s ease;pointer-events:none;';
+  document.body.appendChild(fade);
+  setTimeout(()=>{ fade.style.opacity='1'; }, 50);
+  setTimeout(()=>{ window.location.href='clear.html'; }, 1200);
+}
+
+/* ═══════════════════════════════════════
+   다시 도전
+═══════════════════════════════════════ */
+$('btn-retry').addEventListener('touchend',e=>{e.preventDefault();$('btn-retry').click();},{passive:false});
+$('btn-retry').addEventListener('click',()=>{
+  ['hud','cutscene','cond-wrap','card-section','progress'].forEach(id=>{
+    $(id).style.display='';
+  });
+  $('ending').classList.remove('show');
+  initGame();
+});
+
+/* ═══════════════════════════════════════
+   초기화
+═══════════════════════════════════════ */
+function initGame(){
+  S.bossHp=300; S.playerHp=100;
+  S.roundIdx=0; S.selected=[]; S.results=[];
+  S.selectedRounds = pickRounds();
+  setHP(300,100);
+  startRound(0);
+}
+
+initGame();
+</script>
+</body>
+</html>
