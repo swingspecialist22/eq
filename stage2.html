@@ -20,18 +20,18 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 #hud-right .zone{color:#aad4ff;font-size:11px;}
 #hud-mission{background:rgba(0,0,0,0.78);border:1px solid #1a5a3a;border-radius:4px;padding:5px 10px;font-size:10px;line-height:1.8;color:#8aa;}
 #hud-mission .mtitle{color:#88ddcc;font-size:10px;font-weight:bold;letter-spacing:1px;}
-#dialog-box{position:absolute;bottom:0;left:0;right:0;background:rgba(4,12,20,0.96);border-top:2px solid #204060;padding:16px 24px 18px;display:none;font-size:17px;line-height:1.8;min-height:100px;z-index:5;}
-#dialog-box .speaker{color:#44aaff;font-weight:bold;margin-bottom:4px;font-size:15px;}
+#dialog-box{position:absolute;bottom:0;left:0;right:0;background:rgba(4,12,20,0.96);border-top:2px solid #204060;padding:clamp(12px,2vh,22px) clamp(16px,2vw,30px);display:none;font-size:clamp(14px,1.4vw,22px);line-height:1.8;min-height:clamp(80px,12vh,130px);z-index:5;}
+#dialog-box .speaker{color:#44aaff;font-weight:bold;margin-bottom:4px;font-size:clamp(12px,1.25vw,18px);}
 #dialog-text{color:#e8e8e8;white-space:pre-wrap;}
-#dialog-continue{color:#666;font-size:13px;text-align:right;margin-top:5px;animation:blink .9s step-end infinite;}
+#dialog-continue{color:#666;font-size:clamp(11px,1vw,15px);text-align:right;margin-top:5px;animation:blink .9s step-end infinite;}
 @keyframes blink{50%{opacity:0;}}
-#item-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#0a1a08,#162810);border:2px solid #44aa44;border-radius:8px;padding:28px 48px;text-align:center;z-index:1001;box-shadow:0 0 40px #44aa4466;transition:transform .25s cubic-bezier(.34,1.56,.64,1),opacity .25s;opacity:0;pointer-events:none;min-width:min(440px,42vw);}
+#item-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#0a1a08,#162810);border:2px solid #44aa44;border-radius:8px;padding:clamp(20px,3vh,40px) clamp(32px,5vw,64px);text-align:center;z-index:1001;box-shadow:0 0 40px #44aa4466;transition:transform .25s cubic-bezier(.34,1.56,.64,1),opacity .25s;opacity:0;pointer-events:none;min-width:min(440px,42vw);}
 #item-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
-#item-popup .ip-label{font-size:13px;letter-spacing:3px;color:#66bbdd;margin-bottom:10px;}
-#item-popup .ip-icon{font-size:54px;margin:8px 0;}
-#item-popup .ip-name{font-size:22px;color:#ccffff;font-weight:bold;margin-bottom:10px;}
-#item-popup .ip-desc{font-size:15px;color:#889998;line-height:1.6;white-space:pre-wrap;}
-#item-popup .ip-exp{font-size:17px;color:#44aaff;margin-top:12px;}
+#item-popup .ip-label{font-size:clamp(10px,1vw,15px);letter-spacing:3px;color:#66bbdd;margin-bottom:clamp(6px,.8vh,12px);}
+#item-popup .ip-icon{font-size:clamp(40px,5.5vw,72px);margin:clamp(6px,1vh,12px) 0;}
+#item-popup .ip-name{font-size:clamp(17px,2vw,30px);color:#ccffff;font-weight:bold;margin-bottom:clamp(6px,.8vh,12px);}
+#item-popup .ip-desc{font-size:clamp(13px,1.4vw,20px);color:#889998;line-height:1.6;white-space:pre-wrap;}
+#item-popup .ip-exp{font-size:clamp(14px,1.5vw,22px);color:#44aaff;margin-top:clamp(8px,1vh,14px);}
 #quiz-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px);z-index:1000;overflow-y:auto;}
 #quiz-overlay.active{display:flex;}
 #quiz-panel{width:min(680px,96vw);max-height:90vh;background:#110d08;border:2px solid #8a4a1a;border-radius:8px;box-shadow:0 0 40px #aa440044;overflow-y:auto;animation:qIn .22s ease-out;}
@@ -127,6 +127,19 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 @media(hover:hover) and (pointer:fine){
   #joystick-base,#btn-confirm{display:none!important;}
 }
+#inv-toggle{pointer-events:all;background:rgba(25,20,15,0.88);border:1px solid #444;border-radius:3px;color:#aaa;font-size:clamp(10px,1.1vw,13px);padding:4px 8px;margin-top:5px;cursor:pointer;width:100%;font-family:inherit;letter-spacing:.5px;text-align:center;}
+#inv-panel{position:absolute;top:0;right:0;width:clamp(230px,28vw,360px);height:100%;background:rgba(8,6,4,0.97);border-left:2px solid #2a2018;z-index:300;transform:translateX(100%);transition:transform .25s ease;overflow-y:auto;display:flex;flex-direction:column;}
+#inv-panel.open{transform:translateX(0);}
+#inv-ph{padding:clamp(8px,1.2vh,14px) clamp(10px,1.5vw,18px);border-bottom:1px solid #1a1408;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+#inv-ph-title{color:#aa8844;font-size:clamp(10px,1.1vw,14px);letter-spacing:2px;}
+#inv-close{cursor:pointer;color:#554433;font-size:clamp(14px,1.6vw,20px);line-height:1;background:none;border:none;padding:0;font-family:inherit;}
+.inv-item{display:flex;gap:clamp(8px,1.2vw,14px);padding:clamp(10px,1.5vh,16px) clamp(10px,1.5vw,18px);border-bottom:1px solid #181210;}
+.inv-icon-w{font-size:clamp(26px,4vw,48px);flex-shrink:0;line-height:1;width:clamp(36px,5vw,58px);text-align:center;}
+.inv-name{font-size:clamp(12px,1.5vw,18px);color:#eeddcc;font-weight:bold;}
+.inv-story{font-size:clamp(9px,1vw,13px);color:#665544;font-style:italic;}
+.inv-desc{font-size:clamp(11px,1.25vw,16px);color:#99aa88;line-height:1.6;}
+.inv-tag{font-size:clamp(9px,.95vw,12px);color:#cc8833;}
+.inv-item.locked .inv-icon-w{opacity:.2;filter:grayscale(1);}
 </style>
 </head>
 <body>
@@ -149,6 +162,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
       <div class="zone" id="hud-zone">바람의 해안</div>
       <div>에너지 코인 🌊 <span id="hud-coin">0</span></div>
       <div id="hud-coords" style="font-size:9px;color:#444">x:0 y:0</div>
+      <button id="inv-toggle">🎒 아이템 목록</button>
     </div>
   </div>
   <div id="dialog-box">
@@ -162,6 +176,10 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
     <div class="ip-name" id="ip-name">아이템 이름</div>
     <div class="ip-desc" id="ip-desc">설명</div>
     <div class="ip-exp" id="ip-exp">+15 EXP</div>
+  </div>
+  <div id="inv-panel">
+    <div id="inv-ph"><span id="inv-ph-title">▣ 수집 아이템</span><button id="inv-close">✕</button></div>
+    <div id="inv-list"></div>
   </div>
   <div id="quiz-overlay">
     <div id="quiz-panel">
@@ -486,6 +504,7 @@ function showItemPopup(item,onDone){
   document.getElementById('ip-desc').textContent=item.desc;
   document.getElementById('ip-exp').textContent=`+${item.exp} EXP  /  +${item.coins} 🌊`;
   $ipop.classList.add('show');
+  if(window._invRender)window._invRender();
   setTimeout(()=>{$ipop.classList.remove('show');setTimeout(()=>{itemPopupActive=false;if(onDone)onDone();},250);},2800);
 }
 function checkItemPickup(){
@@ -1596,6 +1615,33 @@ const SFX = (function(){
   document.addEventListener('touchstart', startBGM, {once:true});
   document.addEventListener('click', startBGM, {once:true});
   document.addEventListener('keydown', startBGM, {once:true});
+})();
+
+(function(){
+  const btn=document.getElementById('inv-toggle');
+  const panel=document.getElementById('inv-panel');
+  const list=document.getElementById('inv-list');
+  document.getElementById('inv-close').addEventListener('click',()=>panel.classList.remove('open'));
+  function render(){
+    list.innerHTML='';
+    ITEMS.forEach(item=>{
+      const has=player.inventory.has(item.id);
+      const d=document.createElement('div');
+      d.className='inv-item'+(has?'':' locked');
+      d.innerHTML='<div class="inv-icon-w">'+item.icon+'</div><div class="inv-info">'
+        +'<div class="inv-name">'+item.name+'</div>'
+        +(has&&item.story?'<div class="inv-story">'+item.story+'</div>':'')
+        +'<div class="inv-desc">'+(has?item.desc.replace(/\n/g,'<br>'):'아직 발견하지 못한 아이템입니다.')+'</div>'
+        +(has?'<div class="inv-tag">+'+item.exp+' EXP &nbsp;·&nbsp; +'+item.coins+'코인</div>':'')
+        +'</div>';
+      list.appendChild(d);
+    });
+  }
+  window._invRender=render;
+  btn.addEventListener('click',()=>{panel.classList.toggle('open');render();});
+  document.addEventListener('keydown',e=>{
+    if((e.key==='i'||e.key==='I')&&!dialogActive&&!itemPopupActive)btn.click();
+  });
 })();
 
 </script>
