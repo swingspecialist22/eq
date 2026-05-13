@@ -20,18 +20,18 @@ body{margin:0;padding:0;background:#06020e;overflow:hidden;user-select:none;-web
 #hud-right .zone{color:#dd99ff;font-size:11px;}
 #hud-mission{background:rgba(0,0,0,0.82);border:1px solid #7a1a3a;border-radius:4px;padding:5px 8px;font-size:clamp(9px,2vw,10px);line-height:1.8;color:#aa8899;}
 #hud-mission .mtitle{color:#ff6688;font-size:10px;font-weight:bold;letter-spacing:1px;}
-#dialog-box{position:absolute;bottom:0;left:0;right:0;background:rgba(6,2,14,0.97);border-top:2px solid #7a1a9a;padding:12px 16px clamp(14px,4vh,20px);display:none;font-size:clamp(11px,2.5vw,12px);line-height:1.75;min-height:70px;z-index:5;padding-bottom:max(14px,env(safe-area-inset-bottom));}
-#dialog-box .speaker{color:#cc44ff;font-weight:bold;margin-bottom:3px;font-size:11px;}
-#dialog-text{color:#eeddf8;white-space:pre-wrap;font-size:clamp(11px,2.5vw,13px);line-height:1.8;}
-#dialog-continue{color:#555;font-size:10px;text-align:right;margin-top:5px;animation:blink .9s step-end infinite;}
+#dialog-box{position:absolute;bottom:0;left:0;right:0;background:rgba(6,2,14,0.97);border-top:2px solid #7a1a9a;padding:16px 24px clamp(18px,4vh,24px);display:none;font-size:clamp(15px,2.5vw,17px);line-height:1.8;min-height:100px;z-index:5;padding-bottom:max(18px,env(safe-area-inset-bottom));}
+#dialog-box .speaker{color:#cc44ff;font-weight:bold;margin-bottom:4px;font-size:15px;}
+#dialog-text{color:#eeddf8;white-space:pre-wrap;font-size:clamp(15px,2.5vw,17px);line-height:1.8;}
+#dialog-continue{color:#555;font-size:13px;text-align:right;margin-top:5px;animation:blink .9s step-end infinite;}
 @keyframes blink{50%{opacity:0;}}
-#item-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#0e0418,#180828);border:2px solid #9933cc;border-radius:8px;padding:16px clamp(16px,5vw,28px);text-align:center;z-index:1001;box-shadow:0 0 40px #9933cc66;transition:transform .25s cubic-bezier(.34,1.56,.64,1),opacity .25s;opacity:0;pointer-events:none;min-width:min(260px,85vw);}
+#item-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#0e0418,#180828);border:2px solid #9933cc;border-radius:8px;padding:28px clamp(28px,5vw,48px);text-align:center;z-index:1001;box-shadow:0 0 40px #9933cc66;transition:transform .25s cubic-bezier(.34,1.56,.64,1),opacity .25s;opacity:0;pointer-events:none;min-width:min(440px,85vw);}
 #item-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
-#item-popup .ip-label{font-size:9px;letter-spacing:3px;color:#cc88ff;margin-bottom:6px;}
-#item-popup .ip-icon{font-size:32px;margin:4px 0;}
-#item-popup .ip-name{font-size:14px;color:#eeccff;font-weight:bold;margin-bottom:6px;}
-#item-popup .ip-desc{font-size:10px;color:#7a5a88;line-height:1.6;white-space:pre-wrap;}
-#item-popup .ip-exp{font-size:11px;color:#cc44ff;margin-top:8px;}
+#item-popup .ip-label{font-size:13px;letter-spacing:3px;color:#cc88ff;margin-bottom:10px;}
+#item-popup .ip-icon{font-size:54px;margin:8px 0;}
+#item-popup .ip-name{font-size:22px;color:#eeccff;font-weight:bold;margin-bottom:10px;}
+#item-popup .ip-desc{font-size:15px;color:#7a5a88;line-height:1.6;white-space:pre-wrap;}
+#item-popup .ip-exp{font-size:17px;color:#cc44ff;margin-top:12px;}
 /* 자물쇠 퍼즐 오버레이 */
 #puzzle-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px);z-index:1000;overflow-y:auto;}
 #puzzle-overlay.active{display:flex;}
