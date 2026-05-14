@@ -90,18 +90,24 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 @media(hover:hover) and (pointer:fine){#joystick-base,#btn-confirm{display:none!important;}}
 #inv-toggle,#bgm-toggle{pointer-events:all;background:rgba(25,20,15,0.88);border:1px solid #444;border-radius:3px;color:#aaa;font-size:clamp(10px,1.1vw,13px);padding:4px 8px;margin-top:5px;cursor:pointer;width:100%;font-family:inherit;letter-spacing:.5px;text-align:center;}
 #bgm-toggle.off{color:#555;border-color:#333;}
-#inv-panel{position:absolute;top:0;right:0;width:clamp(230px,28vw,360px);height:100%;background:rgba(8,6,4,0.97);border-left:2px solid #2a2018;z-index:300;transform:translateX(100%);transition:transform .25s ease;overflow-y:auto;display:flex;flex-direction:column;}
-#inv-panel.open{transform:translateX(0);}
-#inv-ph{padding:clamp(8px,1.2vh,14px) clamp(10px,1.5vw,18px);border-bottom:1px solid #1a1408;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
-#inv-ph-title{color:#aa8844;font-size:clamp(10px,1.1vw,14px);letter-spacing:2px;}
+#inv-modal{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.72);z-index:400;align-items:center;justify-content:center;}
+#inv-modal.open{display:flex;}
+#inv-modal-inner{background:linear-gradient(160deg,#1a1208,#0d0a05);border:2px solid #604020;border-radius:8px;width:clamp(320px,55vw,620px);max-height:80vh;display:flex;flex-direction:column;overflow:hidden;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;}
+#inv-modal-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #3a2510;color:#cc9944;font-size:clamp(12px,1.4vw,17px);letter-spacing:2px;flex-shrink:0;}
 #inv-close{cursor:pointer;color:#554433;font-size:clamp(14px,1.6vw,20px);line-height:1;background:none;border:none;padding:0;font-family:inherit;}
-.inv-item{display:flex;gap:clamp(8px,1.2vw,14px);padding:clamp(10px,1.5vh,16px) clamp(10px,1.5vw,18px);border-bottom:1px solid #181210;}
-.inv-icon-w{font-size:clamp(26px,4vw,48px);flex-shrink:0;line-height:1;width:clamp(36px,5vw,58px);text-align:center;}
-.inv-name{font-size:clamp(12px,1.5vw,18px);color:#eeddcc;font-weight:bold;}
-.inv-story{font-size:clamp(9px,1vw,13px);color:#665544;font-style:italic;}
-.inv-desc{font-size:clamp(11px,1.25vw,16px);color:#99aa88;line-height:1.6;}
-.inv-tag{font-size:clamp(9px,.95vw,12px);color:#cc8833;}
-.inv-item.locked .inv-icon-w{opacity:.2;filter:grayscale(1);}
+#inv-close:hover{color:#cc9944;}
+#inv-modal-body{display:flex;flex:1;overflow:hidden;min-height:0;}
+#inv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:12px;width:clamp(160px,26vw,260px);flex-shrink:0;overflow-y:auto;align-content:start;}
+.inv-slot{aspect-ratio:1;background:rgba(20,15,8,0.9);border:1px solid #3a2510;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:clamp(20px,2.8vw,34px);cursor:pointer;transition:border-color .15s,background .15s;}
+.inv-slot:hover:not(.locked){border-color:#aa7733;background:rgba(40,28,12,0.95);}
+.inv-slot.active{border-color:#ffaa33;background:rgba(60,38,10,0.98);}
+.inv-slot.locked{opacity:0.22;filter:grayscale(1);cursor:default;}
+#inv-detail{flex:1;padding:14px 16px;border-left:1px solid #2a1a08;display:flex;flex-direction:column;gap:8px;overflow-y:auto;}
+#inv-det-icon{font-size:clamp(32px,5vw,56px);text-align:center;line-height:1.3;}
+#inv-det-name{font-size:clamp(13px,1.5vw,18px);color:#eeddcc;font-weight:bold;text-align:center;}
+#inv-det-story{font-size:clamp(9px,1vw,13px);color:#665544;line-height:1.5;font-style:italic;}
+#inv-det-desc{font-size:clamp(11px,1.2vw,15px);color:#99aa88;line-height:1.6;}
+#inv-det-tag{font-size:clamp(9px,.95vw,12px);color:#cc8833;background:rgba(50,30,0,.45);border:1px solid #442200;border-radius:3px;padding:3px 10px;display:inline-block;align-self:flex-start;}
 </style>
 </head>
 <body>
@@ -139,9 +145,21 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
     <div class="ip-desc" id="ip-desc"></div>
     <div class="ip-exp" id="ip-exp"></div>
   </div>
-  <div id="inv-panel">
-    <div id="inv-ph"><span id="inv-ph-title">▣ 수집 아이템</span><button id="inv-close">✕</button></div>
-    <div id="inv-list"></div>
+  <!-- 인벤토리 모달 -->
+  <div id="inv-modal">
+    <div id="inv-modal-inner">
+      <div id="inv-modal-header"><span>🎒 아이템 가방</span><button id="inv-close">✕</button></div>
+      <div id="inv-modal-body">
+        <div id="inv-grid"></div>
+        <div id="inv-detail">
+          <div id="inv-det-icon">🎒</div>
+          <div id="inv-det-name">아이템을 선택하세요</div>
+          <div id="inv-det-story"></div>
+          <div id="inv-det-desc"></div>
+          <div id="inv-det-tag" style="display:none"></div>
+        </div>
+      </div>
+    </div>
   </div>
   <div id="quiz-overlay">
     <div id="quiz-panel">
@@ -1256,11 +1274,11 @@ function gameLoop(){
   // 전시 오브젝트
   for(const ex of EXHIBITS){const sx=ex.tx*TS-cx,sy=ex.ty*TS-cy;if(sx>-TS&&sx<W&&sy>-TS&&sy<H)drawExhibit(ex,sx,sy);}
 
+  // 말풍선 NPC (아이템보다 먼저 그려서 아이템이 위에 표시)
+  for(const n of BUBBLE_NPCS){const sx=n.tx*TS-cx,sy=n.ty*TS-cy;if(sx>-TS-80&&sx<W&&sy>-TS-80&&sy<H)drawBubbleNPC(n,sx,sy);}
+
   // 아이템 글로우
   for(const item of ITEMS){const sx=item.tx*TS-cx,sy=item.ty*TS-cy;if(sx>-TS&&sx<W&&sy>-TS&&sy<H)drawItemGlow(item,sx,sy);}
-
-  // 말풍선 NPC
-  for(const n of BUBBLE_NPCS){const sx=n.tx*TS-cx,sy=n.ty*TS-cy;if(sx>-TS-80&&sx<W&&sy>-TS-80&&sy<H)drawBubbleNPC(n,sx,sy);}
 
   // NPC
   for(const n of NPCS){
@@ -1327,8 +1345,12 @@ requestAnimationFrame(gameLoop);
   function fit(){
     const vW=window.innerWidth, vH=window.innerHeight;
     const scale=Math.min(vW/gW,vH/gH);
-    canvas.style.width=Math.round(gW*scale)+'px';
+    const cW=Math.round(gW*scale);
+    canvas.style.width=cW+'px';
     canvas.style.height=Math.round(gH*scale)+'px';
+    const off=Math.round((vW-cW)/2);
+    const dl=document.getElementById('dialog-box');
+    if(dl){dl.style.left=off+'px';dl.style.right=off+'px';}
   }
   fit(); window.addEventListener('resize',fit);
   screen.orientation&&screen.orientation.addEventListener('change',()=>setTimeout(fit,100));
@@ -1415,28 +1437,49 @@ const SFX=(function(){
 
 (function(){
   const btn=document.getElementById('inv-toggle');
-  const panel=document.getElementById('inv-panel');
-  const list=document.getElementById('inv-list');
-  document.getElementById('inv-close').addEventListener('click',()=>panel.classList.remove('open'));
+  const modal=document.getElementById('inv-modal');
+  const grid=document.getElementById('inv-grid');
+  const detIcon=document.getElementById('inv-det-icon');
+  const detName=document.getElementById('inv-det-name');
+  const detStory=document.getElementById('inv-det-story');
+  const detDesc=document.getElementById('inv-det-desc');
+  const detTag=document.getElementById('inv-det-tag');
+  document.getElementById('inv-close').addEventListener('click',()=>modal.classList.remove('open'));
+  modal.addEventListener('click',e=>{ if(e.target===modal) modal.classList.remove('open'); });
+  function showDetail(item,has){
+    detIcon.textContent=item.icon;
+    detName.textContent=has?item.name:'???';
+    detStory.textContent=has&&item.story?item.story:'';
+    detDesc.textContent=has?item.desc:'아직 발견하지 못한 아이템입니다.';
+    if(has){ detTag.textContent='+'+item.exp+' EXP · +'+item.coins+'코인'; detTag.style.display='inline-block'; }
+    else{ detTag.style.display='none'; }
+  }
   function render(){
-    list.innerHTML='';
+    grid.innerHTML='';
+    let firstSlot=null;
     ITEMS.forEach(item=>{
       const has=player.inventory.has(item.id);
-      const d=document.createElement('div');
-      d.className='inv-item'+(has?'':' locked');
-      d.innerHTML='<div class="inv-icon-w">'+item.icon+'</div><div class="inv-info">'
-        +'<div class="inv-name">'+item.name+'</div>'
-        +(has&&item.story?'<div class="inv-story">'+item.story+'</div>':'')
-        +'<div class="inv-desc">'+(has?item.desc.replace(/\n/g,'<br>'):'아직 발견하지 못한 아이템입니다.')+'</div>'
-        +(has?'<div class="inv-tag">+'+item.exp+' EXP &nbsp;·&nbsp; +'+item.coins+'코인</div>':'')
-        +'</div>';
-      list.appendChild(d);
+      const slot=document.createElement('div');
+      slot.className='inv-slot'+(has?'':' locked');
+      slot.textContent=item.icon;
+      slot.title=has?item.name:'???';
+      if(has){
+        if(!firstSlot) firstSlot=slot;
+        slot.addEventListener('click',()=>{
+          grid.querySelectorAll('.inv-slot').forEach(s=>s.classList.remove('active'));
+          slot.classList.add('active');
+          showDetail(item,true);
+        });
+      }
+      grid.appendChild(slot);
     });
+    if(firstSlot){ firstSlot.click(); }
+    else{ detIcon.textContent='🎒'; detName.textContent='아이템 없음'; detStory.textContent=''; detDesc.textContent='아직 아이템을 발견하지 못했습니다.'; detTag.style.display='none'; }
   }
   window._invRender=render;
-  btn.addEventListener('click',()=>{panel.classList.toggle('open');render();});
+  btn.addEventListener('click',()=>{ modal.classList.toggle('open'); render(); });
   document.addEventListener('keydown',e=>{
-    if((e.key==='i'||e.key==='I')&&!dialogActive&&!itemPopupActive)btn.click();
+    if((e.key==='i'||e.key==='I')&&!dialogActive&&!itemPopupActive) btn.click();
   });
 })();
 </script>
