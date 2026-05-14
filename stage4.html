@@ -133,7 +133,8 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 @media(hover:hover) and (pointer:fine){
   #joystick-base,#btn-confirm{display:none!important;}
 }
-#inv-toggle{pointer-events:all;background:rgba(25,20,15,0.88);border:1px solid #444;border-radius:3px;color:#aaa;font-size:clamp(10px,1.1vw,13px);padding:4px 8px;margin-top:5px;cursor:pointer;width:100%;font-family:inherit;letter-spacing:.5px;text-align:center;}
+#inv-toggle,#bgm-toggle{pointer-events:all;background:rgba(25,20,15,0.88);border:1px solid #444;border-radius:3px;color:#aaa;font-size:clamp(10px,1.1vw,13px);padding:4px 8px;margin-top:5px;cursor:pointer;width:100%;font-family:inherit;letter-spacing:.5px;text-align:center;}
+#bgm-toggle.off{color:#555;border-color:#333;}
 #inv-panel{position:absolute;top:0;right:0;width:clamp(230px,28vw,360px);height:100%;background:rgba(8,6,4,0.97);border-left:2px solid #2a2018;z-index:300;transform:translateX(100%);transition:transform .25s ease;overflow-y:auto;display:flex;flex-direction:column;}
 #inv-panel.open{transform:translateX(0);}
 #inv-ph{padding:clamp(8px,1.2vh,14px) clamp(10px,1.5vw,18px);border-bottom:1px solid #1a1408;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
@@ -168,6 +169,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
       <div>에너지 코인 ⚙ <span id="hud-coin">0</span></div>
       <div id="hud-coords" style="font-size:9px;color:#444">x:0 y:0</div>
       <button id="inv-toggle">🎒 아이템 목록</button>
+      <button id="bgm-toggle">🎵 BGM ON</button>
     </div>
   </div>
   <!-- 수소 연료 HUD -->
@@ -1600,6 +1602,7 @@ const SFX = (function(){
     return cache[name];
   }
   let bgmEl = null;
+  let bgmEnabled = localStorage.getItem('eq_bgm') !== 'off';
   return {
     play(name){
       try {
@@ -1608,29 +1611,37 @@ const SFX = (function(){
       } catch(e){}
     },
     bgmStart(){
-      if(bgmEl) return;
+      if(!bgmEnabled || bgmEl) return;
       bgmEl = new Audio(BASE + 'bgm.mp3');
       bgmEl.loop = true;
       bgmEl.volume = 0.7;
-      bgmEl.play().catch(()=>{});
+      bgmEl.play().catch(()=>{ bgmEl = null; });
     },
     bgmStop(){
       if(bgmEl){ bgmEl.pause(); bgmEl = null; }
-    }
+    },
+    bgmToggle(){
+      bgmEnabled = !bgmEnabled;
+      localStorage.setItem('eq_bgm', bgmEnabled ? 'on' : 'off');
+      if(bgmEnabled) this.bgmStart();
+      else this.bgmStop();
+      return bgmEnabled;
+    },
+    bgmIsOn(){ return bgmEnabled; }
   };
 })();
 
-// 첫 터치/클릭 시 BGM 시작 (브라우저 자동재생 정책 대응)
+// BGM: 즉시 자동재생 시도 → 실패 시 첫 상호작용 대기
 (function(){
-  function startBGM(){
-    SFX.bgmStart();
-    document.removeEventListener('touchstart', startBGM);
-    document.removeEventListener('click', startBGM);
-    document.removeEventListener('keydown', startBGM);
-  }
-  document.addEventListener('touchstart', startBGM, {once:true});
-  document.addEventListener('click', startBGM, {once:true});
-  document.addEventListener('keydown', startBGM, {once:true});
+  SFX.bgmStart();
+  function onInteract(){ SFX.bgmStart(); }
+  document.addEventListener('touchstart', onInteract, {once:true});
+  document.addEventListener('click', onInteract, {once:true});
+  document.addEventListener('keydown', onInteract, {once:true});
+  const btn = document.getElementById('bgm-toggle');
+  function updateBtn(){ btn.textContent = SFX.bgmIsOn() ? '🎵 BGM ON' : '🔇 BGM OFF'; }
+  updateBtn();
+  btn.addEventListener('click', ()=>{ SFX.bgmToggle(); updateBtn(); });
 })();
 
 (function(){
