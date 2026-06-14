@@ -239,6 +239,8 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 </div>
 <div id="controls-hint"><span>↑↓←→ / WASD</span> 이동 &nbsp;|&nbsp; <span>SPACE / ENTER</span> 대화·확인 &nbsp;|&nbsp; <span>1-4</span> 퀴즈 선택</div>
 
+<!-- 공용 오디오 엔진 (모든 화면 공통) -->
+<script src="eq-audio.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════
 // CONSTANTS
@@ -1593,61 +1595,8 @@ loadFromLocalStorage();
 })();
 
 
-// ═══════════════════════════════════════════════════════════
-// 오디오 엔진
-// ═══════════════════════════════════════════════════════════
-const SFX = (function(){
-  const BASE = 'audio/';
-  const cache = {};
-  function get(name){
-    if(!cache[name]){
-      cache[name] = new Audio(BASE + name + '.mp3');
-      cache[name].preload = 'auto';
-    }
-    return cache[name];
-  }
-  let bgmEl = null;
-  let bgmEnabled = localStorage.getItem('eq_bgm') !== 'off';
-  return {
-    play(name){
-      try {
-        const a = get(name).cloneNode();
-        a.play().catch(()=>{});
-      } catch(e){}
-    },
-    bgmStart(){
-      if(!bgmEnabled || bgmEl) return;
-      bgmEl = new Audio(BASE + 'bgm.mp3');
-      bgmEl.loop = true;
-      bgmEl.volume = 0.7;
-      bgmEl.play().catch(()=>{ bgmEl = null; });
-    },
-    bgmStop(){
-      if(bgmEl){ bgmEl.pause(); bgmEl = null; }
-    },
-    bgmToggle(){
-      bgmEnabled = !bgmEnabled;
-      localStorage.setItem('eq_bgm', bgmEnabled ? 'on' : 'off');
-      if(bgmEnabled) this.bgmStart();
-      else this.bgmStop();
-      return bgmEnabled;
-    },
-    bgmIsOn(){ return bgmEnabled; }
-  };
-})();
+  // ── 오디오 엔진(SFX/BGM)은 공용 파일 eq-audio.js 로 분리됨 ──
 
-// BGM: 즉시 자동재생 시도 → 실패 시 첫 상호작용 대기
-(function(){
-  SFX.bgmStart();
-  function onInteract(){ SFX.bgmStart(); }
-  document.addEventListener('touchstart', onInteract, {once:true});
-  document.addEventListener('click', onInteract, {once:true});
-  document.addEventListener('keydown', onInteract, {once:true});
-  const btn = document.getElementById('bgm-toggle');
-  function updateBtn(){ btn.textContent = SFX.bgmIsOn() ? '🎵 BGM ON' : '🔇 BGM OFF'; }
-  updateBtn();
-  btn.addEventListener('click', ()=>{ SFX.bgmToggle(); updateBtn(); });
-})();
 
 (function(){
   const btn=document.getElementById('inv-toggle');
