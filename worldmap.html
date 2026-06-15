@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>에너지 퀘스트 — 에너지 여정</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+  background:radial-gradient(circle at 50% 0%,#13203a 0%,#0a0e18 60%,#06080e 100%);
+  color:#e8e8e8; min-height:100vh; user-select:none;
+  display:flex; flex-direction:column; align-items:center;
+  padding:clamp(16px,3vh,40px) 12px; overflow-x:hidden;
+}
+#title{ text-align:center; margin-bottom:clamp(16px,3vh,32px); }
+#title h1{ font-size:clamp(20px,3vw,32px); color:#ff8800; text-shadow:0 0 18px #ff880077; letter-spacing:2px; }
+#title .sub{ font-size:clamp(10px,1.3vw,14px); color:#7790b0; letter-spacing:4px; margin-top:4px; }
+#greet{ font-size:clamp(11px,1.4vw,15px); color:#aabbd0; margin-top:10px; }
+
+#journey{ position:relative; width:min(560px,94vw); display:flex; flex-direction:column; gap:clamp(10px,1.6vh,18px); }
+/* 노드들을 잇는 세로선 */
+#journey::before{
+  content:''; position:absolute; left:clamp(30px,7vw,46px); top:24px; bottom:24px; width:3px;
+  background:linear-gradient(#3a4a6a,#26304a); border-radius:2px; z-index:0;
+}
+.node{
+  position:relative; z-index:1; display:flex; align-items:center; gap:clamp(10px,2vw,16px);
+  background:rgba(20,28,46,0.92); border:2px solid #2c3a58; border-radius:12px;
+  padding:clamp(10px,1.6vh,16px) clamp(12px,2vw,18px); cursor:pointer;
+  transition:transform .12s, border-color .15s, box-shadow .15s;
+}
+.node .icon{
+  flex-shrink:0; width:clamp(44px,9vw,60px); height:clamp(44px,9vw,60px); border-radius:10px;
+  display:flex; align-items:center; justify-content:center; font-size:clamp(22px,4.5vw,32px);
+  background:#0d1424; border:2px solid currentColor;
+}
+.node .body{ flex:1; min-width:0; }
+.node .name{ font-size:clamp(14px,2vw,19px); font-weight:bold; color:#fff; }
+.node .theme{ font-size:clamp(10px,1.4vw,13px); color:#9fb0c8; margin-top:2px; }
+.node .badge{ flex-shrink:0; font-size:clamp(9px,1.2vw,12px); padding:4px 10px; border-radius:20px; letter-spacing:1px; font-weight:bold; }
+
+/* 상태별 */
+.node.cleared{ border-color:#3a9a5a; }
+.node.cleared .badge{ background:#0d2a16; color:#7df7a0; border:1px solid #3a9a5a; }
+.node.current{ border-color:#ff8800; box-shadow:0 0 22px #ff880033; animation:pulse 1.6s ease-in-out infinite; }
+.node.current .badge{ background:#3a2200; color:#ffcc66; border:1px solid #ff8800; }
+.node.locked{ cursor:default; opacity:0.5; filter:grayscale(0.6); }
+.node.locked .badge{ background:#1a1f2e; color:#667; border:1px solid #33405c; }
+@keyframes pulse{ 0%,100%{box-shadow:0 0 22px #ff880033;} 50%{box-shadow:0 0 30px #ff880066;} }
+.node:not(.locked):hover{ transform:translateX(5px); border-color:#ffaa44; }
+.node:not(.locked):active{ transform:translateX(2px) scale(0.99); }
+
+#footer{ margin-top:clamp(20px,3vh,36px); display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+.btn{
+  font-family:inherit; font-size:clamp(12px,1.5vw,15px); letter-spacing:1px; cursor:pointer;
+  background:transparent; border:2px solid #44aaff; color:#7cc2ff;
+  border-radius:8px; padding:10px 22px; transition:background .15s;
+}
+.btn:hover{ background:rgba(68,170,255,0.15); }
+#hint{ font-size:clamp(9px,1.1vw,12px); color:#556; margin-top:14px; text-align:center; }
+</style>
+</head>
+<body>
+  <div id="title">
+    <h1>⚡ 에너지 여정</h1>
+    <div class="sub">ENERGY QUEST · WORLD MAP</div>
+    <div id="greet"></div>
+  </div>
+
+  <div id="journey"></div>
+
+  <div id="footer">
+    <button class="btn" onclick="location.href='index.html'">🏠 타이틀로</button>
+  </div>
+  <div id="hint">잠긴 곳(🔒)은 앞 스테이지를 깨야 열려요 · 깬 곳은 다시 들어갈 수 있어요</div>
+
+<script>
+// ── 에너지 여정 스테이지 정의 (설계: 태양광→풍력→하베스팅→저장→스마트그리드→본부) ──
+const STAGES = [
+  {n:1, file:'stage1.html', icon:'☀',  name:'태양의 사막',   theme:'태양광 발전',       color:'#ff8800'},
+  {n:2, file:'stage2.html', icon:'🌬', name:'바람의 해안',   theme:'풍력 발전',         color:'#44aaff'},
+  {n:3, file:'stage3.html', icon:'⚡', name:'발명가의 도시', theme:'에너지 하베스팅',   color:'#eebb22'},
+  {n:4, file:'stage4.html', icon:'🔋', name:'공장 지대',     theme:'에너지 저장·자립',  color:'#44dd88'},
+  {n:5, file:'stage5.html', icon:'🧠', name:'데이터 타워',   theme:'스마트그리드',      color:'#38bdf8'},
+  {n:6, file:'stage6.html', icon:'🏛', name:'DEC 본부',      theme:'최종 결전 · 에너지 자립', color:'#ff5555'},
+];
+
+function isCleared(n){ return localStorage.getItem('eq_stage'+n+'_cleared') === '1'; }
+
+// 인사말 (캐릭터 이름 있으면)
+(function(){
+  const name = localStorage.getItem('eq_char_name');
+  document.getElementById('greet').textContent =
+    name ? `${name} 공학자의 여정` : '에너지 자립을 향한 여정';
+})();
+
+// 노드 렌더
+const journey = document.getElementById('journey');
+let currentAssigned = false;
+STAGES.forEach(s=>{
+  const cleared = isCleared(s.n);
+  const unlocked = (s.n === 1) || isCleared(s.n - 1);
+  // 첫 번째 '열렸지만 안 깬' 스테이지 = 현재 목표
+  let state = 'locked';
+  if (cleared) state = 'cleared';
+  else if (unlocked && !currentAssigned) { state = 'current'; currentAssigned = true; }
+  else if (unlocked) state = 'available';
+
+  const node = document.createElement('div');
+  node.className = 'node ' + (state==='available' ? '' : state);
+  node.style.color = (state==='locked') ? '#556' : s.color;
+  const badge = state==='cleared' ? '✓ 완료'
+              : state==='current' ? '▶ 여기부터'
+              : state==='available' ? '도전 가능'
+              : '🔒 잠김';
+  node.innerHTML =
+    `<div class="icon">${state==='locked' ? '🔒' : s.icon}</div>
+     <div class="body">
+       <div class="name">${s.n}. ${s.name}</div>
+       <div class="theme">${s.theme}</div>
+     </div>
+     <div class="badge">${badge}</div>`;
+  if (state !== 'locked'){
+    node.addEventListener('click', ()=>{ location.href = s.file; });
+  }
+  journey.appendChild(node);
+});
+</script>
+</body>
+</html>
