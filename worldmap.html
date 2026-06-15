@@ -87,11 +87,13 @@ const STAGES = [
   {n:6, file:'stage6.html', icon:'🏛', name:'DEC 본부',      theme:'최종 결전 · 에너지 자립', color:'#ff5555'},
 ];
 
-function isCleared(n){ return localStorage.getItem('eq_stage'+n+'_cleared') === '1'; }
+// localStorage 접근이 막힌 환경(file:// 등)에서도 안 멈추도록 안전하게 읽기
+function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+function isCleared(n){ return lsGet('eq_stage'+n+'_cleared') === '1'; }
 
 // 인사말 (캐릭터 이름 있으면)
 (function(){
-  const name = localStorage.getItem('eq_char_name');
+  const name = lsGet('eq_char_name');
   document.getElementById('greet').textContent =
     name ? `${name} 공학자의 여정` : '에너지 자립을 향한 여정';
 })();
