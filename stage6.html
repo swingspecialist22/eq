@@ -166,7 +166,7 @@ body{margin:0;padding:0;background:#06020e;overflow:hidden;user-select:none;-web
   <div id="levelup-popup">
     <div class="lu-title">LEVEL UP!</div>
     <div class="lu-lv" id="lu-lv-num">2</div>
-    <div class="lu-sub" id="lu-sub-text">새로운 기술 해금!</div>
+    <div class="lu-sub" id="lu-sub-text"></div>
   </div>
   <div id="restore-overlay"></div>
   <button id="quest-log-btn" onclick="showQuestLog()">📋 퀘스트</button>
@@ -593,7 +593,7 @@ function showLvUp(){
   SFX.play('stage_clear');
   const p=document.getElementById('levelup-popup');
   document.getElementById('lu-lv-num').textContent=player.lv;
-  document.getElementById('lu-sub-text').textContent=LV_UNLOCK[player.lv]||'능력치 상승!';
+  document.getElementById('lu-sub-text').textContent='잘하고 있어요!';
   p.classList.add('show');setTimeout(()=>p.classList.remove('show'),2800);
 }
 function spawnFloat(txt,col,x,y){
