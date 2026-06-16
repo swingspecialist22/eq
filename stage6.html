@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>에너지 퀘스트 — DEC 본부 최심부</title>
+<link rel="stylesheet" href="eq-ui.css">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -20,11 +21,7 @@ body{margin:0;padding:0;background:#06020e;overflow:hidden;user-select:none;-web
 #hud-right .zone{color:#dd99ff;font-size:11px;}
 #hud-mission{background:rgba(0,0,0,0.82);border:1px solid #7a1a3a;border-radius:4px;padding:5px 8px;font-size:clamp(9px,2vw,10px);line-height:1.8;color:#aa8899;}
 #hud-mission .mtitle{color:#ff6688;font-size:10px;font-weight:bold;letter-spacing:1px;}
-#dialog-box{position:absolute;bottom:0;left:0;right:0;background:rgba(6,2,14,0.97);border-top:2px solid #7a1a9a;padding:clamp(12px,2vh,22px) clamp(16px,2vw,30px);display:none;font-size:clamp(14px,1.4vw,22px);line-height:1.8;min-height:clamp(80px,12vh,130px);z-index:5;}
-#dialog-box .speaker{color:#cc44ff;font-weight:bold;margin-bottom:4px;font-size:clamp(12px,1.25vw,18px);}
-#dialog-text{color:#eeddf8;white-space:pre-wrap;}
-#dialog-continue{color:#555;font-size:clamp(11px,1vw,15px);text-align:right;margin-top:5px;animation:blink .9s step-end infinite;}
-@keyframes blink{50%{opacity:0;}}
+:root{--eq-dlg-bg:rgba(6,2,14,0.97);--eq-dlg-border:#7a1a9a;--eq-dlg-speaker:#cc44ff;--eq-dlg-text:#eeddf8;}
 #item-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#0e0418,#180828);border:2px solid #9933cc;border-radius:8px;padding:clamp(20px,3vh,40px) clamp(32px,5vw,64px);text-align:center;z-index:1001;box-shadow:0 0 40px #9933cc66;transition:transform .25s cubic-bezier(.34,1.56,.64,1),opacity .25s;opacity:0;pointer-events:none;min-width:min(440px,42vw);}
 #item-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
 #item-popup .ip-label{font-size:clamp(10px,1vw,15px);letter-spacing:3px;color:#cc88ff;margin-bottom:clamp(6px,.8vh,12px);}

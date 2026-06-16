@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>에너지 퀘스트 — 바람의 해안</title>
+<link rel="stylesheet" href="eq-ui.css">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -20,11 +21,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 #hud-right .zone{color:#aad4ff;font-size:11px;}
 #hud-mission{background:rgba(0,0,0,0.78);border:1px solid #1a5a3a;border-radius:4px;padding:5px 10px;font-size:10px;line-height:1.8;color:#8aa;}
 #hud-mission .mtitle{color:#88ddcc;font-size:10px;font-weight:bold;letter-spacing:1px;}
-#dialog-box{position:absolute;bottom:0;left:0;right:0;background:rgba(4,12,20,0.96);border-top:2px solid #204060;padding:clamp(12px,2vh,22px) clamp(16px,2vw,30px);display:none;font-size:clamp(14px,1.4vw,22px);line-height:1.8;min-height:clamp(80px,12vh,130px);z-index:5;}
-#dialog-box .speaker{color:#44aaff;font-weight:bold;margin-bottom:4px;font-size:clamp(12px,1.25vw,18px);}
-#dialog-text{color:#e8e8e8;white-space:pre-wrap;}
-#dialog-continue{color:#666;font-size:clamp(11px,1vw,15px);text-align:right;margin-top:5px;animation:blink .9s step-end infinite;}
-@keyframes blink{50%{opacity:0;}}
+:root{--eq-dlg-bg:rgba(4,12,20,0.96);--eq-dlg-border:#204060;--eq-dlg-speaker:#44aaff;--eq-dlg-text:#e8e8e8;}
 #item-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#0a1a08,#162810);border:2px solid #44aa44;border-radius:8px;padding:clamp(20px,3vh,40px) clamp(32px,5vw,64px);text-align:center;z-index:1001;box-shadow:0 0 40px #44aa4466;transition:transform .25s cubic-bezier(.34,1.56,.64,1),opacity .25s;opacity:0;pointer-events:none;min-width:min(440px,42vw);}
 #item-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
 #item-popup .ip-label{font-size:clamp(10px,1vw,15px);letter-spacing:3px;color:#66bbdd;margin-bottom:clamp(6px,.8vh,12px);}

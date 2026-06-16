@@ -4,16 +4,18 @@
    화면마다 제각각이던 UI를 stage1 기준으로 통일하는 파일.
    바꾸고 싶으면 여기 한 곳만 고치면 연결된 모든 화면에 반영됨.
 
-   [대화창] stage1의 반응형(화면비례) 방식이 기준.
-     - position:fixed 로 항상 "화면" 맨 아래에 고정 (캔버스 스케일과 무관)
-     - clamp() 로 화면 크기에 맞춰 글자/여백이 커짐 → 잘리지 않음
-     - 화면마다 speaker 요소가 .speaker 또는 #dialog-speaker 라서 둘 다 지정
+   [대화창] 구조(위치·크기·폰트)는 공통, 색은 스테이지별 CSS 변수로.
+     - position:fixed 로 항상 "화면" 맨 아래 고정 (캔버스 스케일과 무관, 안 잘림)
+     - clamp() 로 화면 크기에 맞춰 글자/여백이 커짐
+     - 색은 각 스테이지가 :root 에서 --eq-dlg-* 변수로 지정(테마색 보존).
+       안 정하면 아래 기본값(사막 톤) 사용.
+     - speaker 요소는 .speaker 또는 #dialog-speaker 둘 다 지정.
    ════════════════════════════════════════════════════════════ */
 
 #dialog-box{
   position:fixed; bottom:0; left:0; right:0;
-  background:rgba(12,8,4,0.96);
-  border-top:2px solid #604020;
+  background:var(--eq-dlg-bg, rgba(12,8,4,0.96));
+  border-top:2px solid var(--eq-dlg-border, #604020);
   padding:clamp(12px,2vh,22px) clamp(16px,2vw,30px);
   display:none;
   font-size:clamp(14px,1.4vw,22px);
@@ -23,10 +25,10 @@
 }
 #dialog-box .speaker,
 #dialog-speaker{
-  color:#ff8800; font-weight:bold; margin-bottom:4px;
+  color:var(--eq-dlg-speaker, #ff8800); font-weight:bold; margin-bottom:4px;
   font-size:clamp(12px,1.25vw,18px); letter-spacing:1px;
 }
-#dialog-text{ color:#e8e8e8; white-space:pre-wrap; }
+#dialog-text{ color:var(--eq-dlg-text, #e8e8e8); white-space:pre-wrap; }
 #dialog-continue{
   color:#666; text-align:right; margin-top:5px;
   font-size:clamp(11px,1vw,15px);
