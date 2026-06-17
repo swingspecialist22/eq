@@ -72,8 +72,8 @@ body{
   <div id="journey"></div>
 
   <div id="footer">
-    <button class="btn" onclick="location.href='dogam.html'">📚 에너지 도감</button>
-    <button class="btn" onclick="location.href='index.html'">🏠 타이틀로</button>
+    <button class="btn" onclick="go('dogam.html')">📚 에너지 도감</button>
+    <button class="btn" onclick="go('index.html')">🏠 타이틀로</button>
   </div>
   <div id="hint">잠긴 곳(🔒)은 앞 스테이지를 깨야 열려요 · 깬 곳은 다시 들어갈 수 있어요</div>
 
@@ -91,6 +91,8 @@ const STAGES = [
 // localStorage 접근이 막힌 환경(file:// 등)에서도 안 멈추도록 안전하게 읽기
 function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
 function isCleared(n){ return lsGet('eq_stage'+n+'_cleared') === '1'; }
+// 엿보기 모달(아이프레임) 안에서도 부모 창을 이동시키도록 top 기준으로 이동
+function go(u){ try{ (window.top||window).location.href=u; }catch(e){ location.href=u; } }
 
 // 인사말 (캐릭터 이름 있으면)
 (function(){
@@ -126,7 +128,7 @@ STAGES.forEach(s=>{
      </div>
      <div class="badge">${badge}</div>`;
   if (state !== 'locked'){
-    node.addEventListener('click', ()=>{ location.href = s.file; });
+    node.addEventListener('click', ()=>{ go(s.file); });
   }
   journey.appendChild(node);
 });

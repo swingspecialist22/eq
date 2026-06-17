@@ -35,3 +35,11 @@
   animation:blink .9s step-end infinite;
 }
 @keyframes blink{ 50%{opacity:0;} }
+
+/* 효과음 토글 버튼 (eq-audio.js가 BGM 버튼 옆에 주입) — #bgm-toggle 과 동일한 모양 */
+#sfx-toggle{
+  pointer-events:all; background:rgba(25,20,15,0.88); border:1px solid #444; border-radius:3px;
+  color:#aaa; font-size:clamp(10px,1.1vw,13px); padding:4px 8px; margin-top:5px; cursor:pointer;
+  width:100%; font-family:inherit; letter-spacing:.5px; text-align:center;
+}
+#sfx-toggle.off{ color:#555; border-color:#333; }

@@ -1,14 +1,8 @@
 // ════════════════════════════════════════════════════════════
 // 에너지 퀘스트 — 공용 오디오 엔진 (eq-audio.js)
-//
-// 기존에 모든 스테이지(stage1~6 등)에 똑같이 복붙돼 있던 SFX/BGM 코드를
-// 이 파일 "하나"로 모은 것. 각 스테이지는 인라인 정의 대신
-//   <script src="eq-audio.js"></script>
-// 한 줄만 넣으면 된다. 효과음/배경음을 바꾸려면 여기만 고치면 전체 반영.
-//
-// 사용법: SFX.play('warp'), SFX.bgmStart(), SFX.bgmToggle() 등
-//         audio/ 폴더의 mp3 파일명을 그대로 넘긴다.
-// 의존: <body>에 id="bgm-toggle" 버튼이 있어야 토글이 연결됨.
+// 모든 스테이지가 공유. BGM on/off + 효과음(SFX) on/off 둘 다 지원.
+// 사용: SFX.play('warp'), SFX.bgmStart(), SFX.bgmToggle(), SFX.sfxToggle() 등
+// 의존: <body>에 id="bgm-toggle" 버튼이 있으면 BGM·효과음 토글 버튼이 자동 연결됨.
 // ════════════════════════════════════════════════════════════
 const SFX = (function(){
   const BASE = 'audio/';
@@ -22,8 +16,10 @@ const SFX = (function(){
   }
   let bgmEl = null;
   let bgmEnabled = localStorage.getItem('eq_bgm') !== 'off';
+  let sfxEnabled = localStorage.getItem('eq_sfx') !== 'off';   // 효과음 on/off
   return {
     play(name){
+      if(!sfxEnabled) return;            // 효과음 꺼져 있으면 무시
       try {
         const a = get(name).cloneNode();
         a.play().catch(()=>{});
@@ -46,20 +42,39 @@ const SFX = (function(){
       else this.bgmStop();
       return bgmEnabled;
     },
-    bgmIsOn(){ return bgmEnabled; }
+    bgmIsOn(){ return bgmEnabled; },
+    sfxToggle(){
+      sfxEnabled = !sfxEnabled;
+      localStorage.setItem('eq_sfx', sfxEnabled ? 'on' : 'off');
+      return sfxEnabled;
+    },
+    sfxIsOn(){ return sfxEnabled; }
   };
 })();
 
-// BGM: 즉시 자동재생 시도 → 실패 시 첫 상호작용 대기
+// BGM 자동재생 + BGM/효과음 토글 버튼 연결
 (function(){
   SFX.bgmStart();
   function onInteract(){ SFX.bgmStart(); }
   document.addEventListener('touchstart', onInteract, {once:true});
   document.addEventListener('click', onInteract, {once:true});
   document.addEventListener('keydown', onInteract, {once:true});
+
   const btn = document.getElementById('bgm-toggle');
-  if(!btn) return;
-  function updateBtn(){ btn.textContent = SFX.bgmIsOn() ? '🎵 BGM ON' : '🔇 BGM OFF'; }
-  updateBtn();
-  btn.addEventListener('click', ()=>{ SFX.bgmToggle(); updateBtn(); });
+  if(!btn) return;   // 메뉴 화면 등 토글 버튼 없는 곳은 패스
+
+  function updateBgm(){ btn.textContent = SFX.bgmIsOn() ? '🎵 BGM ON' : '🔇 BGM OFF'; btn.classList.toggle('off', !SFX.bgmIsOn()); }
+  updateBgm();
+  btn.addEventListener('click', ()=>{ SFX.bgmToggle(); updateBgm(); });
+
+  // 효과음 토글 버튼을 BGM 버튼 바로 뒤에 주입 (스타일은 eq-ui.css의 #sfx-toggle)
+  if(!document.getElementById('sfx-toggle')){
+    const sb = document.createElement('button');
+    sb.id = 'sfx-toggle';
+    sb.type = 'button';
+    function updateSfx(){ sb.textContent = SFX.sfxIsOn() ? '🔊 효과음 ON' : '🔈 효과음 OFF'; sb.classList.toggle('off', !SFX.sfxIsOn()); }
+    updateSfx();
+    sb.addEventListener('click', ()=>{ SFX.sfxToggle(); updateSfx(); });
+    btn.parentNode.insertBefore(sb, btn.nextSibling);
+  }
 })();
