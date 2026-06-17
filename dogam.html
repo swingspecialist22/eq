@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>에너지 퀘스트 — 에너지 도감</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+  background:radial-gradient(circle at 50% 0%,#1a1530 0%,#0c0a14 60%,#06060a 100%);
+  color:#e8e8e8; min-height:100vh; user-select:none;
+  display:flex; flex-direction:column; align-items:center;
+  padding:clamp(16px,3vh,40px) 12px;
+}
+#title{ text-align:center; margin-bottom:clamp(10px,2vh,20px); }
+#title h1{ font-size:clamp(20px,3vw,32px); color:#ffcc44; text-shadow:0 0 18px #ffcc4477; letter-spacing:2px; }
+#title .sub{ font-size:clamp(10px,1.3vw,14px); color:#8a90b0; letter-spacing:4px; margin-top:4px; }
+#progress-wrap{ width:min(680px,92vw); margin:6px 0 clamp(14px,2.5vh,26px); }
+#progress-label{ font-size:clamp(11px,1.4vw,15px); color:#cdd3e8; text-align:center; margin-bottom:6px; }
+#progress-bar{ height:10px; background:#1c1a2e; border-radius:6px; overflow:hidden; border:1px solid #2e2c44; }
+#progress-fill{ height:100%; width:0%; background:linear-gradient(90deg,#ffcc44,#ff8800); border-radius:6px; transition:width .6s; }
+
+#grid{
+  width:min(820px,94vw);
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(min(220px,44vw),1fr));
+  gap:clamp(8px,1.4vw,14px);
+}
+.card{
+  background:rgba(22,20,38,0.9); border:2px solid #2c2a48; border-radius:12px;
+  padding:clamp(10px,1.6vh,16px); display:flex; gap:12px; align-items:flex-start;
+  transition:transform .12s, border-color .15s, box-shadow .15s;
+}
+.card.unlocked:hover{ transform:translateY(-3px); box-shadow:0 8px 22px #00000066; }
+.card .icon{
+  flex-shrink:0; width:clamp(40px,8vw,52px); height:clamp(40px,8vw,52px); border-radius:10px;
+  display:flex; align-items:center; justify-content:center; font-size:clamp(20px,4vw,28px);
+  background:#0e0c1a; border:2px solid currentColor;
+}
+.card .body{ flex:1; min-width:0; }
+.card .name{ font-size:clamp(13px,1.7vw,17px); font-weight:bold; color:#fff; margin-bottom:3px; }
+.card .stage{ font-size:clamp(8px,1vw,11px); color:#8088a8; margin-bottom:5px; }
+.card .desc{ font-size:clamp(10px,1.25vw,13px); color:#b9c0d8; line-height:1.55; }
+
+.card.locked{ opacity:0.55; filter:grayscale(0.7); }
+.card.locked .icon{ color:#556 !important; }
+.card.locked .name,.card.locked .desc{ color:#667; }
+
+#footer{ margin-top:clamp(18px,3vh,32px); display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+.btn{
+  font-family:inherit; font-size:clamp(12px,1.5vw,15px); letter-spacing:1px; cursor:pointer;
+  background:transparent; border:2px solid #44aaff; color:#7cc2ff;
+  border-radius:8px; padding:10px 22px; transition:background .15s;
+}
+.btn:hover{ background:rgba(68,170,255,0.15); }
+#hint{ font-size:clamp(9px,1.1vw,12px); color:#556; margin-top:14px; text-align:center; }
+</style>
+</head>
+<body>
+  <div id="title">
+    <h1>📚 에너지 도감</h1>
+    <div class="sub">ENERGY CODEX</div>
+  </div>
+  <div id="progress-wrap">
+    <div id="progress-label"></div>
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+  </div>
+
+  <div id="grid"></div>
+
+  <div id="footer">
+    <button class="btn" onclick="location.href='worldmap.html'">🗺 월드맵</button>
+    <button class="btn" onclick="location.href='index.html'">🏠 타이틀로</button>
+  </div>
+  <div id="hint">스테이지를 깰수록 그곳에서 배운 에너지 개념 카드가 열립니다</div>
+
+<script>
+// localStorage 접근이 막힌 환경(file://)에서도 안 멈추게
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function cleared(n){ return lsGet('eq_stage'+n+'_cleared')==='1'; }
+
+// ── 에너지 개념 카드 (배운 순서) — stage: 그 스테이지를 깨면 열림 ──
+const CARDS = [
+  {icon:'☀', color:'#ff8800', name:'태양광 발전',   stage:1, src:'태양의 사막', desc:'빛이 태양전지(반도체)에 닿으면 전자가 튀어나와 전기가 흐른다 — 광전 효과!'},
+  {icon:'🔆', color:'#ffaa33', name:'태양 추적',     stage:1, src:'태양의 사막', desc:'해바라기처럼 해를 따라 패널을 돌려 햇빛을 정면으로 받아 발전 효율을 높인다.'},
+  {icon:'🌬', color:'#44aaff', name:'풍력 발전',     stage:2, src:'바람의 해안', desc:'바람이 날개를 돌리고, 그 회전이 발전기를 돌려 전기를 만든다.'},
+  {icon:'🗺', color:'#66bbee', name:'풍력 입지',     stage:2, src:'바람의 해안', desc:'바람이 세고 일정하게 부는 해안·산등성이가 풍력 발전의 명당이다.'},
+  {icon:'🔲', color:'#eebb22', name:'압전 발전',     stage:3, src:'발명가의 도시', desc:'밟거나 누르는 "힘"으로 전기를! 사람이 많이 다니는 바닥에 깔면 자투리 전기를 모은다.'},
+  {icon:'🌡', color:'#e8a020', name:'열전 발전',     stage:3, src:'발명가의 도시', desc:'뜨거운 곳과 차가운 곳의 "온도 차이"로 전기를 만든다. 버려지는 열도 자원!'},
+  {icon:'⚡', color:'#ffd24a', name:'에너지 하베스팅', stage:3, src:'발명가의 도시', desc:'주변에 버려지는 작은 에너지(압력·진동·열)를 긁어모아 전기로 바꾸는 기술.'},
+  {icon:'🔋', color:'#44dd88', name:'배터리(ESS)',   stage:4, src:'공장 지대', desc:'전기를 화학에너지로 바꿔 저장했다가 필요할 때 다시 꺼내 쓰는 저장 장치.'},
+  {icon:'💧', color:'#38bdf8', name:'양수발전',      stage:4, src:'공장 지대', desc:'남는 전기로 물을 높이 퍼올렸다가, 필요할 때 떨어뜨려 발전하는 대형 저장 방식.'},
+  {icon:'⚗', color:'#22d3ee', name:'수소 저장',     stage:4, src:'공장 지대', desc:'남는 전기로 물을 분해해 수소로 저장하고, 연료전지로 다시 전기를 만든다(그린수소).'},
+  {icon:'🧠', color:'#7dd3fc', name:'스마트그리드',  stage:5, src:'데이터 타워', desc:'전력망에 IT를 더해 전기를 실시간 측정·분석하고 똑똑하게 분배하는 전력망.'},
+  {icon:'🔗', color:'#a78bfa', name:'분산형 전력망', stage:5, src:'데이터 타워', desc:'여러 곳에서 나눠 생산·연결 → 한 곳이 끊겨도 안전하다. 이것이 에너지 안보!'},
+  {icon:'🤖', color:'#c084fc', name:'AI 에너지 관리', stage:5, src:'데이터 타워', desc:'AI가 날씨·사용량을 예측해 전력을 낭비 없이 딱 맞게 분배한다.'},
+  {icon:'🏛', color:'#ff6b6b', name:'에너지 자립',   stage:6, src:'DEC 본부', desc:'우리 손으로 만들고 관리하는 에너지 — 누구에게도 휘둘리지 않는 힘. 여정의 결실!'},
+];
+
+const grid = document.getElementById('grid');
+let unlocked = 0;
+CARDS.forEach(card=>{
+  const open = cleared(card.stage);
+  if(open) unlocked++;
+  const el = document.createElement('div');
+  el.className = 'card ' + (open ? 'unlocked' : 'locked');
+  el.style.color = open ? card.color : '#556';
+  el.innerHTML =
+    `<div class="icon">${open ? card.icon : '🔒'}</div>
+     <div class="body">
+       <div class="name">${open ? card.name : '???'}</div>
+       <div class="stage">${open ? ('▶ '+card.src) : '아직 잠김'}</div>
+       <div class="desc">${open ? card.desc : '해당 스테이지를 클리어하면 열립니다.'}</div>
+     </div>`;
+  grid.appendChild(el);
+});
+
+const pct = Math.round(unlocked / CARDS.length * 100);
+document.getElementById('progress-label').textContent =
+  `수집한 에너지 지식  ${unlocked} / ${CARDS.length}`;
+document.getElementById('progress-fill').style.width = pct + '%';
+</script>
+</body>
+</html>
