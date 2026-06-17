@@ -47,6 +47,33 @@
     document.body.appendChild(btn);
   }
 
-  if (document.body) addBtn();
-  else document.addEventListener('DOMContentLoaded', addBtn);
+  // ── 학습 등급: HUD의 의미없던 Lv/EXP를 "에너지 지식 등급"(도감 수집 기반)으로 대체 ──
+  function setupRank(){
+    var lv = document.getElementById('hud-lv');
+    if(!lv) return;                              // HUD 없는 화면은 패스
+    if(document.getElementById('eq-rank-box')) return;
+    function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+    var count=0;
+    for(var i=1;i<=5;i++){ if(g('eq_stage'+i+'_cleared')==='1') count+=3; }   // 스테이지당 도감 3장
+    if(g('eq_stage6_cleared')==='1') count+=1;                                 // 피날레 1장
+    var T=16;
+    var rank = count>=16?'에너지 마스터' : count>=11?'베테랑 공학자' : count>=6?'에너지 공학자' : count>=1?'수습 공학자' : '견습 공학자';
+    var lvLine = lv.parentNode;                  // "Lv.X  EXP y/z" 줄
+    if(lvLine) lvLine.style.display='none';       // 숨김 (span은 남겨 updateHUD가 안 깨지게)
+    var oldBar = document.getElementById('exp-bar-wrap');
+    if(oldBar) oldBar.style.display='none';
+    var host = (lvLine && lvLine.parentNode) || document.getElementById('hud-left');
+    if(!host) return;
+    var box = document.createElement('div');
+    box.id = 'eq-rank-box';
+    box.innerHTML =
+      '<div style="color:#ffcc44;font-weight:bold;">🏅 '+rank+'</div>'+
+      '<div style="font-size:9px;color:#9fb0c8;margin-top:1px;">📚 에너지 지식 '+count+'/'+T+'</div>'+
+      '<div style="width:110px;height:6px;background:#1a1726;border-radius:3px;margin-top:2px;overflow:hidden;"><div style="height:100%;width:'+Math.round(count/T*100)+'%;background:linear-gradient(90deg,#ffcc44,#ff8800);"></div></div>';
+    host.insertBefore(box, lvLine || host.firstChild);
+  }
+
+  function init(){ addBtn(); setupRank(); }
+  if (document.body) init();
+  else document.addEventListener('DOMContentLoaded', init);
 })();
