@@ -11,6 +11,17 @@
     var canvas = document.getElementById('game-canvas');
     if(!wrap || !canvas || document.getElementById('eq-fx-layer')) return;
 
+    // 0) 스테이지 배경 이미지 — assets/bg/bg_stageN.png 가 있으면 검은 여백을 채움
+    //    (이미지가 없으면 그냥 살짝 어두운 채로 남음 = 기존과 비슷, 안전)
+    var sm = location.pathname.match(/stage(\d)/);
+    if(sm){
+      wrap.style.backgroundImage =
+        "linear-gradient(rgba(6,5,14,0.32), rgba(6,5,14,0.5)), url('assets/bg/bg_stage"+sm[1]+".png')";
+      wrap.style.backgroundSize = 'cover';
+      wrap.style.backgroundPosition = 'center';
+      wrap.style.backgroundRepeat = 'no-repeat';
+    }
+
     // 1) 비네팅 + 은은한 상단 광 (캔버스 바로 위)
     var vig = document.createElement('div');
     vig.id = 'eq-fx-vignette';
