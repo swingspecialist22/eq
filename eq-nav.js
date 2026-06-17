@@ -53,11 +53,13 @@
     if(!lv) return;                              // HUD 없는 화면은 패스
     if(document.getElementById('eq-rank-box')) return;
     function g(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
-    var count=0;
-    for(var i=1;i<=5;i++){ if(g('eq_stage'+i+'_cleared')==='1') count+=3; }   // 스테이지당 도감 3장
-    if(g('eq_stage6_cleared')==='1') count+=1;                                 // 피날레 1장
+    var stages=0, count=0;
+    for(var i=1;i<=5;i++){ if(g('eq_stage'+i+'_cleared')==='1'){ stages++; count+=3; } }  // 스테이지당 도감 3장
+    if(g('eq_stage6_cleared')==='1'){ stages++; count+=1; }                                // 피날레 1장
     var T=16;
-    var rank = count>=16?'에너지 마스터' : count>=11?'베테랑 공학자' : count>=6?'에너지 공학자' : count>=1?'수습 공학자' : '견습 공학자';
+    // DEC 경비병(스테이지)을 이길 때마다 등급 상승 — 클리어한 스테이지 수 기준
+    var RANKS=['견습 공학자','수습 공학자','정식 공학자','숙련 공학자','전문 공학자','베테랑 공학자','에너지 마스터'];
+    var rank = RANKS[Math.min(stages,6)];
     var lvLine = lv.parentNode;                  // "Lv.X  EXP y/z" 줄
     if(lvLine) lvLine.style.display='none';       // 숨김 (span은 남겨 updateHUD가 안 깨지게)
     var oldBar = document.getElementById('exp-bar-wrap');

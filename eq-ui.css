@@ -43,3 +43,8 @@
   width:100%; font-family:inherit; letter-spacing:.5px; text-align:center;
 }
 #sfx-toggle.off{ color:#555; border-color:#333; }
+
+/* 레벨/EXP는 '에너지 지식 등급'(eq-nav.js)으로 대체됨
+   → 아이템 획득 시 뜨던 "+EXP" 표시와 옛 레벨업 팝업을 숨긴다(개별 아이템으론 등급 안 오름). */
+.ip-exp{ display:none !important; }
+#levelup-popup{ display:none !important; }
