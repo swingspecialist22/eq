@@ -975,31 +975,32 @@ ctx.imageSmoothingEnabled=false;
 // ═══════════════════════════════════════════════════════════
 // 타일 드로잉 (사막 테마)
 // ═══════════════════════════════════════════════════════════
+// 타일 텍스처: assets/bg/tile_*.png 를 타일 크기로 미리 축소해 캐시 (로드 전엔 기존 색으로 폴백)
+const TILE_TEX={};
+['sand','path','water'].forEach(function(n){
+  var im=new Image();
+  im.onload=function(){ var c=document.createElement('canvas'); c.width=TS; c.height=TS; c.getContext('2d').drawImage(im,0,0,TS,TS); TILE_TEX[n]=c; };
+  im.src='assets/bg/tile_'+n+'.png';
+});
+function tileBase(name,s,fb){ if(TILE_TEX[name]){ ctx.drawImage(TILE_TEX[name],0,0,s,s); } else { ctx.fillStyle=fb; ctx.fillRect(0,0,s,s); } }
+
 function drawTile(type,sx,sy){
   const s=TS;
   ctx.save();ctx.translate(sx,sy);
   switch(type){
     case T.SAND:{
-      ctx.fillStyle='#c8903a';ctx.fillRect(0,0,s,s);
-      ctx.fillStyle='#d49a45';ctx.fillRect(4,4,s-8,s-8);
-      ctx.fillStyle='#daa04855';
-      for(let i=0;i<5;i++){ctx.fillRect(8+i*11,12,3,2);ctx.fillRect(5+i*11,28,2,2);ctx.fillRect(10+i*11,44,3,2);}
+      tileBase('sand',s,'#c8903a');
       break;}
     case T.PATH:{
-      ctx.fillStyle='#e8c060';ctx.fillRect(0,0,s,s);
-      ctx.fillStyle='#f0cc70';ctx.fillRect(3,3,s-6,s-6);
-      ctx.strokeStyle='#c8a04088';ctx.lineWidth=1;
-      ctx.beginPath();ctx.moveTo(0,s/2);ctx.lineTo(s,s/2);ctx.stroke();
+      if(TILE_TEX.path){ctx.drawImage(TILE_TEX.path,0,0,s,s);}
+      else{ctx.fillStyle='#e8c060';ctx.fillRect(0,0,s,s);ctx.fillStyle='#f0cc70';ctx.fillRect(3,3,s-6,s-6);ctx.strokeStyle='#c8a04088';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,s/2);ctx.lineTo(s,s/2);ctx.stroke();}
       break;}
     case T.OASIS:{
-      ctx.fillStyle='#1a7aaa';ctx.fillRect(0,0,s,s);
-      ctx.fillStyle='#2a8abb44';
-      ctx.fillRect(0,10,s,8);ctx.fillRect(0,32,s,6);ctx.fillRect(0,50,s,7);
-      ctx.fillStyle='#60c0ee33';
-      ctx.fillRect(10,5,s-20,3);ctx.fillRect(14,38,s-24,3);
+      if(TILE_TEX.water){ctx.drawImage(TILE_TEX.water,0,0,s,s);}
+      else{ctx.fillStyle='#1a7aaa';ctx.fillRect(0,0,s,s);ctx.fillStyle='#2a8abb44';ctx.fillRect(0,10,s,8);ctx.fillRect(0,32,s,6);ctx.fillRect(0,50,s,7);ctx.fillStyle='#60c0ee33';ctx.fillRect(10,5,s-20,3);ctx.fillRect(14,38,s-24,3);}
       break;}
     case T.CACTUS:{
-      ctx.fillStyle='#c8903a';ctx.fillRect(0,0,s,s);
+      tileBase('sand',s,'#c8903a');
       ctx.fillStyle='#2a7a30';
       ctx.fillRect(s/2-5,12,10,s-16);
       ctx.fillRect(s/2-16,24,12,8);ctx.fillRect(s/2+4,20,12,8);
@@ -1082,7 +1083,7 @@ function drawTile(type,sx,sy){
       }
       break;}
     case T.SIGN:{
-      ctx.fillStyle='#c8903a';ctx.fillRect(0,0,s,s);
+      tileBase('sand',s,'#c8903a');
       ctx.fillStyle='#7a4a18';ctx.fillRect(s/2-3,s/2+4,6,s/2-4);
       ctx.fillStyle='#c47830';ctx.fillRect(8,10,s-16,30);
       ctx.strokeStyle='#6a3810';ctx.lineWidth=1;ctx.strokeRect(8,10,s-16,30);
@@ -1097,14 +1098,14 @@ function drawTile(type,sx,sy){
       } else {
         g.addColorStop(0,'#aaaacc');g.addColorStop(0.4,'rgba(100,100,200,0.4)');g.addColorStop(1,'rgba(50,50,150,0)');
       }
-      ctx.fillStyle='#c8903a';ctx.fillRect(0,0,s,s);
+      tileBase('sand',s,'#c8903a');
       ctx.fillStyle=g;ctx.beginPath();ctx.arc(s/2,s/2,22+Math.sin(Date.now()/500)*3,0,Math.PI*2);ctx.fill();
       ctx.fillStyle=gameState.stageComplete?'#fff':'#8888cc';
       const t2=(Date.now()/500)%1;
       for(let i=0;i<5;i++){const a=(i/5+t2)*Math.PI*2,r=16;ctx.fillRect(s/2+Math.cos(a)*r-2,s/2+Math.sin(a)*r-2,4,4);}
       break;}
     case T.PALM:{
-      ctx.fillStyle='#c8903a';ctx.fillRect(0,0,s,s);
+      tileBase('sand',s,'#c8903a');
       ctx.fillStyle='#7a5028';ctx.fillRect(s/2-4,s/2-4,8,s/2+4);
       for(let i=0;i<5;i++){const a=(i/5)*Math.PI*2-0.5;ctx.beginPath();ctx.moveTo(s/2,s/2-4);ctx.lineTo(s/2+Math.cos(a)*28,s/2-6+Math.sin(a)*16);ctx.lineWidth=4;ctx.strokeStyle='#4aa028';ctx.stroke();}
       ctx.fillStyle='#e8aa55';
@@ -1117,7 +1118,7 @@ function drawTile(type,sx,sy){
       ctx.strokeStyle='#440a0a44';ctx.lineWidth=1;ctx.strokeRect(2,2,s-4,s-4);
       break;}
     default:{
-      ctx.fillStyle='#c8903a';ctx.fillRect(0,0,s,s);
+      tileBase('sand',s,'#c8903a');
     }
   }
   ctx.restore();
