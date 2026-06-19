@@ -984,6 +984,16 @@ const TILE_TEX={};
 });
 function tileBase(name,s,fb){ if(TILE_TEX[name]){ ctx.drawImage(TILE_TEX[name],0,0,s,s); } else { ctx.fillStyle=fb; ctx.fillRect(0,0,s,s); } }
 
+// 캐릭터 일러스트: assets/char/char_<id>.png 가 있으면 필드에서 픽셀 대신 '빌보드'로 사용
+// (그림 없는 캐릭터는 로드 실패 → ready=false → 기존 픽셀 스프라이트 유지)
+const PLAYER_IMG={};
+['haetsal','nari','nuri','saebyeok'].forEach(function(id){
+  var o={img:new Image(),ready:false};
+  o.img.onload=function(){o.ready=true;};
+  o.img.src='assets/char/char_'+id+'.png';
+  PLAYER_IMG[id]=o;
+});
+
 function drawTile(type,sx,sy){
   const s=TS;
   ctx.save();ctx.translate(sx,sy);
@@ -1174,6 +1184,24 @@ function drawPlayer(sx,sy){
   // 그림자
   ctx.fillStyle='rgba(0,0,0,0.3)';
   ctx.beginPath();ctx.ellipse(bx,by+2,11,4,0,0,Math.PI*2);ctx.fill();
+
+  // ── 치비 일러스트 빌보드: 해당 캐릭터 PNG가 로드됐으면 픽셀 대신 그림으로 ──
+  var _pim = PLAYER_IMG[charId];
+  if(_pim && _pim.ready){
+    var _bob = player.moving ? (fr%2===0 ? -4 : 0) : 0;   // 걸을 때 통통
+    var _th  = TS*1.30;                                   // 키 ≈ 1.3타일
+    var _tw  = _th * (_pim.img.width/_pim.img.height);
+    var _dx  = bx - _tw/2, _dy = (by+5) - _th + _bob;     // 가로 중앙·발은 타일 바닥
+    ctx.imageSmoothingEnabled = true;                     // 치비는 부드럽게 (restore가 되돌림)
+    if(f==='left'){                                       // 왼쪽 이동 = 좌우 반전
+      ctx.save(); ctx.translate(bx,0); ctx.scale(-1,1); ctx.translate(-bx,0);
+      ctx.drawImage(_pim.img,_dx,_dy,_tw,_th); ctx.restore();
+    } else {
+      ctx.drawImage(_pim.img,_dx,_dy,_tw,_th);
+    }
+    ctx.restore();   // drawPlayer 최상단 ctx.save()와 짝
+    return;
+  }
 
   function px(x,y,w,h,col,oc){
     ctx.fillStyle=oc||'#1a1a1a';ctx.fillRect(x-1,y-1,w+2,h+2);
