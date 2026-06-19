@@ -175,6 +175,7 @@ body{margin:0;padding:0;background:#06020e;overflow:hidden;user-select:none;-web
 <!-- 공용 오디오 엔진 (모든 화면 공통) -->
 <script src="eq-audio.js"></script>
 <script src="eq-nav.js"></script>
+<script src="eq-char.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
 // CONSTANTS — stage2와 동일 스케일
@@ -850,6 +851,7 @@ function drawPlayer(sx,sy){
   // 보라빛 그림자
   ctx.fillStyle='rgba(160,0,255,0.18)';
   ctx.beginPath();ctx.ellipse(bx,by+2,11,4,0,0,Math.PI*2);ctx.fill();
+  if(window.EQChar&&EQChar.drawBillboard(ctx,charId,f,player.moving,fr,bx,by,TS)){ ctx.restore(); return; }
 
   function drawFaceDown(bx,by,PAL){
     fill(bx-6,by-44,4,6,'#fff');fill(bx+2,by-44,4,6,'#fff');

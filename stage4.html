@@ -252,6 +252,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 <!-- 공용 오디오 엔진 (모든 화면 공통) -->
 <script src="eq-audio.js"></script>
 <script src="eq-nav.js"></script>
+<script src="eq-char.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════
 // CONSTANTS
@@ -1205,6 +1206,7 @@ function drawPlayer(sx,sy){
   const bx=s/2, by=s-10;
   ctx.fillStyle='rgba(0,0,0,0.3)';
   ctx.beginPath();ctx.ellipse(bx,by+2,11,4,0,0,Math.PI*2);ctx.fill();
+  if(window.EQChar&&EQChar.drawBillboard(ctx,charId,f,player.moving,fr,bx,by,TS)){ ctx.restore(); return; }
   function px(x,y,w,h,col,oc){ctx.fillStyle=oc||'#1a1a1a';ctx.fillRect(x-1,y-1,w+2,h+2);ctx.fillStyle=col;ctx.fillRect(x,y,w,h);}
   function fill(x,y,w,h,col){ctx.fillStyle=col;ctx.fillRect(x,y,w,h);}
   function drawFaceDown(bx,by,PAL){

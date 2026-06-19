@@ -1,14 +1,14 @@
 // 에너지 퀘스트 — 서비스 워커 (PWA)
 // 네트워크 우선: 온라인이면 항상 최신을 보여주고(업데이트 즉시 반영),
 // 오프라인일 때만 캐시로 폴백. (예전엔 '캐시 우선'이라 업데이트가 안 보였음)
-const CACHE = 'energy-quest-v3';
+const CACHE = 'energy-quest-v4';
 const FILES = [
   '/index.html',
   '/character-select.html',
   '/prologue.html',
   '/stage1.html', '/stage2.html', '/stage3.html', '/stage4.html', '/stage5.html', '/stage6.html',
   '/worldmap.html', '/dogam.html',
-  '/eq-audio.js', '/eq-nav.js', '/eq-fx.js', '/eq-ui.css',
+  '/eq-audio.js', '/eq-nav.js', '/eq-char.js', '/eq-fx.js', '/eq-ui.css',
   '/manifest.json',
   '/audio/bgm.mp3', '/audio/stage_clear.mp3', '/audio/quiz_answer_npc_talk.mp3',
   '/audio/quiz_false.mp3', '/audio/quiz_true.mp3', '/audio/victory.mp3',
