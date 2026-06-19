@@ -322,9 +322,10 @@ var CHARS=[
     drawFn:drawHaetsal
   },
   {
-    id:'nari', defaultName:'나리', job:'에너지 연구원',
-    desc:'냉철한 두뇌의 신재생에너지 박사.\n데이터로 DEC의 약점을 정확히 파고든다.',
+    id:'nari', defaultName:'패러데이', job:'에너지 학자',
+    desc:'전자기 유도를 발견해 「발전기」의 길을 연 대학자.\n방대한 지식으로 DEC의 약점을 꿰뚫는다.',
     tags:[],
+    img:'assets/char/char_nari.png',
     palette:{cloth:'#e8f4f8',cloth2:'#88ccdd',hair:'#4a4a7a',skin:'#f8e0d0',pants:'#2a2a5a',shoe:'#1a1a3a',goggle:'#22aacc',goggle2:'#88ddee',antenna:'#22aacc',antenna2:'#aaeeff',badge:'#aaeeff',badge2:'#22aacc',eyeColor:'#1a88aa'},
     drawFn:drawNari
   },
@@ -374,6 +375,26 @@ var SC=3, CW=168, CH=200, BX=CW/2/SC, BY=(CH-12)/SC;
 var selectedId=null;
 var cardEls={};
 
+// 카드 1장 렌더 — 치비 일러스트(ch.img)가 로드됐으면 이미지, 아니면 픽셀 드로우(폴백)
+function drawCard(ch,fr,bounce){
+  var cctx=cardEls[ch.id].cv.getContext('2d');
+  bounce=bounce||0;
+  if(ch._imgReady){
+    cctx.imageSmoothingEnabled=true;
+    cctx.clearRect(0,0,CW,CH);
+    cctx.fillStyle=ch.palette.cloth+'18';
+    cctx.fillRect(0,0,CW,CH);
+    var iw=ch._imgEl.width, ih=ch._imgEl.height;
+    var k=Math.min(CW/iw,CH/ih);            // 카드 안에 꽉 차게(비율 유지)
+    var dw=iw*k, dh=ih*k;
+    cctx.drawImage(ch._imgEl,(CW-dw)/2,(CH-dh)+bounce,dw,dh); // 가로 중앙·하단 정렬
+  } else {
+    cctx.imageSmoothingEnabled=false;
+    drawBg(cctx,ch,CW,CH);
+    ch.drawFn(cctx,BX,BY+bounce,SC,ch.palette,fr);
+  }
+}
+
 CHARS.forEach(function(ch){
   var card=document.createElement('div');
   card.className='char-card';
@@ -398,10 +419,12 @@ CHARS.forEach(function(ch){
   document.getElementById('card-grid').appendChild(card);
   cardEls[ch.id]={card:card,cv:cv};
 
-  var cctx=cv.getContext('2d');
-  cctx.imageSmoothingEnabled=false;
-  drawBg(cctx,ch,CW,CH);
-  ch.drawFn(cctx,BX,BY,SC,ch.palette,0);
+  drawCard(ch,0,0);
+  if(ch.img){   // 치비 일러스트 비동기 로드 → 완료 시 자동 교체(실패하면 픽셀아트 유지)
+    var im=new Image();
+    im.onload=(function(c,image){return function(){c._imgEl=image;c._imgReady=true;cardEls[c.id].cv.style.imageRendering='auto';drawCard(c,0,0);};})(ch,im);
+    im.src=ch.img;
+  }
 
   card.addEventListener('click',function(id){return function(){selectChar(id);};}(ch.id));
 });
@@ -423,12 +446,8 @@ var animTick=0, animFr=0;
     var ch=null;
     for(var i=0;i<CHARS.length;i++) if(CHARS[i].id===selectedId){ch=CHARS[i];break;}
     if(ch){
-      var cv=cardEls[ch.id].cv;
-      var cctx=cv.getContext('2d');
-      cctx.imageSmoothingEnabled=false;
-      drawBg(cctx,ch,CW,CH);
       var bounce=animFr===2?-1:0;
-      ch.drawFn(cctx,BX,BY+bounce,SC,ch.palette,animFr);
+      drawCard(ch,animFr,bounce);
     }
   }
   requestAnimationFrame(loop);
@@ -443,11 +462,7 @@ function selectChar(id){
     var prev=null;
     for(var i=0;i<CHARS.length;i++) if(CHARS[i].id===selectedId){prev=CHARS[i];break;}
     if(prev){
-      var cv=cardEls[selectedId].cv;
-      var cctx=cv.getContext('2d');
-      cctx.imageSmoothingEnabled=false;
-      drawBg(cctx,prev,CW,CH);
-      prev.drawFn(cctx,BX,BY,SC,prev.palette,0);
+      drawCard(prev,0,0);
     }
   }
   selectedId=id;
