@@ -15,8 +15,9 @@
   IDS.forEach(function(id){
     var set = {};
     VIEWS.forEach(function(v){
-      var o = { img:new Image(), ready:false };
-      o.img.onload = function(){ o.ready = true; };
+      var o = { img:new Image(), ready:false, failed:false, firstWait:0 };
+      o.img.onload  = function(){ o.ready = true; };
+      o.img.onerror = function(){ o.failed = true; };   // 그림 없음(404 등) → 픽셀 폴백
       o.img.src = 'assets/char/char_' + id + v[1] + '.png';
       set[v[0]] = o;
     });
@@ -29,11 +30,19 @@
     // 빌보드를 그렸으면 true, 그릴 그림이 없으면 false. ctx 상태는 내부 save/restore로 보존.
     drawBillboard: function(ctx, charId, facing, moving, fr, bx, by, TS){
       var set = IMG[charId];
-      if(!(set && set.front && set.front.ready)) return false;
+      if(!set || !set.front) return false;
+      var front = set.front;
+      if(!front.ready){
+        // 정면 그림 로딩 중: 짧은 유예(800ms) 동안엔 픽셀 대신 비워둠(픽셀→치비 깜빡임 방지).
+        // 그림이 없거나(404·실패) 유예를 넘기면 false 반환 → 호출부가 픽셀 스프라이트를 그림.
+        if(front.failed) return false;
+        if(!front.firstWait) front.firstWait = Date.now();
+        return (Date.now() - front.firstWait) < 800;   // true=대기(픽셀 안 그림) · false=픽셀 폴백
+      }
       var view = (facing === 'up') ? set.back
                : (facing === 'left' || facing === 'right') ? set.side
-               : set.front;
-      if(!view || !view.ready) view = set.front;   // 방향 그림 없으면 정면 폴백
+               : front;
+      if(!view || !view.ready) view = front;       // 방향 그림 없으면 정면 폴백
       var bob = moving ? (fr % 2 === 0 ? -4 : 0) : 0;   // 걸을 때 통통
       var th  = TS * 1.30;                              // 키 ≈ 1.3타일
       var tw  = th * (view.img.width / view.img.height);

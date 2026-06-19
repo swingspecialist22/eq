@@ -1,7 +1,7 @@
 // 에너지 퀘스트 — 서비스 워커 (PWA)
 // 네트워크 우선: 온라인이면 항상 최신을 보여주고(업데이트 즉시 반영),
 // 오프라인일 때만 캐시로 폴백. (예전엔 '캐시 우선'이라 업데이트가 안 보였음)
-const CACHE = 'energy-quest-v4';
+const CACHE = 'energy-quest-v5';
 const FILES = [
   '/index.html',
   '/character-select.html',
@@ -26,19 +26,24 @@ self.addEventListener('activate', e => {
   );
 });
 self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  // 네트워크 우선 → 실패(오프라인) 시 캐시
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  // 네트워크 우선 + 항상 최신(브라우저 캐시 무시) → 옛 화면이 먼저 뜨는 문제 방지.
+  // navigate 요청엔 init를 줄 수 없으므로(스펙상 throw) URL로 새 요청을 만든다.
+  const fresh = (req.mode === 'navigate')
+    ? fetch(req.url, { cache: 'no-cache' })
+    : fetch(req, { cache: 'no-cache' });
   e.respondWith(
-    fetch(e.request)
+    fresh
       .then(res => {
         try {
-          if (new URL(e.request.url).origin === location.origin) {
+          if (new URL(req.url).origin === location.origin) {
             const copy = res.clone();
-            caches.open(CACHE).then(c => c.put(e.request, copy)).catch(()=>{});
+            caches.open(CACHE).then(c => c.put(req, copy)).catch(()=>{});
           }
         } catch (_) {}
         return res;
       })
-      .catch(() => caches.match(e.request))
+      .catch(() => caches.match(req))   // 오프라인일 때만 캐시 폴백
   );
 });

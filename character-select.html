@@ -388,6 +388,10 @@ function drawCard(ch,fr,bounce){
     var k=Math.min(CW/iw,CH/ih);            // 카드 안에 꽉 차게(비율 유지)
     var dw=iw*k, dh=ih*k;
     cctx.drawImage(ch._imgEl,(CW-dw)/2,(CH-dh)+bounce,dw,dh); // 가로 중앙·하단 정렬
+  } else if(ch.img && !ch._imgFailed){
+    // 일러스트 로딩 중 → 픽셀 깜빡임 방지: 배경만 그리고 대기(곧 일러스트 팝인)
+    cctx.imageSmoothingEnabled=false;
+    drawBg(cctx,ch,CW,CH);
   } else {
     cctx.imageSmoothingEnabled=false;
     drawBg(cctx,ch,CW,CH);
@@ -423,6 +427,8 @@ CHARS.forEach(function(ch){
   if(ch.img){   // 치비 일러스트 비동기 로드 → 완료 시 자동 교체(실패하면 픽셀아트 유지)
     var im=new Image();
     im.onload=(function(c,image){return function(){c._imgEl=image;c._imgReady=true;cardEls[c.id].cv.style.imageRendering='auto';drawCard(c,0,0);};})(ch,im);
+    im.onerror=(function(c){return function(){c._imgFailed=true;drawCard(c,0,0);};})(ch);   // 로드 실패 → 픽셀 폴백
+    setTimeout((function(c){return function(){ if(!c._imgReady){ c._imgFailed=true; drawCard(c,0,0); } };})(ch),4000); // 안전장치
     im.src=ch.img;
   }
 
