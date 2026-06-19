@@ -984,14 +984,19 @@ const TILE_TEX={};
 });
 function tileBase(name,s,fb){ if(TILE_TEX[name]){ ctx.drawImage(TILE_TEX[name],0,0,s,s); } else { ctx.fillStyle=fb; ctx.fillRect(0,0,s,s); } }
 
-// 캐릭터 일러스트: assets/char/char_<id>.png 가 있으면 필드에서 픽셀 대신 '빌보드'로 사용
-// (그림 없는 캐릭터는 로드 실패 → ready=false → 기존 픽셀 스프라이트 유지)
+// 캐릭터 일러스트(방향별): assets/char/char_<id>[_back|_side].png 를 필드에서 빌보드로 사용
+//  front=정면(아래로 이동)  back=뒤통수(위로 이동)  side=옆모습(오른쪽 기준; 왼쪽은 좌우반전)
+// 해당 방향 그림이 없으면 정면으로 폴백, 정면도 없으면 기존 픽셀 스프라이트 유지
 const PLAYER_IMG={};
 ['haetsal','nari','nuri','saebyeok'].forEach(function(id){
-  var o={img:new Image(),ready:false};
-  o.img.onload=function(){o.ready=true;};
-  o.img.src='assets/char/char_'+id+'.png';
-  PLAYER_IMG[id]=o;
+  var set={};
+  [['front',''],['back','_back'],['side','_side']].forEach(function(v){
+    var o={img:new Image(),ready:false};
+    o.img.onload=function(){o.ready=true;};
+    o.img.src='assets/char/char_'+id+v[1]+'.png';
+    set[v[0]]=o;
+  });
+  PLAYER_IMG[id]=set;
 });
 
 function drawTile(type,sx,sy){
@@ -1185,19 +1190,22 @@ function drawPlayer(sx,sy){
   ctx.fillStyle='rgba(0,0,0,0.3)';
   ctx.beginPath();ctx.ellipse(bx,by+2,11,4,0,0,Math.PI*2);ctx.fill();
 
-  // ── 치비 일러스트 빌보드: 해당 캐릭터 PNG가 로드됐으면 픽셀 대신 그림으로 ──
-  var _pim = PLAYER_IMG[charId];
-  if(_pim && _pim.ready){
+  // ── 치비 일러스트 빌보드(방향별): 정면 그림이 로드됐으면 픽셀 대신 그림으로 ──
+  var _set = PLAYER_IMG[charId];
+  if(_set && _set.front && _set.front.ready){
+    // 이동 방향에 맞는 그림 선택 (해당 방향 그림이 없으면 정면으로 폴백)
+    var _view = (f==='up') ? _set.back : (f==='left'||f==='right') ? _set.side : _set.front;
+    if(!_view || !_view.ready) _view = _set.front;
     var _bob = player.moving ? (fr%2===0 ? -4 : 0) : 0;   // 걸을 때 통통
     var _th  = TS*1.30;                                   // 키 ≈ 1.3타일
-    var _tw  = _th * (_pim.img.width/_pim.img.height);
+    var _tw  = _th * (_view.img.width/_view.img.height);
     var _dx  = bx - _tw/2, _dy = (by+5) - _th + _bob;     // 가로 중앙·발은 타일 바닥
     ctx.imageSmoothingEnabled = true;                     // 치비는 부드럽게 (restore가 되돌림)
-    if(f==='left'){                                       // 왼쪽 이동 = 좌우 반전
+    if(f==='left'){                                       // 왼쪽 이동 = 옆모습 좌우반전
       ctx.save(); ctx.translate(bx,0); ctx.scale(-1,1); ctx.translate(-bx,0);
-      ctx.drawImage(_pim.img,_dx,_dy,_tw,_th); ctx.restore();
+      ctx.drawImage(_view.img,_dx,_dy,_tw,_th); ctx.restore();
     } else {
-      ctx.drawImage(_pim.img,_dx,_dy,_tw,_th);
+      ctx.drawImage(_view.img,_dx,_dy,_tw,_th);
     }
     ctx.restore();   // drawPlayer 최상단 ctx.save()와 짝
     return;
