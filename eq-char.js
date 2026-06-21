@@ -16,10 +16,11 @@
   IDS.forEach(function(id){
     var set = {};
     VIEWS.forEach(function(v){
-      var o = { img:new Image(), ready:false, failed:false, firstWait:0 };
-      o.img.onload  = function(){ o.ready = true; };
-      o.img.onerror = function(){ o.failed = true; };   // 그림 없음(404 등) → 픽셀 폴백
-      o.img.src = 'assets/char/char_' + id + v[1] + '.png';
+      var o = { img:new Image(), ready:false, failed:false, firstWait:0, tries:0 };
+      var url = 'assets/char/char_' + id + v[1] + '.png';
+      o.img.onload  = function(){ o.ready = true; o.failed = false; };
+      o.img.onerror = function(){ o.tries++; if(o.tries<=6){ setTimeout(function(){ o.img.src = url + '?r=' + o.tries; }, 500*o.tries); } else { o.failed = true; } };  // 일시적 404 재시도 후 픽셀 폴백
+      o.img.src = url;
       set[v[0]] = o;
     });
     IMG[id] = set;
@@ -60,10 +61,11 @@
       if(!key) return false;
       var o = NPC_IMG[key];
       if(!o){
-        o = { img:new Image(), ready:false, failed:false, firstWait:0 };
-        o.img.onload  = function(){ o.ready = true; };
-        o.img.onerror = function(){ o.failed = true; };   // 그림 없으면 픽셀 폴백
-        o.img.src = 'assets/char/npc_' + key + '.png';
+        o = { img:new Image(), ready:false, failed:false, firstWait:0, tries:0 };
+        var nurl = 'assets/char/npc_' + key + '.png';
+        o.img.onload  = function(){ o.ready = true; o.failed = false; };
+        o.img.onerror = function(){ o.tries++; if(o.tries<=6){ var oo=o; setTimeout(function(){ oo.img.src = nurl + '?r=' + oo.tries; }, 500*oo.tries); } else { o.failed = true; } };  // 일시적 404 재시도 후 픽셀 폴백
+        o.img.src = nurl;
         NPC_IMG[key] = o;
       }
       if(!o.ready){

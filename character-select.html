@@ -427,12 +427,16 @@ CHARS.forEach(function(ch){
   cardEls[ch.id]={card:card,cv:cv};
 
   drawCard(ch,0,0);
-  if(ch.img){   // 치비 일러스트 비동기 로드 → 완료 시 자동 교체(실패하면 픽셀아트 유지)
-    var im=new Image();
-    im.onload=(function(c,image){return function(){c._imgEl=image;c._imgReady=true;cardEls[c.id].cv.style.imageRendering='auto';drawCard(c,0,0);};})(ch,im);
-    im.onerror=(function(c){return function(){c._imgFailed=true;drawCard(c,0,0);};})(ch);   // 로드 실패 → 픽셀 폴백
-    setTimeout((function(c){return function(){ if(!c._imgReady){ c._imgFailed=true; drawCard(c,0,0); } };})(ch),4000); // 안전장치
-    im.src=ch.img;
+  if(ch.img){   // 치비 일러스트 로드 — 일시적 404(배포 전파 등)면 재시도, 그동안 배경만(픽셀 깜빡임 방지)
+    (function(c){
+      var tries=0;
+      (function load(){
+        var im=new Image();
+        im.onload=function(){ c._imgEl=im; c._imgReady=true; c._imgFailed=false; cardEls[c.id].cv.style.imageRendering='auto'; drawCard(c,0,0); };
+        im.onerror=function(){ tries++; if(tries<=6){ setTimeout(load, 500*tries); } else { c._imgFailed=true; drawCard(c,0,0); } };
+        im.src = c.img + (tries ? ('?r='+tries) : '');
+      })();
+    })(ch);
   }
 
   card.addEventListener('click',function(id){return function(){selectChar(id);};}(ch.id));
