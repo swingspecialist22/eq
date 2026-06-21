@@ -1528,6 +1528,10 @@ function drawNPC(npc,sx,sy){
   const s=TS; ctx.save(); ctx.translate(sx,sy);
   const bx=s/2, by=s-8;
 
+  // 치비 일러스트(assets/char/npc_<key>.png) 있으면 빌보드로, 없으면 절차적 픽셀
+  const NPC_SPRITE={'촌장 어르신':'chief','기술자 NPC':'technician','DEC 감시병':'guard','발전소 박사':'doctor'};
+  if(window.EQChar && EQChar.drawNPC(ctx, NPC_SPRITE[npc.name], bx, by, TS)){ ctx.restore(); return; }
+
   // NPC별 개성 정의
   const profiles={
     '촌장 어르신': {cloth:'#8a6a2a',hair:'#cccccc',pants:'#4a3a1a',hat:'#6a4a18',smile:true},

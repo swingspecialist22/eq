@@ -12,6 +12,7 @@
   var IDS = ['haetsal','nari','nuri','saebyeok'];
   var VIEWS = [['front',''],['back','_back'],['side','_side']];
   var IMG = {};
+  var NPC_IMG = {};   // NPC는 방향 없이 정면 1장(assets/char/npc_<key>.png), key별 지연 로드
   IDS.forEach(function(id){
     var set = {};
     VIEWS.forEach(function(v){
@@ -51,6 +52,33 @@
       ctx.imageSmoothingEnabled = true;                 // 치비는 부드럽게
       if(facing === 'left'){ ctx.translate(bx,0); ctx.scale(-1,1); ctx.translate(-bx,0); }
       ctx.drawImage(view.img, dx, dy, tw, th);
+      ctx.restore();
+      return true;
+    },
+    // NPC 빌보드: 정면 1장(assets/char/npc_<key>.png) 지연 로드. 그렸으면 true, 그림 없으면 false→픽셀.
+    drawNPC: function(ctx, key, bx, by, TS){
+      if(!key) return false;
+      var o = NPC_IMG[key];
+      if(!o){
+        o = { img:new Image(), ready:false, failed:false, firstWait:0 };
+        o.img.onload  = function(){ o.ready = true; };
+        o.img.onerror = function(){ o.failed = true; };   // 그림 없으면 픽셀 폴백
+        o.img.src = 'assets/char/npc_' + key + '.png';
+        NPC_IMG[key] = o;
+      }
+      if(!o.ready){
+        if(o.failed) return false;
+        if(!o.firstWait) o.firstWait = Date.now();
+        return (Date.now() - o.firstWait) < 800;   // 로딩 중엔 픽셀 안 그림(깜빡임 방지)
+      }
+      var th = TS * 1.25;                               // NPC 키 ≈ 1.25타일
+      var tw = th * (o.img.width / o.img.height);
+      var dx = bx - tw / 2, dy = (by + 4) - th;
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.28)';              // 그림자
+      ctx.beginPath(); ctx.ellipse(bx, by + 2, 11, 4, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(o.img, dx, dy, tw, th);
       ctx.restore();
       return true;
     }
