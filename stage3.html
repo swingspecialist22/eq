@@ -1400,6 +1400,10 @@ function drawNPC(npc,sx,sy){
   const s=TS; ctx.save(); ctx.translate(sx,sy);
   const bx=s/2, by=s-8;
 
+  // 치비 일러스트(assets/char/npc_<key>.png) 있으면 빌보드로, 없으면 절차적 픽셀
+  const NPC_SPRITE={'괴짜 발명가':'inventor','건설 소장':'foreman','자동차 연구원':'car_researcher','DEC 경비병':'guard','도시 안내원':'city_guide'};
+  if(window.EQChar && EQChar.drawNPC(ctx, NPC_SPRITE[npc.name], bx, by, TS)){ ctx.restore(); return; }
+
   const profiles={
     '괴짜 발명가':  {cloth:'#f59e0b',cloth2:'#d97706',hair:'#2a1800',pants:'#3a2a10',hat:'#ffdd00',eyeColor:'#3a2a00',smile:true},
     '건설 소장':    {cloth:'#f97316',cloth2:'#ea580c',hair:'#3d2200',pants:'#2a1a08',hat:'#ff8800',eyeColor:'#2a1800',smile:true},

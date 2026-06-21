@@ -1154,6 +1154,9 @@ function drawNPCSprite(bx,by,clothColor,hairColor,skinColor,opts={}){
 function drawNPC(npc,sx,sy){
   const s=TS;ctx.save();ctx.translate(sx,sy);
   const bx=s/2,by=s-8;
+  // 치비 일러스트(assets/char/npc_<key>.png) 있으면 빌보드로, 없으면 절차적 픽셀
+  const NPC_SPRITE={'포로 박사':'captive_doctor','포로 기술자':'captive_tech','DEC 기술자':'dec_tech','DEC 경비대장':'guard'};
+  if(window.EQChar && EQChar.drawNPC(ctx, NPC_SPRITE[npc.name], bx, by, TS)){ ctx.restore(); return; }
   const profiles={
     '포로 박사':    {cloth:'#2a5a8a',hair:'#cccccc',pants:'#1a3a5a',eyeColor:'#2a6a8a',smile:true},
     '포로 기술자':  {cloth:'#4a6a2a',hair:'#4a3a1a',pants:'#2a3a1a',eyeColor:'#4a6a1a'},

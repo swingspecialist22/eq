@@ -1123,6 +1123,9 @@ function drawNPCSprite(bx,by,clothColor,hairColor,skinColor,opts={}){
 function drawNPC(npc,sx,sy){
   const s=TS; ctx.save(); ctx.translate(sx,sy);
   const bx=s/2, by=s-8;
+  // 치비 일러스트(assets/char/npc_<key>.png) 있으면 빌보드로, 없으면 절차적 픽셀
+  const NPC_SPRITE={'윤 반장':'foreman_yoon','이 박사':'dr_lee','오 주임':'manager_oh','최 기사':'engineer_choi','MANU-9':'manu9'};
+  if(window.EQChar && EQChar.drawNPC(ctx, NPC_SPRITE[npc.name], bx, by, TS)){ ctx.restore(); return; }
   const profiles={
     '윤 반장':    {cloth:'#f59e0b',cloth2:'#d97706',hair:'#2a1800',pants:'#3a2a10',hat:'#ff8800',eyeColor:'#3a2a00',smile:true},
     '이 박사':    {cloth:'#818cf8',cloth2:'#4f46e5',hair:'#1a1a4a',pants:'#1a1a3a',eyeColor:'#2a2aaa',smile:true},

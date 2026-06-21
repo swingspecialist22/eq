@@ -1064,6 +1064,9 @@ function drawNPCSprite(bx,by,clothColor,hairColor,skinColor,opts={}){
 function drawNPC(npc,sx,sy){
   const s=TS; ctx.save(); ctx.translate(sx,sy);
   const bx=s/2, by=s-8;
+  // 치비 일러스트(assets/char/npc_<key>.png) 있으면 빌보드로, 없으면 절차적 픽셀
+  const NPC_SPRITE={'그리드 제어 박사':'grid_doctor','전력망 엔지니어':'grid_engineer','AI 에너지 연구원':'ai_researcher','DEC 해커':'dec_hacker','시스템 안내 AI':'system_ai'};
+  if(window.EQChar && EQChar.drawNPC(ctx, NPC_SPRITE[npc.name], bx, by, TS)){ ctx.restore(); return; }
   const profiles={
     '하드웨어 박사':{cloth:'#38bdf8',cloth2:'#0369a1',hair:'#1a2a4a',pants:'#0a2040',eyeColor:'#0a8aca',smile:true},
     'AI 연구원':    {cloth:'#34d399',cloth2:'#059669',hair:'#1a3a2a',pants:'#0a2018',eyeColor:'#0a8a6a',smile:true},
