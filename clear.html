@@ -176,8 +176,8 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh;font-family:'Couri
   </div>
   <div id="stats">
     <div class="stat-chip">
-      <div class="stat-label">LEVEL</div>
-      <div class="stat-value" id="stat-lv">1</div>
+      <div class="stat-label">지식 등급</div>
+      <div class="stat-value" id="stat-lv">—</div>
     </div>
     <div class="stat-chip">
       <div class="stat-label">COINS</div>
@@ -240,7 +240,7 @@ $grade.style.color = data.color;
 
 document.getElementById('clear-title').textContent = data.title;
 document.getElementById('story-text').textContent  = data.story;
-document.getElementById('stat-lv').textContent     = savedLv;
+document.getElementById('stat-lv').textContent     = (function(){var R=['견습 공학자','수습 공학자','정식 공학자','숙련 공학자','전문 공학자','베테랑 공학자','에너지 마스터'];var c=0;for(var i=1;i<=6;i++)if(localStorage.getItem('eq_stage'+i+'_cleared'))c++;return R[Math.min(c,R.length-1)];})();
 document.getElementById('stat-coin').textContent   = savedCoin;
 document.getElementById('stat-hp').textContent     = savedHp + '/100';
 

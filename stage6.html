@@ -417,7 +417,7 @@ function showItemPopup(item,onDone){
   document.getElementById('ip-icon').textContent=item.icon;
   document.getElementById('ip-name').textContent=item.name;
   document.getElementById('ip-desc').textContent=item.desc;
-  document.getElementById('ip-exp').textContent=`+${item.exp} EXP  /  +${item.coins} ⚡`;
+  document.getElementById('ip-exp').textContent=`+${item.coins} ⚡`;
   $ipop.classList.add('show');
   if(window._invRender)window._invRender();
   setTimeout(()=>{$ipop.classList.remove('show');setTimeout(()=>{itemPopupActive=false;if(onDone)onDone();},250);},2800);
@@ -553,7 +553,7 @@ document.getElementById('puzzle-submit').addEventListener('click',()=>{
       closePuzzle();
       gameState.gatesCleared.add(currentPuzzleId);
       gainExp(p.exp);gainCoin(p.coins);
-      spawnFloat(`+${p.exp} EXP`,'#cc44ff',W/2-30,H/2-80);
+      spawnFloat(`아이템 획득!`,'#cc44ff',W/2-30,H/2-80);
       if(gameState.gatesCleared.size>=3){
         gameState.allGatesCleared=true;gameState.stageComplete=true;
         gameState.gatesCleared.add('gateD');
@@ -1405,7 +1405,7 @@ requestAnimationFrame(gameLoop);
     detName.textContent=has?item.name:'???';
     detStory.textContent=has&&item.story?item.story:'';
     detDesc.textContent=has?item.desc:'아직 발견하지 못한 아이템입니다.';
-    if(has){ detTag.textContent='+'+item.exp+' EXP · +'+item.coins+'코인'; detTag.style.display='inline-block'; }
+    if(has){ detTag.textContent='+'+item.coins+'코인'; detTag.style.display='inline-block'; }
     else{ detTag.style.display='none'; }
   }
   function render(){

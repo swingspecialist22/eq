@@ -379,7 +379,7 @@ const NPCS=[
         gameState.npcMet.add('이 박사');
         updateHUD();
         gainExp(10); gainCoin(2);
-        spawnFloat('+10 EXP','#818cf8', W/2, H/2-60);
+        spawnFloat('+2 ⚙','#818cf8', W/2, H/2-60);
       }
       if(this._talkCount===1) return [
         '오, 공학자! 잘 왔어. 나는 에너지 저장 연구원 이 박사야.',
@@ -410,7 +410,7 @@ const NPCS=[
         gameState.npcMet.add('오 주임');
         updateHUD();
         gainExp(10); gainCoin(2);
-        spawnFloat('+10 EXP','#f59e0b', W/2, H/2-60);
+        spawnFloat('+2 ⚙','#f59e0b', W/2, H/2-60);
       }
       if(this._talkCount===1) return [
         '반갑소, 공학자! 나는 수소 저장 담당 오 주임이라오.',
@@ -438,7 +438,7 @@ const NPCS=[
         gameState.npcMet.add('최 기사');
         updateHUD();
         gainExp(10); gainCoin(2);
-        spawnFloat('+10 EXP','#38bdf8', W/2, H/2-60);
+        spawnFloat('+2 ⚙','#38bdf8', W/2, H/2-60);
       }
       if(this._talkCount===1) return [
         '반가워, 공학자! 나는 설계 전문 기술자 최 기사야.',
@@ -669,7 +669,7 @@ function showItemPopup(item,onDone){
   document.getElementById('ip-icon').textContent=item.icon;
   document.getElementById('ip-name').textContent=item.name;
   document.getElementById('ip-desc').textContent=item.desc;
-  document.getElementById('ip-exp').textContent=`+${item.exp} EXP  /  +${item.coins} ⚙`;
+  document.getElementById('ip-exp').textContent=`+${item.coins} ⚙`;
   $ipop.classList.add('show');
   if(window._invRender)window._invRender();
   setTimeout(()=>{$ipop.classList.remove('show');setTimeout(()=>{itemPopupActive=false;if(onDone)onDone();},250);},2800);
@@ -789,9 +789,9 @@ function submitAnswer(timeout=false){
   } else {
     SFX.play('quiz_true');
     $rbadge.textContent='✓ 정답!';$rbadge.className='result-badge ok';
-    gainExp(q.exp);gainCoin(q.coins);spawnFloat(`+${q.exp} EXP`,'#f97316',W/2-30,H/2-80);
+    gainExp(q.exp);gainCoin(q.coins);spawnFloat(`정답! +${q.coins} 코인`,'#f97316',W/2-30,H/2-80);
     if(quizState.currentIdx===2){$rexp.textContent='🎉 3문제 모두 통과! MANU-9 격파!';$rnext.textContent='[ 관문 통과! → ]';}
-    else{$rexp.textContent=`+${q.exp} EXP  /  +${q.coins} ⚙  — 다음 문제!`;$rnext.textContent=`[ 다음 문제 Q${quizState.currentIdx+2} → ]`;}
+    else{$rexp.textContent=`+${q.coins} ⚙  — 다음 문제!`;$rnext.textContent=`[ 다음 문제 Q${quizState.currentIdx+2} → ]`;}
     $rexpl.textContent='💡 '+q.explanation;
   }
 }
@@ -1793,7 +1793,7 @@ requestAnimationFrame(gameLoop);
     detName.textContent=has?item.name:'???';
     detStory.textContent=has&&item.story?item.story:'';
     detDesc.textContent=has?item.desc:'아직 발견하지 못한 아이템입니다.';
-    if(has){ detTag.textContent='+'+item.exp+' EXP · +'+item.coins+'코인'; detTag.style.display='inline-block'; }
+    if(has){ detTag.textContent='+'+item.coins+'코인'; detTag.style.display='inline-block'; }
     else{ detTag.style.display='none'; }
   }
   function render(){

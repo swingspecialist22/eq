@@ -523,7 +523,7 @@ function showItemPopup(item,onDone){
   document.getElementById('ip-icon').textContent=item.icon;
   document.getElementById('ip-name').textContent=item.name;
   document.getElementById('ip-desc').textContent=item.desc;
-  document.getElementById('ip-exp').textContent=`+${item.exp} EXP  /  +${item.coins} 🌊`;
+  document.getElementById('ip-exp').textContent=`+${item.coins} 🌊`;
   $ipop.classList.add('show');
   if(window._invRender)window._invRender();
   setTimeout(()=>{$ipop.classList.remove('show');setTimeout(()=>{itemPopupActive=false;if(onDone)onDone();},250);},2800);
@@ -642,9 +642,9 @@ function submitAnswer(timeout=false){
   } else {
     SFX.play('quiz_true');
     $rbadge.textContent='✓ 정답!';$rbadge.className='result-badge ok';
-    gainExp(q.exp);gainCoin(q.coins);spawnFloat(`+${q.exp} EXP`,'#4affcc',W/2-30,H/2-80);
+    gainExp(q.exp);gainCoin(q.coins);spawnFloat(`정답! +${q.coins} 코인`,'#4affcc',W/2-30,H/2-80);
     if(quizState.currentIdx===2){$rexp.textContent='🎉 3문제 모두 통과! 관문이 열린다!';$rnext.textContent='[ 관문 통과! → ]';}
-    else{$rexp.textContent=`+${q.exp} EXP  /  +${q.coins} 🌊  —  다음 문제!`;$rnext.textContent=`[ 다음 문제 Q${quizState.currentIdx+2} → ]`;}
+    else{$rexp.textContent=`+${q.coins} 🌊  —  다음 문제!`;$rnext.textContent=`[ 다음 문제 Q${quizState.currentIdx+2} → ]`;}
     $rexpl.textContent='💡 '+q.explanation;
   }
 }
@@ -707,7 +707,7 @@ function handlePortal(){
   openDialog('🌀 포털',[
     '바람의 해안 스테이지 완료!',
     '다음 여정: [발명가의 도시] — 발명·특허와 수송 기술이 기다리고 있어!',
-    '레벨과 경험치가 저장됩니다. 계속 나아가세요, 공학자!',
+    '진행 상황이 저장됩니다. 계속 나아가세요, 공학자!',
   ],()=>{setTimeout(()=>{SFX.play('warp');
       window.location.href='stage3.html';},400);});
 }
@@ -1618,7 +1618,7 @@ loadFromLocalStorage();
     detName.textContent=has?item.name:'???';
     detStory.textContent=has&&item.story?item.story:'';
     detDesc.textContent=has?item.desc:'아직 발견하지 못한 아이템입니다.';
-    if(has){ detTag.textContent='+'+item.exp+' EXP · +'+item.coins+'코인'; detTag.style.display='inline-block'; }
+    if(has){ detTag.textContent='+'+item.coins+'코인'; detTag.style.display='inline-block'; }
     else{ detTag.style.display='none'; }
   }
   function render(){
