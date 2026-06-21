@@ -1495,7 +1495,11 @@ function drawPlayer(sx,sy){
   // 그림자
   ctx.fillStyle='rgba(0,0,0,0.3)';
   ctx.beginPath();ctx.ellipse(bx,by+2,11,4,0,0,Math.PI*2);ctx.fill();
-  if(window.EQChar&&EQChar.drawBillboard(ctx,charId,f,player.moving,fr,bx,by,TS)){ ctx.restore(); return; }
+  if(window.EQChar&&EQChar.has(charId)){
+    if(typeof gameState!=='undefined'&&gameState.playerOnCar) drawPlayerOnCar(ctx,bx,by,PAL,f,fr);  // 차 먼저(아래)
+    EQChar.drawBillboard(ctx,charId,f,player.moving,fr,bx,by,TS);                                    // 치비 위에
+    ctx.restore(); return;
+  }
 
   function px(x,y,w,h,col,oc){
     ctx.fillStyle=oc||'#1a1a1a';ctx.fillRect(x-1,y-1,w+2,h+2);
