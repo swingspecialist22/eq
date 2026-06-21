@@ -834,10 +834,8 @@ function handlePortal(){
     '재생소재 배터리팩을 획득했어 — 다음 스테이지 데이터 타워에서 핵심 아이템이야!',
     '수고했어, 공학자!',
   ],()=>{
-    const co=document.getElementById('clear-overlay');
-    co.classList.add('show');
     setTimeout(()=>{SFX.play('warp');
-      window.location.href='stage5.html';},3000);
+      window.location.href='stage5.html';},500);
   });
 }
 
