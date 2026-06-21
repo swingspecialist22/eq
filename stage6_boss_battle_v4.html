@@ -562,7 +562,7 @@ $('btn-submit').addEventListener('click',()=>{
   const correctPicks = S.selected.filter(id => ans.includes(id)).length;
   const wrongPicks   = S.selected.filter(id => !ans.includes(id)).length;
   const pointPerCard = 50;
-  const netScore = (correctPicks * pointPerCard) - (wrongPicks * pointPerCard); // -150 ~ +250 등 가능
+  const netScore = correctPicks * pointPerCard; // 틀린 카드는 0(감점 없음) — 교육용 공정성
   const allCorrect = correctPicks === ans.length && wrongPicks === 0;
 
   $('btn-submit').disabled = true;
@@ -573,14 +573,8 @@ $('btn-submit').addEventListener('click',()=>{
     bossAnimate('do-hurt');
     setHP(S.bossHp - netScore, S.playerHp);
     spawnDmg('-'+netScore, 'var(--red)', 'boss-art');
-  } else if(netScore < 0){
-    // 플레이어 HP 감소
-    $('wrap').classList.add('flash');
-    setTimeout(()=>$('wrap').classList.remove('flash'), 350);
-    setHP(S.bossHp, S.playerHp + netScore); // netScore가 음수이므로 +로 처리
-    spawnDmg(netScore.toString(), 'var(--green)', 'hud');
   } else {
-    // 0점 — 무효
+    // 맞는 카드를 못 골라 데미지 0 (감점·반격 없음)
     spawnDmg('±0', 'var(--muted)', 'hud');
   }
 
@@ -604,19 +598,15 @@ function showResult(allCorrect, correctPicks, wrongPicks, netScore, r){
     $('res-icon').style.color = 'var(--amber)';
     $('res-title').textContent = 'PARTIAL HIT';
     $('res-title').style.color = 'var(--amber)';
-    $('res-desc').textContent  = `${total}장 중 ${correctPicks}장 적중, ${wrongPicks}장 오답. 보스에게 ${netScore} 데미지!`;
-  } else if(netScore === 0){
+    $('res-desc').textContent  = wrongPicks > 0
+      ? `${total}장 중 ${correctPicks}장 적중! 보스에게 ${netScore} 데미지! (${wrongPicks}장은 빗나가 효과 없음)`
+      : `${total}장 중 ${correctPicks}장 적중! 보스에게 ${netScore} 데미지!`;
+  } else {
     $('res-icon').textContent = '△';
     $('res-icon').style.color = 'var(--muted)';
     $('res-title').textContent = 'NO EFFECT';
     $('res-title').style.color = 'var(--muted)';
-    $('res-desc').textContent  = `정답 ${correctPicks}장, 오답 ${wrongPicks}장. 상쇄돼서 효과 없음.`;
-  } else {
-    $('res-icon').textContent = '✕';
-    $('res-icon').style.color = 'var(--red)';
-    $('res-title').textContent = 'BACKFIRE!';
-    $('res-title').style.color = 'var(--red)';
-    $('res-desc').textContent  = `${r.failMsg} (정답 ${correctPicks}장, 오답 ${wrongPicks}장 → ${netScore} 데미지)`;
+    $('res-desc').textContent  = '맞는 카드를 고르지 못했어요. 효과 없음 — 해설을 보고 다시 도전!';
   }
 
   // 점수 시각화
@@ -625,7 +615,7 @@ function showResult(allCorrect, correctPicks, wrongPicks, netScore, r){
     return `<span style="display:inline-flex;align-items:center;gap:4px;margin:2px 4px;padding:3px 8px;border-radius:2px;font-size:11px;background:${hit?'rgba(46,196,182,0.15)':'rgba(230,57,70,0.10)'};border:1px solid ${hit?'var(--green)':'var(--border)'};">${hit?'✓':'—'} ${CARDS[id].icon} ${CARDS[id].name} <strong style="color:${hit?'var(--green)':'var(--muted)'}">${hit?'+50':''}</strong></span>`;
   });
   const wrongRows = S.selected.filter(id=>!r.answer.includes(id)).map(id =>
-    `<span style="display:inline-flex;align-items:center;gap:4px;margin:2px 4px;padding:3px 8px;border-radius:2px;font-size:11px;background:rgba(230,57,70,0.15);border:1px solid var(--red);">✕ ${CARDS[id].icon} ${CARDS[id].name} <strong style="color:var(--red)">-50</strong></span>`
+    `<span style="display:inline-flex;align-items:center;gap:4px;margin:2px 4px;padding:3px 8px;border-radius:2px;font-size:11px;background:rgba(255,255,255,0.04);border:1px solid var(--border);">— ${CARDS[id].icon} ${CARDS[id].name} <strong style="color:var(--muted)">효과 없음</strong></span>`
   );
 
   $('res-why').innerHTML =
