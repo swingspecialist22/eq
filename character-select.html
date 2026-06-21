@@ -315,9 +315,10 @@ function drawSaebyeok(ctx,bx,by,sc,p,fr){
 // ═══════════════════════════════════════════════════
 var CHARS=[
   {
-    id:'haetsal', defaultName:'햇살', job:'에너지 공학자',
-    desc:'태양처럼 밝고 넉넉한 베테랑 현장 공학자.\n어떤 상황도 웃으며 돌파한다.',
+    id:'haetsal', defaultName:'와트', job:'에너지 공학자',
+    desc:'태양광 파워슈트를 두른 에너지 히어로.\n가슴의 태양 코어로 어떤 위기도 돌파한다.',
     tags:[],
+    img:'assets/char/char_haetsal.png',
     palette:{cloth:'#3a8aff',cloth2:'#2060cc',hair:'#3d2200',skin:'#f5c49a',pants:'#1a3a80',shoe:'#22223e',goggle:'#1a3fa0',goggle2:'#4488ff',antenna:'#ff8800',antenna2:'#ffcc00',badge:'#ffcc00',badge2:'#ff8800',eyeColor:'#1a1a8a'},
     drawFn:drawHaetsal
   },
@@ -330,16 +331,18 @@ var CHARS=[
     drawFn:drawNari
   },
   {
-    id:'nuri', defaultName:'누리', job:'천재 발명가',
-    desc:'엉뚱하지만 기발한 아이디어의 소유자.\n폐품으로 발명품을 뚝딱 만들어낸다.',
+    id:'nuri', defaultName:'퀴리', job:'에너지 마법사',
+    desc:'빛나는 에너지를 다루는 천재 마법사.\n초록 라듐의 빛으로 DEC의 어둠을 밝힌다.',
     tags:[],
+    img:'assets/char/char_nuri.png',
     palette:{cloth:'#cc6a1a',cloth2:'#aa4a08',hair:'#2a1800',skin:'#e8b888',pants:'#3a2a10',shoe:'#2a1a08',goggle:'#cc6a1a',goggle2:'#ffaa44',antenna:'#ffdd00',antenna2:'#ffffff',badge:'#ffdd00',badge2:'#ff8800',eyeColor:'#3a2a00'},
     drawFn:drawNuri
   },
   {
-    id:'saebyeok', defaultName:'새벽', job:'정보전 해커',
-    desc:'어둠 속에서 DEC 시스템을 해킹하는 사이버 전사.\n말은 적고 실력은 최고다.',
+    id:'saebyeok', defaultName:'테슬라', job:'정보전 해커',
+    desc:'번개를 다루는 전설의 사이버 해커.\nDEC의 시스템을 단숨에 무너뜨린다.',
     tags:[],
+    img:'assets/char/char_saebyeok.png',
     palette:{cloth:'#4a1a6a',cloth2:'#2a0a4a',hair:'#1a0a2a',skin:'#f0d8e8',pants:'#1a0a2a',shoe:'#0a0818',goggle:'#8822cc',goggle2:'#cc66ff',antenna:'#cc44ff',antenna2:'#ffaaff',badge:'#cc44ff',badge2:'#8822cc',eyeColor:'#8822cc'},
     drawFn:drawSaebyeok
   },

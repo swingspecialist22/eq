@@ -83,6 +83,7 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 
 <!-- 공용 오디오 엔진 (모든 화면 공통) -->
 <script src="eq-audio.js"></script>
+<script src="eq-char.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
 // 캔버스 / 상수
@@ -637,8 +638,11 @@ function gameLoop(){
     ctx.fillStyle='#ff0000';ctx.font='bold 8px Courier New';ctx.textAlign='center';ctx.fillText('DEC',dx,dy+1);
   }
 
-  // 플레이어
-  charDrawFn(sprites.player.x*TS, sprites.player.y*TS, 1, charPal, sprites.player.fr);
+  // 플레이어 — 치비 일러스트 있으면 빌보드, 없으면 기존 픽셀
+  var _pbx=sprites.player.x*TS, _pby=sprites.player.y*TS;
+  if(!(window.EQChar && EQChar.drawBillboard(ctx, charId, sprites.player.facing, sprites.player.moving, sprites.player.fr, _pbx, _pby, TS))){
+    charDrawFn(_pbx, _pby, 1, charPal, sprites.player.fr);
+  }
 
   // 타이핑 효과
   if(dialogActive && !twDone){
