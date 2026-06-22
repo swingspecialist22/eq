@@ -6,8 +6,10 @@
 <title>에너지 퀘스트 — 프롤로그</title>
 <link rel="stylesheet" href="eq-ui.css">
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap');
+
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Courier New',monospace;user-select:none;overflow:hidden;padding-top:8px;}
+body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:"Do Hyeon","Malgun Gothic",sans-serif;user-select:none;overflow:hidden;padding-top:8px;}
 #game-wrapper{position:relative;}
 #game-canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges;}
 
@@ -17,7 +19,7 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 #skip-btn{
   position:absolute;top:12px;right:12px;
   background:rgba(0,0,0,0.7);border:1px solid #443322;
-  color:#886644;font-family:'Courier New',monospace;font-size:10px;
+  color:#886644;font-family:"Do Hyeon","Malgun Gothic",sans-serif;font-size:10px;
   padding:5px 12px;border-radius:3px;cursor:pointer;letter-spacing:1px;z-index:20;
   transition:border-color .15s,color .15s;
 }
@@ -635,7 +637,7 @@ function gameLoop(){
     // 프로펠러
     ctx.fillStyle='#888';ctx.fillRect(dx-24,dy-10,10,4);ctx.fillRect(dx+14,dy-10,10,4);
     // DEC 마크
-    ctx.fillStyle='#ff0000';ctx.font='bold 8px Courier New';ctx.textAlign='center';ctx.fillText('DEC',dx,dy+1);
+    ctx.fillStyle='#ff0000';ctx.font='bold 8px "Do Hyeon"';ctx.textAlign='center';ctx.fillText('DEC',dx,dy+1);
   }
 
   // 플레이어 — 치비 일러스트 있으면 빌보드, 없으면 기존 픽셀
