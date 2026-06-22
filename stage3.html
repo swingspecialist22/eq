@@ -6,7 +6,7 @@
 <title>에너지 퀘스트 — 발명가의 도시</title>
 <link rel="stylesheet" href="eq-ui.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;700;800&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
 body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none;}
 #game-title{display:none;}
@@ -43,7 +43,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 #quiz-q-num{font-size:10px;color:#445;margin-bottom:6px;}
 #quiz-question{font-size:15px;color:#ffe8cc;line-height:1.7;margin-bottom:16px;min-height:44px;}
 #quiz-choices{display:flex;flex-direction:column;gap:8px;}
-.choice-btn{background:#120e08;border:1px solid #3a2a1a;border-radius:5px;padding:14px 14px;color:#cca;font-size:14px;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:background .12s,border-color .12s,transform .1s;line-height:1.4;width:100%;box-sizing:border-box;}
+.choice-btn{background:#120e08;border:1px solid #3a2a1a;border-radius:5px;padding:14px 14px;color:#cca;font-size:14px;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:background .12s,border-color .12s,transform .1s;line-height:1.4;width:100%;box-sizing:border-box;}
 .choice-btn:hover,.choice-btn.selected{background:#1a0a40;border-color:#7c3aed;color:#fff;transform:translateX(3px);}
 .choice-btn.correct{background:#0a2a18;border-color:#2a9a5a;color:#6ee7b7;transform:none;}
 .choice-btn.wrong{background:#2a0a10;border-color:#9a2a30;color:#fca5a5;animation:shk .3s;}
@@ -54,7 +54,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 .choice-btn.wrong .choice-key{background:#3a1020;border-color:#aa3a40;color:#faa;}
 #quiz-footer{padding:10px 22px 16px;display:flex;justify-content:space-between;align-items:center;}
 #quiz-hint{font-size:10px;color:#334;}
-#quiz-submit-btn{background:#6a2a08;border:1px solid #cc6622;color:#ffcc88;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:14px;padding:12px 28px;border-radius:6px;cursor:pointer;letter-spacing:1px;}
+#quiz-submit-btn{background:#6a2a08;border:1px solid #cc6622;color:#ffcc88;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:14px;padding:12px 28px;border-radius:6px;cursor:pointer;letter-spacing:1px;}
 #quiz-submit-btn:hover{background:#3a0080;}
 #quiz-submit-btn:disabled{opacity:.3;cursor:default;}
 #quiz-result{display:none;padding:0 22px 18px;border-top:1px solid #160a30;margin-top:4px;}
@@ -63,7 +63,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 #result-badge.ng{background:#2a0808;border:1px solid #9a3030;color:#fca5a5;}
 #result-exp{font-size:11px;color:#a78bfa;margin-bottom:8px;}
 #result-explanation{font-size:11px;color:#776688;line-height:1.65;word-break:keep-all;}
-#result-next-btn{margin-top:12px;background:transparent;border:1px solid #5a3a1a;color:#cc8855;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:14px;padding:12px 24px;border-radius:6px;cursor:pointer;}
+#result-next-btn{margin-top:12px;background:transparent;border:1px solid #5a3a1a;color:#cc8855;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:14px;padding:12px 24px;border-radius:6px;cursor:pointer;}
 #result-next-btn:hover{background:#1a0a40;color:#fff;}
 #levelup-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#1a0800,#2a1500);border:2px solid #ff8800;border-radius:8px;padding:20px 40px;text-align:center;z-index:1001;box-shadow:0 0 40px #ff880066;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;pointer-events:none;}
 #levelup-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
@@ -75,7 +75,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 @keyframes expFloat{0%{transform:translateY(0);opacity:1;}100%{transform:translateY(-60px);opacity:0;}}
 #controls-hint{display:none;}
 #controls-hint span{color:#777;}
-#quest-log-btn{position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.6);border:1px solid #2a1a4a;color:#887aaa;font-size:9px;padding:4px 8px;border-radius:3px;cursor:pointer;letter-spacing:1px;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;}
+#quest-log-btn{position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.6);border:1px solid #2a1a4a;color:#887aaa;font-size:9px;padding:4px 8px;border-radius:3px;cursor:pointer;letter-spacing:1px;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;}
 #quest-log-btn:hover{border-color:#3a2a5a;color:#c4b5fd;}
 
 /* ═══════════════════ 모바일 컨트롤 ═══════════════════ */
@@ -128,7 +128,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 #bgm-toggle.off{color:#555;border-color:#333;}
 #inv-modal{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.72);z-index:400;align-items:center;justify-content:center;}
 #inv-modal.open{display:flex;}
-#inv-modal-inner{background:linear-gradient(160deg,#1a1208,#0d0a05);border:2px solid #604020;border-radius:8px;width:clamp(320px,55vw,620px);max-height:80vh;display:flex;flex-direction:column;overflow:hidden;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;}
+#inv-modal-inner{background:linear-gradient(160deg,#1a1208,#0d0a05);border:2px solid #604020;border-radius:8px;width:clamp(320px,55vw,620px);max-height:80vh;display:flex;flex-direction:column;overflow:hidden;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;}
 #inv-modal-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #3a2510;color:#cc9944;font-size:clamp(12px,1.4vw,17px);letter-spacing:2px;flex-shrink:0;}
 #inv-close{cursor:pointer;color:#554433;font-size:clamp(14px,1.6vw,20px);line-height:1;background:none;border:none;padding:0;font-family:inherit;}
 #inv-close:hover{color:#cc9944;}
@@ -170,13 +170,13 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
     </div>
   </div>
   <!-- 수소 연료 HUD -->
-  <div id="fuel-wrap" style="display:none;position:absolute;top:0;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.78);border:1px solid #0ea5e9;border-radius:4px;padding:5px 14px;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:10px;color:#7dd3fc;pointer-events:none;z-index:3;white-space:nowrap;">
+  <div id="fuel-wrap" style="display:none;position:absolute;top:0;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.78);border:1px solid #0ea5e9;border-radius:4px;padding:5px 14px;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:10px;color:#7dd3fc;pointer-events:none;z-index:3;white-space:nowrap;">
     🚗 H₂ 연료&nbsp;<span id="fuel-txt">100%</span>
     <div style="width:90px;height:5px;background:#0a1a2a;border-radius:3px;margin-top:3px;overflow:hidden;display:inline-block;vertical-align:middle;">
       <div id="fuel-bar" style="height:5px;width:100%;background:#38bdf8;border-radius:3px;transition:width .4s,background .4s;"></div>
     </div>
   </div>
-  <div id="fuel-warning" style="display:none;position:absolute;top:44px;left:50%;transform:translateX(-50%);font-size:11px;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-weight:bold;pointer-events:none;z-index:3;"></div>
+  <div id="fuel-warning" style="display:none;position:absolute;top:44px;left:50%;transform:translateX(-50%);font-size:11px;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-weight:bold;pointer-events:none;z-index:3;"></div>
   <div id="dialog-box">
     <div class="speaker" id="dialog-speaker"></div>
     <div id="dialog-text"></div>
@@ -1032,7 +1032,7 @@ function showLvUp(){
 }
 function spawnFloat(txt,col,x,y){
   const el=document.createElement('div');el.textContent=txt;
-  el.style.cssText=`position:absolute;left:${x}px;top:${y}px;color:${col};font-size:13px;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-weight:bold;pointer-events:none;z-index:30;animation:expFloat 1.2s forwards;`;
+  el.style.cssText=`position:absolute;left:${x}px;top:${y}px;color:${col};font-size:13px;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-weight:bold;pointer-events:none;z-index:30;animation:expFloat 1.2s forwards;`;
   document.getElementById('game-wrapper').appendChild(el);setTimeout(()=>el.remove(),1200);
 }
 
@@ -1220,7 +1220,7 @@ function drawVehicle(v, sx, sy){
   ctx.fillStyle='rgba(0,0,0,0.7)';
   ctx.fillRect(s/2-18, 2, 36, 12);
   ctx.fillStyle='#fff';
-  ctx.font='10px "Nanum Gothic Coding","Malgun Gothic",sans-serif';
+  ctx.font='10px "Gothic A1","Malgun Gothic",sans-serif';
   ctx.textAlign='center';
   ctx.fillText(v.type==='hydrogen'?'H₂':v.type==='electric'?'EV':'ICE', s/2, 11);
 
@@ -1229,7 +1229,7 @@ function drawVehicle(v, sx, sy){
   if(nearX<=1&&nearY<=1){
     const blink=(Math.sin(Date.now()/300)+1)/2;
     ctx.fillStyle=`rgba(255,255,180,${0.6+0.4*blink})`;
-    ctx.font='11px "Nanum Gothic Coding","Malgun Gothic",sans-serif';
+    ctx.font='11px "Gothic A1","Malgun Gothic",sans-serif';
     ctx.fillText('[SPACE]', s/2, s-2);
   }
 
@@ -1251,7 +1251,7 @@ function drawStructure(st, sx, sy){
     ctx.fillStyle='#d6d3d1'; ctx.fillRect(38, 4, 8, s-8);       // 내벽
     // 라벨
     ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,s,12);
-    ctx.fillStyle='#fb923c'; ctx.font='10px "Nanum Gothic Coding","Malgun Gothic",sans-serif'; ctx.textAlign='center';
+    ctx.fillStyle='#fb923c'; ctx.font='10px "Gothic A1","Malgun Gothic",sans-serif'; ctx.textAlign='center';
     ctx.fillText('단열벽 단면', s/2, 9);
   } else if(st.label==='3중 유리창'){
     // 창틀
@@ -1263,7 +1263,7 @@ function drawStructure(st, sx, sy){
     ctx.fillStyle='rgba(255,255,255,0.15)'; ctx.fillRect(28,8,6,s-16); // 공기층2
     ctx.fillStyle='rgba(186,230,253,0.7)'; ctx.fillRect(34, 8, 10, s-16);
     ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,s,12);
-    ctx.fillStyle='#bae6fd'; ctx.font='10px "Nanum Gothic Coding","Malgun Gothic",sans-serif'; ctx.textAlign='center';
+    ctx.fillStyle='#bae6fd'; ctx.font='10px "Gothic A1","Malgun Gothic",sans-serif'; ctx.textAlign='center';
     ctx.fillText('3중 유리창', s/2, 9);
   } else if(st.label==='열회수 환기장치'){
     // 박스 형태
@@ -1276,7 +1276,7 @@ function drawStructure(st, sx, sy){
     // 나가는 화살표 (←)
     ctx.beginPath(); ctx.moveTo(s-8,34); ctx.lineTo(s-22,34); ctx.lineTo(s-18,30); ctx.moveTo(s-22,34); ctx.lineTo(s-18,38); ctx.stroke();
     ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,s,12);
-    ctx.fillStyle='#7dd3fc'; ctx.font='10px "Nanum Gothic Coding","Malgun Gothic",sans-serif'; ctx.textAlign='center';
+    ctx.fillStyle='#7dd3fc'; ctx.font='10px "Gothic A1","Malgun Gothic",sans-serif'; ctx.textAlign='center';
     ctx.fillText('열회수환기', s/2, 9);
   } else if(st.label==='기밀 시공 테이프'){
     // 롤 테이프 형태
@@ -1288,7 +1288,7 @@ function drawStructure(st, sx, sy){
     // 테이프 풀린 부분
     ctx.fillRect(s/2+16, s/2-2, 16, 6);
     ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,s,12);
-    ctx.fillStyle='#fde68a'; ctx.font='10px "Nanum Gothic Coding","Malgun Gothic",sans-serif'; ctx.textAlign='center';
+    ctx.fillStyle='#fde68a'; ctx.font='10px "Gothic A1","Malgun Gothic",sans-serif'; ctx.textAlign='center';
     ctx.fillText('기밀테이프', s/2, 9);
   }
 
@@ -1297,7 +1297,7 @@ function drawStructure(st, sx, sy){
   if(nearX<=1&&nearY<=1){
     const blink=(Math.sin(Date.now()/300)+1)/2;
     ctx.fillStyle=`rgba(255,255,180,${0.5+0.4*blink})`;
-    ctx.font='11px "Nanum Gothic Coding","Malgun Gothic",sans-serif'; ctx.textAlign='center';
+    ctx.font='11px "Gothic A1","Malgun Gothic",sans-serif'; ctx.textAlign='center';
     ctx.fillText('[SPACE]', s/2, s-2);
   }
   ctx.restore();
@@ -1432,7 +1432,7 @@ function drawBubbleNPC(npc,sx,sy){
   drawNPCSprite(s/2,s-8, npc.color, '#554433', '#f5c49a', {pants:'#3a3040'});
   ctx.restore();
   // 말풍선
-  const FONT='12px '+'"Nanum Gothic Coding","Malgun Gothic","Apple SD Gothic Neo",sans-serif';
+  const FONT='12px '+'"Gothic A1","Malgun Gothic","Apple SD Gothic Neo",sans-serif';
   ctx.font=FONT;
   const lines=npc.bubble.split('\n');
   const lineH=18, pad=10;
@@ -1792,7 +1792,7 @@ function drawPlayerOnCar(ctx, bx, by, PAL, f, fr){
   ctx.beginPath();ctx.arc(bx-14,cy2+12,3,0,Math.PI*2);ctx.fill();
   ctx.beginPath();ctx.arc(bx+14,cy2+12,3,0,Math.PI*2);ctx.fill();
   // H₂ 마크
-  ctx.fillStyle='#ffffff'; ctx.font='bold 10px "Nanum Gothic Coding","Malgun Gothic",sans-serif'; ctx.textAlign='center';
+  ctx.fillStyle='#ffffff'; ctx.font='bold 10px "Gothic A1","Malgun Gothic",sans-serif'; ctx.textAlign='center';
   ctx.fillText('H₂', bx, cy2+4);
   // 이동 중 수증기 (무공해 배기)
   if(fr===1||fr===3){
@@ -1957,7 +1957,7 @@ function gameLoop(){
       ctx.fillStyle='#1e293b';ctx.beginPath();ctx.arc(17,42,7,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(39,42,7,0,Math.PI*2);ctx.fill();
       ctx.fillStyle='#94a3b8';ctx.beginPath();ctx.arc(17,42,3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(39,42,3,0,Math.PI*2);ctx.fill();
       // H₂ 마크
-      ctx.fillStyle='#fff';ctx.font='bold 12px "Nanum Gothic Coding","Malgun Gothic",sans-serif';ctx.textAlign='center';ctx.fillText('H₂',28,35);
+      ctx.fillStyle='#fff';ctx.font='bold 12px "Gothic A1","Malgun Gothic",sans-serif';ctx.textAlign='center';ctx.fillText('H₂',28,35);
       // 이동 중 먼지/연기 효과
       if(hydrogenCar._moving){
         ctx.fillStyle=`rgba(200,230,255,${0.3+pulse*0.3})`;
@@ -1973,7 +1973,7 @@ function gameLoop(){
         ctx.fillStyle='#38bdf8'; ctx.fillRect(12,21,8,4);  // 옷
         // 연구원 이름표 (차 위)
         ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,-10,56,12);
-        ctx.fillStyle='#38bdf8'; ctx.font='bold 10px "Nanum Gothic Coding","Malgun Gothic",sans-serif'; ctx.textAlign='center';
+        ctx.fillStyle='#38bdf8'; ctx.font='bold 10px "Gothic A1","Malgun Gothic",sans-serif'; ctx.textAlign='center';
         ctx.fillText('자동차 연구원', 28, -1);
       }
       ctx.restore();
@@ -2001,7 +2001,7 @@ function gameLoop(){
   drawPlayer(player.tx*TS+player.px-cx, player.ty*TS+player.py-cy);
 
   // 이름표
-  ctx.font='bold 12px "Nanum Gothic Coding","Malgun Gothic",sans-serif';ctx.textAlign='center';
+  ctx.font='bold 12px "Gothic A1","Malgun Gothic",sans-serif';ctx.textAlign='center';
   for(const n of NPCS){
     if(n.isGuard&&gameState.gateCleared)continue;
     if(gameState.hydrogenEventActive && n.name==='자동차 연구원')continue;
@@ -2024,7 +2024,7 @@ function gameLoop(){
       ctx.textAlign='center';
       ctx.fillStyle='rgba(0,0,0,.6)';const ptw=ctx.measureText('🌀 포털').width;ctx.fillRect(sx-ptw/2-5,sy-13,ptw+10,15);
       ctx.fillStyle=gameState.stageComplete?'#e9d5ff':'#6666aa';
-      ctx.font='bold 12px "Nanum Gothic Coding","Malgun Gothic",sans-serif';ctx.fillText('🌀 포털',sx,sy);
+      ctx.font='bold 12px "Gothic A1","Malgun Gothic",sans-serif';ctx.fillText('🌀 포털',sx,sy);
       ctx.textAlign='left';
     }
   }

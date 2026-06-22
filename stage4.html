@@ -6,7 +6,7 @@
 <title>에너지 퀘스트 — 공장 던전</title>
 <link rel="stylesheet" href="eq-ui.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;700;800&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
 body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none;}
 #game-title{display:none;}
@@ -43,7 +43,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 #quiz-q-num{font-size:10px;color:#445;margin-bottom:6px;}
 #quiz-question{font-size:15px;color:#ffe8cc;line-height:1.7;margin-bottom:16px;min-height:44px;}
 #quiz-choices{display:flex;flex-direction:column;gap:8px;}
-.choice-btn{background:#120e08;border:1px solid #3a2a1a;border-radius:5px;padding:14px 14px;color:#cca;font-size:14px;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:background .12s,border-color .12s,transform .1s;line-height:1.4;width:100%;box-sizing:border-box;}
+.choice-btn{background:#120e08;border:1px solid #3a2a1a;border-radius:5px;padding:14px 14px;color:#cca;font-size:14px;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;transition:background .12s,border-color .12s,transform .1s;line-height:1.4;width:100%;box-sizing:border-box;}
 .choice-btn:hover,.choice-btn.selected{background:#2a1000;border-color:#f97316;color:#fff;transform:translateX(3px);}
 .choice-btn.correct{background:#0a2a0a;border-color:#2a9a2a;color:#86efac;transform:none;}
 .choice-btn.wrong{background:#2a0a0a;border-color:#9a2a2a;color:#fca5a5;animation:shk .3s;}
@@ -54,7 +54,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 .choice-btn.wrong .choice-key{background:#2a1010;border-color:#aa3a3a;color:#faa;}
 #quiz-footer{padding:10px 22px 16px;display:flex;justify-content:space-between;align-items:center;}
 #quiz-hint{font-size:10px;color:#334;}
-#quiz-submit-btn{background:#6a2a08;border:1px solid #cc6622;color:#ffcc88;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:14px;padding:12px 28px;border-radius:6px;cursor:pointer;letter-spacing:1px;}
+#quiz-submit-btn{background:#6a2a08;border:1px solid #cc6622;color:#ffcc88;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:14px;padding:12px 28px;border-radius:6px;cursor:pointer;letter-spacing:1px;}
 #quiz-submit-btn:hover{background:#5a2000;}
 #quiz-submit-btn:disabled{opacity:.3;cursor:default;}
 #quiz-result{display:none;padding:0 22px 18px;border-top:1px solid #2a1000;margin-top:4px;}
@@ -63,7 +63,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 #result-badge.ng{background:#2a0808;border:1px solid #9a3030;color:#fca5a5;}
 #result-exp{font-size:11px;color:#f97316;margin-bottom:8px;}
 #result-explanation{font-size:11px;color:#776655;line-height:1.65;word-break:keep-all;}
-#result-next-btn{margin-top:12px;background:transparent;border:1px solid #5a3a1a;color:#cc8855;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:14px;padding:12px 24px;border-radius:6px;cursor:pointer;}
+#result-next-btn{margin-top:12px;background:transparent;border:1px solid #5a3a1a;color:#cc8855;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:14px;padding:12px 24px;border-radius:6px;cursor:pointer;}
 #result-next-btn:hover{background:#2a1000;color:#fff;}
 #levelup-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#1a0800,#2a1500);border:2px solid #ff8800;border-radius:8px;padding:20px 40px;text-align:center;z-index:1001;box-shadow:0 0 40px #ff880066;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;pointer-events:none;}
 #levelup-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
@@ -75,7 +75,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 @keyframes expFloat{0%{transform:translateY(0);opacity:1;}100%{transform:translateY(-60px);opacity:0;}}
 #controls-hint{display:none;}
 #controls-hint span{color:#777;}
-#quest-log-btn{position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.6);border:1px solid #4a2a00;color:#886a49;font-size:9px;padding:4px 8px;border-radius:3px;cursor:pointer;letter-spacing:1px;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;}
+#quest-log-btn{position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.6);border:1px solid #4a2a00;color:#886a49;font-size:9px;padding:4px 8px;border-radius:3px;cursor:pointer;letter-spacing:1px;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;}
 #quest-log-btn:hover{border-color:#f97316;color:#fb923c;}
 /* 연료 HUD */
 /* 스테이지 클리어 오버레이 */
@@ -134,7 +134,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 #bgm-toggle.off{color:#555;border-color:#333;}
 #inv-modal{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.72);z-index:400;align-items:center;justify-content:center;}
 #inv-modal.open{display:flex;}
-#inv-modal-inner{background:linear-gradient(160deg,#1a1208,#0d0a05);border:2px solid #604020;border-radius:8px;width:clamp(320px,55vw,620px);max-height:80vh;display:flex;flex-direction:column;overflow:hidden;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;}
+#inv-modal-inner{background:linear-gradient(160deg,#1a1208,#0d0a05);border:2px solid #604020;border-radius:8px;width:clamp(320px,55vw,620px);max-height:80vh;display:flex;flex-direction:column;overflow:hidden;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;}
 #inv-modal-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #3a2510;color:#cc9944;font-size:clamp(12px,1.4vw,17px);letter-spacing:2px;flex-shrink:0;}
 #inv-close{cursor:pointer;color:#554433;font-size:clamp(14px,1.6vw,20px);line-height:1;background:none;border:none;padding:0;font-family:inherit;}
 #inv-close:hover{color:#cc9944;}
@@ -873,7 +873,7 @@ function showLvUp(){
 }
 function spawnFloat(txt,col,x,y){
   const el=document.createElement('div');el.textContent=txt;
-  el.style.cssText=`position:absolute;left:${x}px;top:${y}px;color:${col};font-size:13px;font-family:'Nanum Gothic Coding','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-weight:bold;pointer-events:none;z-index:30;animation:expFloat 1.2s forwards;`;
+  el.style.cssText=`position:absolute;left:${x}px;top:${y}px;color:${col};font-size:13px;font-family:'Gothic A1','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-weight:bold;pointer-events:none;z-index:30;animation:expFloat 1.2s forwards;`;
   document.getElementById('game-wrapper').appendChild(el);setTimeout(()=>el.remove(),1200);
 }
 
@@ -1147,7 +1147,7 @@ function drawBubbleNPC(npc,sx,sy){
   drawNPCSprite(s/2,s-8, npc.color, '#554433', '#f5c49a', {pants:'#3a3040'});
   ctx.restore();
   // 말풍선
-  const FONT='12px '+'"Nanum Gothic Coding","Malgun Gothic","Apple SD Gothic Neo",sans-serif';
+  const FONT='12px '+'"Gothic A1","Malgun Gothic","Apple SD Gothic Neo",sans-serif';
   ctx.font=FONT;
   const lines=npc.bubble.split('\n');
   const lineH=18, pad=10;
@@ -1488,7 +1488,7 @@ function drawPlayerOnCar(ctx,bx,by,PAL,f,fr){
   ctx.fillStyle='#94a3b8';
   ctx.beginPath();ctx.arc(bx-14,cy2+12,3,0,Math.PI*2);ctx.fill();
   ctx.beginPath();ctx.arc(bx+14,cy2+12,3,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#ffffff';ctx.font='bold 10px "Nanum Gothic Coding","Malgun Gothic",sans-serif';ctx.textAlign='center';
+  ctx.fillStyle='#ffffff';ctx.font='bold 10px "Gothic A1","Malgun Gothic",sans-serif';ctx.textAlign='center';
   ctx.fillText('H₂',bx,cy2+4);
   if(fr===1||fr===3){
     const pulse=(Math.sin(Date.now()/150)+1)/2;
@@ -1586,7 +1586,7 @@ function gameLoop(){
   drawPlayer(player.tx*TS+player.px-cx, player.ty*TS+player.py-cy);
 
   // 이름표
-  ctx.font='bold 12px "Nanum Gothic Coding","Malgun Gothic",sans-serif';ctx.textAlign='center';
+  ctx.font='bold 12px "Gothic A1","Malgun Gothic",sans-serif';ctx.textAlign='center';
   for(const n of NPCS){
     if(n.isGuard&&gameState.gateCleared)continue;
     const sx=n.tx*TS-cx+TS/2,sy=n.ty*TS-cy-6;
@@ -1598,7 +1598,7 @@ function gameLoop(){
       ctx.fillText(n.name,sx,sy);
       if(met&&!n.isGuard){
         ctx.fillStyle='#86efac';ctx.font='8px serif';ctx.fillText('✓',sx+ctx.measureText(n.name).width/2+8,sy);
-        ctx.font='bold 12px "Nanum Gothic Coding","Malgun Gothic",sans-serif';
+        ctx.font='bold 12px "Gothic A1","Malgun Gothic",sans-serif';
       }
     }
   }
@@ -1615,7 +1615,7 @@ function gameLoop(){
       ctx.textAlign='center';
       ctx.fillStyle='rgba(0,0,0,.6)';const ptw=ctx.measureText('🌀 포털').width;ctx.fillRect(sx-ptw/2-5,sy-13,ptw+10,15);
       ctx.fillStyle=gameState.stageComplete?'#fed7aa':'#6a5a4a';
-      ctx.font='bold 12px "Nanum Gothic Coding","Malgun Gothic",sans-serif';ctx.fillText('🌀 포털',sx,sy);
+      ctx.font='bold 12px "Gothic A1","Malgun Gothic",sans-serif';ctx.fillText('🌀 포털',sx,sy);
     }
   }
 
