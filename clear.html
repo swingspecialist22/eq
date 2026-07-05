@@ -158,6 +158,77 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh;font-family:"Do Hy
   50%{transform:scale(1.5) rotate(180deg);opacity:1;}
   100%{transform:scale(0.5) rotate(360deg) translateY(-60px);opacity:0;}
 }
+
+/* ── 후기 버튼 */
+#btn-review{
+  background:transparent;
+  border-color:#ffd700;
+  color:#ffd700;
+}
+#btn-review:hover,#btn-review:active{background:rgba(255,215,0,0.15);}
+#btn-review.done{border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.5);}
+
+/* ── 후기 모달 */
+#review-modal{
+  position:fixed;inset:0;z-index:200;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.78);
+  padding:16px;
+  -webkit-tap-highlight-color:transparent;
+}
+#review-modal.show{display:flex;}
+#review-card{
+  width:min(440px,94vw);
+  max-height:88vh;overflow-y:auto;
+  touch-action:pan-y;
+  background:#0d1117;
+  border:2px solid #ffd700;
+  border-radius:6px;
+  padding:20px clamp(16px,4vw,24px);
+  box-shadow:0 0 40px rgba(255,215,0,0.25);
+}
+#review-card h2{
+  font-size:clamp(16px,4vw,20px);
+  color:#ffd700;text-align:center;letter-spacing:2px;margin-bottom:4px;
+}
+#review-card .sub{font-size:11px;color:#888;text-align:center;margin-bottom:18px;}
+.rv-field{margin-bottom:16px;}
+.rv-label{display:block;font-size:13px;color:#ddd;margin-bottom:7px;letter-spacing:1px;}
+.rv-label .req{color:#ff6b6b;font-size:12px;margin-left:3px;}
+.rv-field select,.rv-field textarea{
+  width:100%;
+  font-family:"Do Hyeon","Malgun Gothic",sans-serif;
+  font-size:13px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.2);
+  border-radius:4px;color:#fff;padding:10px 12px;
+}
+.rv-field select{height:44px;}
+.rv-field select:focus,.rv-field textarea:focus{outline:none;border-color:#ffd700;}
+.rv-field textarea{resize:vertical;min-height:52px;line-height:1.6;touch-action:auto;}
+.rv-field option{background:#0d1117;color:#fff;}
+#rv-stars{display:flex;gap:6px;font-size:30px;line-height:1;user-select:none;}
+#rv-stars span{color:rgba(255,255,255,0.22);cursor:pointer;transition:transform 0.1s;}
+#rv-stars span.on{color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,0.7);}
+#rv-stars span:active{transform:scale(1.25);}
+.rv-actions{display:flex;gap:10px;margin-top:6px;}
+.rv-btn{
+  flex:1;
+  font-family:"Do Hyeon","Malgun Gothic",sans-serif;
+  font-size:13px;letter-spacing:2px;
+  padding:13px;border-radius:4px;cursor:pointer;
+  border:2px solid;min-height:48px;transition:all 0.15s;
+  -webkit-tap-highlight-color:transparent;
+}
+#rv-send{background:#ffd700;border-color:#ffd700;color:#1a1a1a;font-weight:bold;}
+#rv-send:disabled{opacity:0.4;cursor:not-allowed;}
+#rv-send:not(:disabled):active{background:#ffe44d;}
+#rv-close,#rv-thanks-close{background:transparent;border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);}
+#rv-close:active,#rv-thanks-close:active{background:rgba(255,255,255,0.1);}
+#rv-thanks{display:none;text-align:center;padding:14px 0 4px;}
+#rv-thanks.show{display:block;}
+#rv-thanks .big{font-size:46px;margin-bottom:12px;}
+#rv-thanks p{color:#ddd;font-size:14px;line-height:1.9;margin-bottom:6px;}
 </style>
 </head>
 <body>
@@ -191,8 +262,80 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh;font-family:"Do Hy
     </div>
   </div>
   <div id="btn-wrap">
-    <button class="action-btn" id="btn-title" onclick="goTitle()">[ 타이틀로 ]</button>
+    <button class="action-btn" id="btn-review" onclick="openReview()">[ 후기 남기기 ]</button>
     <button class="action-btn" id="btn-replay" onclick="goReplay()">[ 다시 도전 ]</button>
+    <button class="action-btn" id="btn-title" onclick="goTitle()">[ 타이틀로 ]</button>
+  </div>
+</div>
+
+<!-- ── 후기 모달 ── -->
+<div id="review-modal">
+  <div id="review-card">
+    <div id="rv-form-wrap">
+      <h2>✍️ 후기 남기기</h2>
+      <div class="sub">에너지 퀘스트를 깬 소감을 들려주세요!</div>
+
+      <div class="rv-field">
+        <label class="rv-label" for="rv-grade">몇 학년이세요?<span class="req">*</span></label>
+        <select id="rv-grade">
+          <option value="" disabled selected>선택하세요</option>
+          <option>중학교 1학년</option>
+          <option>중학교 2학년</option>
+          <option>중학교 3학년</option>
+          <option>고등학교 1학년</option>
+          <option>고등학교 2학년</option>
+          <option>고등학교 3학년</option>
+        </select>
+      </div>
+
+      <div class="rv-field">
+        <label class="rv-label">게임이 재미있었나요?<span class="req">*</span></label>
+        <div id="rv-stars">
+          <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+        </div>
+      </div>
+
+      <div class="rv-field">
+        <label class="rv-label" for="rv-stage">가장 기억에 남는 스테이지는?<span class="req">*</span></label>
+        <select id="rv-stage">
+          <option value="" disabled selected>선택하세요</option>
+          <option>1스테이지(태양광마을)</option>
+          <option>2스테이지(바람의 항구(풍력))</option>
+          <option>3스테이지(에너지 하베스팅 도시)</option>
+          <option>4스테이지(에너지 저장소(배터리, 수소))</option>
+          <option>5스테이지(스마트 그리드)</option>
+          <option>6스테이지(블랙하트 보스전)</option>
+        </select>
+      </div>
+
+      <div class="rv-field">
+        <label class="rv-label" for="rv-learn">이 게임으로 새로 알게 된 에너지 이야기는?</label>
+        <textarea id="rv-learn" rows="2" maxlength="500" placeholder="예: 하베스팅으로도 전기를 만들 수 있다는 걸 알았어요!"></textarea>
+      </div>
+
+      <div class="rv-field">
+        <label class="rv-label" for="rv-msg">다음에 할 친구에게 한마디!</label>
+        <textarea id="rv-msg" rows="2" maxlength="500" placeholder="응원 한마디를 남겨보세요"></textarea>
+      </div>
+
+      <div class="rv-field">
+        <label class="rv-label" for="rv-more">더 바라는 점 / 어려웠던 점</label>
+        <textarea id="rv-more" rows="2" maxlength="500" placeholder="자유롭게 적어주세요"></textarea>
+      </div>
+
+      <div class="rv-actions">
+        <button class="rv-btn" id="rv-close" onclick="closeReview()">닫기</button>
+        <button class="rv-btn" id="rv-send" onclick="sendReview()" disabled>보내기</button>
+      </div>
+    </div>
+
+    <div id="rv-thanks">
+      <div class="big">🎉</div>
+      <p id="rv-thanks-msg">후기 고마워요!<br>여러분의 한마디가 큰 힘이 됩니다.</p>
+      <div class="rv-actions" style="margin-top:16px;">
+        <button class="rv-btn" id="rv-thanks-close" onclick="closeReview()">닫기</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -283,6 +426,69 @@ function goReplay(){
 }
 document.getElementById('btn-title').addEventListener('touchend',function(e){e.preventDefault();goTitle();},{passive:false});
 document.getElementById('btn-replay').addEventListener('touchend',function(e){e.preventDefault();goReplay();},{passive:false});
+
+// ══════════════════════════════════════
+//  후기 남기기 (구글 폼으로 전송)
+// ══════════════════════════════════════
+const RV_ACTION='https://docs.google.com/forms/d/e/1FAIpQLSf_te9U5hXyk1komBwMY0x94KV__7xOBR3CLRF6VFK8l7A8ig/formResponse';
+const RV_ENTRY={grade:'entry.1889307555',star:'entry.17890046',stage:'entry.255427643',learn:'entry.876340983',msg:'entry.297551879',more:'entry.1282810332'};
+
+let rvStar=0;
+const $rvStars=document.getElementById('rv-stars');
+$rvStars.querySelectorAll('span').forEach(function(s){
+  function pick(){ rvStar=parseInt(s.dataset.v); paintStars(); checkReady(); }
+  s.addEventListener('click',pick);
+  s.addEventListener('touchend',function(e){e.preventDefault();pick();},{passive:false});
+});
+function paintStars(){
+  $rvStars.querySelectorAll('span').forEach(function(s){
+    s.classList.toggle('on', parseInt(s.dataset.v)<=rvStar);
+  });
+}
+function checkReady(){
+  var ok=document.getElementById('rv-grade').value && rvStar>0 && document.getElementById('rv-stage').value;
+  document.getElementById('rv-send').disabled=!ok;
+}
+document.getElementById('rv-grade').addEventListener('change',checkReady);
+document.getElementById('rv-stage').addEventListener('change',checkReady);
+
+function openReview(){
+  if(localStorage.getItem('eq_review_sent')) showThanks(true);
+  document.getElementById('review-modal').classList.add('show');
+}
+function closeReview(){
+  document.getElementById('review-modal').classList.remove('show');
+}
+function showThanks(already){
+  document.getElementById('rv-form-wrap').style.display='none';
+  document.getElementById('rv-thanks').classList.add('show');
+  if(already) document.getElementById('rv-thanks-msg').innerHTML='이미 후기를 남겼어요.<br>고마워요! 😊';
+}
+function sendReview(){
+  var btn=document.getElementById('rv-send');
+  if(btn.disabled) return;
+  btn.disabled=true; btn.textContent='보내는 중…';
+  var fd=new FormData();
+  fd.append(RV_ENTRY.grade, document.getElementById('rv-grade').value);
+  fd.append(RV_ENTRY.star, '★★★★★'.slice(0,rvStar));
+  fd.append(RV_ENTRY.stage, document.getElementById('rv-stage').value);
+  var learn=document.getElementById('rv-learn').value.trim();
+  var msg=document.getElementById('rv-msg').value.trim();
+  var more=document.getElementById('rv-more').value.trim();
+  if(learn) fd.append(RV_ENTRY.learn, learn);
+  if(msg)   fd.append(RV_ENTRY.msg, msg);
+  if(more)  fd.append(RV_ENTRY.more, more);
+  function done(){ localStorage.setItem('eq_review_sent','1'); showThanks(false); }
+  fetch(RV_ACTION,{method:'POST',mode:'no-cors',body:fd}).then(done).catch(done);
+}
+document.getElementById('btn-review').addEventListener('touchend',function(e){e.preventDefault();openReview();},{passive:false});
+document.getElementById('rv-send').addEventListener('touchend',function(e){e.preventDefault();sendReview();},{passive:false});
+document.getElementById('rv-close').addEventListener('touchend',function(e){e.preventDefault();closeReview();},{passive:false});
+document.getElementById('rv-thanks-close').addEventListener('touchend',function(e){e.preventDefault();closeReview();},{passive:false});
+if(localStorage.getItem('eq_review_sent')){
+  var _b=document.getElementById('btn-review');
+  _b.textContent='[ 후기 완료 ✓ ]'; _b.classList.add('done');
+}
 </script>
 </body>
 </html>
