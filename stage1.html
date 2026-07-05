@@ -11,7 +11,7 @@
 body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none;}
 #game-title{display:none;}
 #game-wrapper{position:fixed;top:0;left:0;width:100dvw;height:100dvh;background:#000;overflow:hidden;}
-#game-canvas{display:block;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+#game-canvas{display:block;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:16px;box-shadow:0 28px 80px rgba(0,0,0,.6),0 6px 24px rgba(0,0,0,.45),0 0 0 1px rgba(255,190,110,.16);}
 
 /* ── HUD ── */
 #hud{position:absolute;top:0;left:0;right:0;padding:8px 12px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;}
@@ -974,6 +974,377 @@ const RS=(window.devicePixelRatio&&window.devicePixelRatio>1)?3:2; canvas.width=
 ctx.imageSmoothingEnabled=false;
 
 // ═══════════════════════════════════════════════════════════
+// 지형 프리렌더 — 골든아워 사막 (bg_stage1 톤 매칭)
+// 정적 지형을 오프스크린에 "한 번만" 고품질로 그려두고 매 프레임 blit
+// → 매 프레임 300타일 fillRect 하던 것보다 예쁘고 빠름
+// ═══════════════════════════════════════════════════════════
+function h2(x,y){const v=Math.sin(x*127.1+y*311.7)*43758.5453;return v-Math.floor(v);}
+const ground=document.createElement('canvas');
+ground.width=MAP_W*TS*RS; ground.height=MAP_H*TS*RS;
+const gx=ground.getContext('2d');
+gx.scale(RS,RS); gx.imageSmoothingEnabled=true;
+
+function gRR(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function gShadow(sx,sy,rx,ry){
+  const s=gx.createRadialGradient(sx,sy,1,sx,sy,rx);
+  s.addColorStop(0,'rgba(58,32,8,0.34)');s.addColorStop(1,'rgba(58,32,8,0)');
+  gx.save();gx.translate(sx,sy);gx.scale(1,ry/rx);gx.translate(-sx,-sy);
+  gx.fillStyle=s;gx.beginPath();gx.arc(sx,sy,rx,0,6.283);gx.fill();gx.restore();
+}
+const atMap=(c,r)=>(c<0||r<0||c>=MAP_W||r>=MAP_H)?T.CACTUS:MAP[r*MAP_W+c];
+
+// ── 길: 모래와 자연스럽게 녹아드는 밝은 통행로
+function gPath(x,y,c,r){
+  const P=T.PATH;
+  const pg=gx.createLinearGradient(x,y,x,y+TS);
+  pg.addColorStop(0,'#efcd7e');pg.addColorStop(1,'#dcb15e');
+  gx.fillStyle=pg;gRR(gx,x+3,y+3,TS-6,TS-6,14);gx.fill();
+  gx.fillStyle='#e6c06e';
+  if(atMap(c+1,r)===P)gx.fillRect(x+TS-14,y+6,14,TS-12);
+  if(atMap(c-1,r)===P)gx.fillRect(x,y+6,14,TS-12);
+  if(atMap(c,r+1)===P)gx.fillRect(x+6,y+TS-14,TS-12,14);
+  if(atMap(c,r-1)===P)gx.fillRect(x+6,y,TS-12,14);
+  // 가장자리 스캘럽(모래로 번짐)
+  gx.fillStyle='#e9c473';
+  for(let i=0;i<7;i++){
+    const a=h2(c*31+i,r*17)*6.283, rr=4+h2(c,r+i)*5;
+    gx.beginPath();gx.arc(x+TS/2+Math.cos(a)*(TS/2-4),y+TS/2+Math.sin(a)*(TS/2-4),rr,0,6.283);gx.fill();
+  }
+  // 자갈
+  for(let i=0;i<4;i++){
+    const px2=x+8+h2(c+i*7,r*13+i)*(TS-16), py=y+8+h2(c*5+i,r+i*11)*(TS-16);
+    gx.fillStyle=`rgba(150,105,50,${0.4+h2(i,c+r)*0.3})`;
+    gx.beginPath();gx.ellipse(px2,py,2.4,1.7,h2(i,c)*3,0,6.283);gx.fill();
+  }
+}
+// ── 오아시스: 젖은 모래 링 + 깊이감 있는 물
+function gOasis(x,y,c,r){
+  const O=T.OASIS;
+  gx.fillStyle='#9a6c2e';gx.fillRect(x,y,TS,TS);
+  gx.fillStyle='rgba(120,85,40,0.6)';gx.fillRect(x+2,y+2,TS-4,TS-4);
+  const n={l:atMap(c-1,r)===O,r:atMap(c+1,r)===O,u:atMap(c,r-1)===O,d:atMap(c,r+1)===O};
+  const m=5;
+  const wx=x+(n.l?0:m), wy=y+(n.u?0:m);
+  const ww=TS-(n.l?0:m)-(n.r?0:m), wh=TS-(n.u?0:m)-(n.d?0:m);
+  // 바깥 모서리만 둥글게(연결된 면은 각지게 → 이음새 없이 한 덩어리 수면)
+  const rad=10;
+  const rtl=(!n.l&&!n.u)?rad:0, rtr=(!n.r&&!n.u)?rad:0, rbr=(!n.r&&!n.d)?rad:0, rbl=(!n.l&&!n.d)?rad:0;
+  function waterPath(){
+    gx.beginPath();
+    gx.moveTo(wx+rtl,wy);
+    gx.lineTo(wx+ww-rtr,wy); gx.arcTo(wx+ww,wy,wx+ww,wy+rtr,rtr);
+    gx.lineTo(wx+ww,wy+wh-rbr); gx.arcTo(wx+ww,wy+wh,wx+ww-rbr,wy+wh,rbr);
+    gx.lineTo(wx+rbl,wy+wh); gx.arcTo(wx,wy+wh,wx,wy+wh-rbl,rbl);
+    gx.lineTo(wx,wy+rtl); gx.arcTo(wx,wy,wx+rtl,wy,rtl);
+    gx.closePath();
+  }
+  const wg=gx.createLinearGradient(x,y,x,y+TS);
+  wg.addColorStop(0,'#3aa8cf');wg.addColorStop(.5,'#1f83b4');wg.addColorStop(1,'#14618f');
+  gx.fillStyle=wg;waterPath();gx.fill();
+  gx.save();waterPath();gx.clip();
+  const dg=gx.createRadialGradient(x+TS/2,y+TS/2,4,x+TS/2,y+TS/2,TS*0.7);
+  dg.addColorStop(0,'rgba(10,60,100,0.32)');dg.addColorStop(1,'rgba(10,60,100,0)');
+  gx.fillStyle=dg;gx.fillRect(x,y,TS,TS);
+  const rg=gx.createLinearGradient(x,y,x+TS,y);   // 노을 반사
+  rg.addColorStop(0,'rgba(255,170,90,0.15)');rg.addColorStop(1,'rgba(255,170,90,0)');
+  gx.fillStyle=rg;gx.fillRect(x,y,TS,TS);
+  gx.restore();
+  if(!n.u){gx.strokeStyle='rgba(220,245,255,0.5)';gx.lineWidth=1.6;
+    gx.beginPath();gx.moveTo(wx+5,wy+1.5);gx.lineTo(wx+ww-5,wy+1.5);gx.stroke();}
+}
+// ── 벽: 사암 벽돌
+function gWall(x,y,c,r){
+  gx.fillStyle='#8f6226';gx.fillRect(x,y,TS,TS);
+  const rows=3,bh=TS/rows;
+  for(let i=0;i<rows;i++){
+    const off=((r*rows+i)%2)*(TS/4);
+    for(let j=-1;j<3;j++){
+      const bx2=x+j*(TS/2)+off+1, by2=y+i*bh+1, bw=TS/2-2;
+      const cx2=Math.max(x,bx2), cw=Math.min(x+TS,bx2+bw)-cx2;
+      if(cw<=0)continue;
+      const tone=0.9+h2(c*13+j,r*7+i)*0.2;
+      gx.fillStyle=`rgb(${Math.round(190*tone)},${Math.round(148*tone)},${Math.round(88*tone)})`;
+      gRR(gx,cx2,by2,cw,bh-2,3);gx.fill();
+      gx.fillStyle='rgba(255,225,160,0.26)';gx.fillRect(cx2+2,by2+1.5,Math.max(0,cw-4),2);
+      gx.fillStyle='rgba(70,40,12,0.30)';gx.fillRect(cx2+2,by2+bh-5,Math.max(0,cw-4),2);
+    }
+  }
+  if(h2(c,r)>0.55){
+    gx.strokeStyle='rgba(70,42,14,0.5)';gx.lineWidth=1.2;
+    let px2=x+8+h2(c*3,r)*40, py=y+4;
+    gx.beginPath();gx.moveTo(px2,py);
+    for(let k=0;k<4;k++){px2+=(h2(c+k,r*k+1)-0.5)*14;py+=13;gx.lineTo(px2,py);}
+    gx.stroke();
+  }
+  const wg2=gx.createLinearGradient(x,y,x+TS,y+TS);
+  wg2.addColorStop(0,'rgba(255,205,120,0.12)');wg2.addColorStop(1,'rgba(40,20,60,0.12)');
+  gx.fillStyle=wg2;gx.fillRect(x,y,TS,TS);
+}
+// ── DEC 금속 바닥
+function gDec(x,y,c,r){
+  gx.fillStyle='#141020';gx.fillRect(x,y,TS,TS);
+  for(let i=0;i<2;i++)for(let j=0;j<2;j++){
+    const px2=x+2+j*(TS/2), py=y+2+i*(TS/2), pw=TS/2-4;
+    gx.fillStyle=(i+j)%2?'#1a1528':'#1f1930';
+    gRR(gx,px2,py,pw,pw,4);gx.fill();
+    gx.strokeStyle='rgba(90,80,140,0.25)';gx.lineWidth=1;gRR(gx,px2,py,pw,pw,4);gx.stroke();
+    gx.fillStyle='#3c3560';
+    gx.fillRect(px2+3,py+3,2,2);gx.fillRect(px2+pw-5,py+3,2,2);
+    gx.fillRect(px2+3,py+pw-5,2,2);gx.fillRect(px2+pw-5,py+pw-5,2,2);
+  }
+  if(h2(c,r)>0.6){
+    gx.save();gx.translate(x+TS/2,y+TS/2);gx.rotate(-0.6);
+    gx.fillStyle='rgba(220,40,40,0.45)';
+    gx.fillRect(-13,-16,6,32);gx.fillRect(7,-16,6,32);
+    gx.restore();
+  }
+  gx.fillStyle='rgba(255,40,60,0.05)';gx.fillRect(x,y,TS,TS);
+}
+// ── 모래 언덕
+function gDune(x,y,c,r){
+  const cx2=x+TS/2, cy2=y+TS*0.62;
+  gShadow(cx2+5,y+TS-8,20,6);
+  const dg=gx.createRadialGradient(cx2-8,cy2-14,4,cx2,cy2,TS*0.55);
+  dg.addColorStop(0,'#f2c579');dg.addColorStop(.6,'#d59d4c');dg.addColorStop(1,'rgba(190,132,58,0)');
+  gx.fillStyle=dg;gx.beginPath();gx.ellipse(cx2,cy2,TS*0.48,TS*0.34,0,0,6.283);gx.fill();
+  gx.strokeStyle='rgba(255,226,160,0.55)';gx.lineWidth=2;
+  gx.beginPath();gx.ellipse(cx2-4,cy2-8,TS*0.3,TS*0.16,-0.25,3.6,5.9);gx.stroke();
+}
+// ── 선인장 (시드 기반 개체 다양화)
+function gCactus(x,y,c,r){
+  const s1=h2(c,r), flip=s1>0.5?1:-1, hgt=TS-18-s1*8;
+  const cx2=x+TS/2+(h2(c*3,r)-0.5)*8, base=y+TS-8;
+  gShadow(cx2+6,base+2,15,5);
+  const bg2=gx.createLinearGradient(cx2-8,0,cx2+8,0);
+  bg2.addColorStop(0,'#4aa452');bg2.addColorStop(.5,'#357f3e');bg2.addColorStop(1,'#265f2e');
+  gx.fillStyle=bg2;
+  gRR(gx,cx2-7,base-hgt,14,hgt,7);gx.fill();
+  const ay=base-hgt*0.55;
+  const armX=flip>0?cx2+6:cx2-16;
+  gRR(gx,armX,ay,10,7,3);gx.fill();
+  const upX=flip>0?cx2+12:cx2-19;
+  gRR(gx,upX,ay-13,7,20,3.5);gx.fill();
+  if(s1>0.72){
+    const armX2=flip>0?cx2-14:cx2+6;
+    gRR(gx,armX2,ay+7,8,6,3);gx.fill();
+    const upX2=flip>0?cx2-17:cx2+9;
+    gRR(gx,upX2,ay-3,6,14,3);gx.fill();
+  }
+  gx.strokeStyle='rgba(18,58,26,0.4)';gx.lineWidth=1.2;
+  for(let k=-1;k<=1;k++){gx.beginPath();gx.moveTo(cx2+k*4,base-hgt+6);gx.lineTo(cx2+k*4,base-4);gx.stroke();}
+  gx.fillStyle='rgba(235,245,210,0.7)';
+  for(let k=0;k<8;k++){
+    const sx2=cx2-6+h2(c+k,r*k+2)*12, sy2=base-hgt+6+h2(c*k+3,r+k)*(hgt-12);
+    gx.fillRect(sx2,sy2,1.4,1.4);
+  }
+  if(s1>0.8){
+    gx.fillStyle='#ff8fae';gx.beginPath();gx.arc(cx2,base-hgt-1,3.4,0,6.283);gx.fill();
+    gx.fillStyle='#ffe08a';gx.beginPath();gx.arc(cx2,base-hgt-1,1.4,0,6.283);gx.fill();
+  }
+  gx.strokeStyle='rgba(255,240,190,0.35)';gx.lineWidth=1.6;
+  gx.beginPath();gx.moveTo(cx2-5,base-hgt+7);gx.lineTo(cx2-5,base-8);gx.stroke();
+}
+// ── 야자수 (굽은 줄기 + 늘어진 잎)
+function gPalm(x,y,c,r){
+  const s1=h2(c,r), lean=(s1-0.5)*10;
+  const bx2=x+TS/2, base=y+TS-6, tx2=bx2+lean, ty2=y+16;
+  gShadow(bx2+8,base+1,18,5.5);
+  gx.strokeStyle='#7a4f26';gx.lineWidth=7;gx.lineCap='round';
+  gx.beginPath();gx.moveTo(bx2-lean*0.4,base);gx.quadraticCurveTo(bx2+lean*0.2,y+TS*0.5,tx2,ty2);gx.stroke();
+  gx.strokeStyle='rgba(255,210,140,0.35)';gx.lineWidth=2.4;
+  gx.beginPath();gx.moveTo(bx2-lean*0.4-1.5,base);gx.quadraticCurveTo(bx2+lean*0.2-1.5,y+TS*0.5,tx2-1.5,ty2);gx.stroke();
+  for(let k=0;k<7;k++){
+    const a=-Math.PI/2+(k-3)*0.42+(h2(c+k,r)-.5)*0.15;
+    const len=20+h2(c,r+k)*7;
+    const ex=tx2+Math.cos(a)*len, ey=ty2+Math.sin(a)*len+8;
+    const mx=tx2+Math.cos(a)*len*0.5, my=ty2+Math.sin(a)*len*0.5-4;
+    gx.strokeStyle=k%2?'#2f8a3a':'#3fa04a';gx.lineWidth=4.4;
+    gx.beginPath();gx.moveTo(tx2,ty2);gx.quadraticCurveTo(mx,my,ex,ey);gx.stroke();
+    gx.strokeStyle=k%2?'#256e2e':'#2f8a3a';gx.lineWidth=1.6;
+    gx.beginPath();gx.moveTo(tx2,ty2);gx.quadraticCurveTo(mx,my+2,ex,ey+1);gx.stroke();
+  }
+  gx.lineCap='butt';
+  gx.fillStyle='#6e4a20';
+  for(let k=0;k<3;k++){gx.beginPath();gx.arc(tx2+(k-1)*5,ty2+6,3,0,6.283);gx.fill();}
+  gx.fillStyle='rgba(255,220,160,0.5)';
+  for(let k=0;k<3;k++){gx.beginPath();gx.arc(tx2+(k-1)*5-0.8,ty2+5.2,1,0,6.283);gx.fill();}
+}
+// ── 텐트 (양지/음지 패널 + 입구 + 깃발)
+function gTent(x,y,c,r){
+  gShadow(x+TS/2+6,y+TS-7,22,6);
+  const ax2=x+TS/2, ay2=y+8;
+  gx.fillStyle='#9c6428';
+  gx.beginPath();gx.moveTo(ax2,ay2);gx.lineTo(x+6,y+TS-8);gx.lineTo(x+TS-6,y+TS-8);gx.closePath();gx.fill();
+  const fg=gx.createLinearGradient(x,y,x+TS,y);
+  fg.addColorStop(0,'#f0bc6a');fg.addColorStop(1,'#cf9040');
+  gx.fillStyle=fg;
+  gx.beginPath();gx.moveTo(ax2,ay2);gx.quadraticCurveTo(x+10,y+TS*0.55,x+8,y+TS-8);gx.lineTo(ax2,y+TS-8);gx.closePath();gx.fill();
+  gx.fillStyle='#dda049';
+  gx.beginPath();gx.moveTo(ax2,ay2);gx.quadraticCurveTo(x+TS-10,y+TS*0.55,x+TS-8,y+TS-8);gx.lineTo(ax2,y+TS-8);gx.closePath();gx.fill();
+  const dg2=gx.createLinearGradient(0,y+TS*0.45,0,y+TS-8);
+  dg2.addColorStop(0,'#2c1706');dg2.addColorStop(1,'#5a3212');
+  gx.fillStyle=dg2;
+  gx.beginPath();gx.moveTo(ax2,y+TS*0.42);gx.lineTo(ax2-9,y+TS-8);gx.lineTo(ax2+9,y+TS-8);gx.closePath();gx.fill();
+  gx.strokeStyle='rgba(255,200,120,0.25)';gx.lineWidth=1.4;
+  gx.beginPath();gx.moveTo(ax2,y+TS*0.5);gx.lineTo(ax2,y+TS-10);gx.stroke();
+  gx.strokeStyle='rgba(120,70,20,0.45)';gx.lineWidth=1.4;
+  gx.beginPath();gx.moveTo(ax2,ay2);gx.lineTo(x+8,y+TS-8);gx.stroke();
+  gx.beginPath();gx.moveTo(ax2,ay2);gx.lineTo(x+TS-8,y+TS-8);gx.stroke();
+  gx.strokeStyle='#6e4318';gx.lineWidth=2;
+  gx.beginPath();gx.moveTo(ax2,ay2);gx.lineTo(ax2,ay2-9);gx.stroke();
+  gx.fillStyle='#e2483c';
+  gx.beginPath();gx.moveTo(ax2,ay2-9);gx.lineTo(ax2+9,ay2-6.5);gx.lineTo(ax2,ay2-4);gx.closePath();gx.fill();
+}
+// ── 표지판
+function gSign(x,y,c,r){
+  gShadow(x+TS/2+4,y+TS-8,13,4.5);
+  const pg2=gx.createLinearGradient(x+TS/2-3,0,x+TS/2+3,0);
+  pg2.addColorStop(0,'#8a5a28');pg2.addColorStop(1,'#5f3a14');
+  gx.fillStyle=pg2;gx.fillRect(x+TS/2-3,y+26,6,TS-34);
+  const bg3=gx.createLinearGradient(0,y+10,0,y+34);
+  bg3.addColorStop(0,'#c98f45');bg3.addColorStop(1,'#a56f2e');
+  gx.fillStyle=bg3;gRR(gx,x+9,y+9,TS-18,26,4);gx.fill();
+  gx.strokeStyle='#6e4315';gx.lineWidth=1.6;gRR(gx,x+9,y+9,TS-18,26,4);gx.stroke();
+  gx.fillStyle='rgba(80,48,14,0.6)';
+  gx.fillRect(x+14,y+15,TS-30,2.4);gx.fillRect(x+14,y+26,TS-36,2.4);
+  gx.fillStyle='#3f2a10';
+  gx.beginPath();gx.arc(x+13,y+13,1.4,0,6.283);gx.fill();
+  gx.beginPath();gx.arc(x+TS-13,y+13,1.4,0,6.283);gx.fill();
+  gx.fillStyle='rgba(255,220,150,0.3)';gx.fillRect(x+11,y+10.5,TS-22,2);
+}
+
+function buildGround(){
+  const MW=MAP_W*TS, MH=MAP_H*TS;
+  // 1) 모래 바탕 — 골든아워 그라데이션
+  let g=gx.createLinearGradient(0,0,0,MH);
+  g.addColorStop(0,'#e0a854');g.addColorStop(.55,'#cf9445');g.addColorStop(1,'#b47c36');
+  gx.fillStyle=g;gx.fillRect(0,0,MW,MH);
+  g=gx.createLinearGradient(0,0,MW,0);
+  g.addColorStop(0,'rgba(255,205,120,0.20)');g.addColorStop(.5,'rgba(255,205,120,0)');g.addColorStop(1,'rgba(90,50,110,0.10)');
+  gx.fillStyle=g;gx.fillRect(0,0,MW,MH);
+  // 2) 큰 명암 굴곡
+  for(let i=0;i<110;i++){
+    const x=h2(i,1)*MW, y=h2(i,2)*MH, rr=50+h2(i,3)*130, lt=h2(i,4)>0.5;
+    const bg=gx.createRadialGradient(x,y,0,x,y,rr);
+    bg.addColorStop(0,lt?'rgba(255,214,140,0.10)':'rgba(122,74,26,0.10)');
+    bg.addColorStop(1,'rgba(0,0,0,0)');
+    gx.fillStyle=bg;gx.beginPath();gx.arc(x,y,rr,0,6.283);gx.fill();
+  }
+  // 3) 사구 물결
+  for(let y=4;y<MH;y+=9){
+    const a=0.05+h2(3,y)*0.06, ph=h2(7,y)*6.283, amp=2+h2(11,y)*2.5;
+    gx.beginPath();
+    for(let x=0;x<=MW;x+=8){const yy=y+Math.sin(x*0.022+ph)*amp;x?gx.lineTo(x,yy):gx.moveTo(x,yy);}
+    gx.strokeStyle=`rgba(112,66,22,${a})`;gx.lineWidth=2;gx.stroke();
+    gx.beginPath();
+    for(let x=0;x<=MW;x+=8){const yy=y-2.2+Math.sin(x*0.022+ph)*amp;x?gx.lineTo(x,yy):gx.moveTo(x,yy);}
+    gx.strokeStyle=`rgba(255,220,150,${a*0.9})`;gx.lineWidth=1.4;gx.stroke();
+  }
+  // 4) 햇빛 글린트
+  for(let i=0;i<160;i++){
+    gx.fillStyle=`rgba(255,240,200,${0.10+h2(i,23)*0.16})`;
+    gx.fillRect(h2(i,21)*MW,h2(i,22)*MH,1.6,1.6);
+  }
+  // 5) 바닥 타일(길 → 수면·벽 → 구조물 순서로 레이어)
+  for(let r=0;r<MAP_H;r++)for(let c=0;c<MAP_W;c++)
+    if(MAP[r*MAP_W+c]===T.PATH)gPath(c*TS,r*TS,c,r);
+  for(let r=0;r<MAP_H;r++)for(let c=0;c<MAP_W;c++){
+    const t=MAP[r*MAP_W+c],x=c*TS,y=r*TS;
+    if(t===T.OASIS)gOasis(x,y,c,r);
+    else if(t===T.WALL)gWall(x,y,c,r);
+    else if(t===T.DEC)gDec(x,y,c,r);
+    else if(t===T.DUNE)gDune(x,y,c,r);
+  }
+  // 6) 구조물 드리운 그림자
+  for(let r=0;r<MAP_H;r++)for(let c=0;c<MAP_W;c++){
+    const t=MAP[r*MAP_W+c];
+    if(t===T.WALL||t===T.DEC||t===T.TENT){
+      const bt=atMap(c,r+1);
+      if(bt===T.SAND||bt===T.PATH){
+        const x=c*TS,y=(r+1)*TS;
+        const sg=gx.createLinearGradient(0,y,0,y+14);
+        sg.addColorStop(0,'rgba(60,32,8,0.30)');sg.addColorStop(1,'rgba(60,32,8,0)');
+        gx.fillStyle=sg;gx.fillRect(x,y,TS,14);
+      }
+    }
+  }
+  // 7) 소품
+  for(let r=0;r<MAP_H;r++)for(let c=0;c<MAP_W;c++){
+    const t=MAP[r*MAP_W+c],x=c*TS,y=r*TS;
+    if(t===T.CACTUS)gCactus(x,y,c,r);
+    else if(t===T.PALM)gPalm(x,y,c,r);
+    else if(t===T.TENT)gTent(x,y,c,r);
+    else if(t===T.SIGN)gSign(x,y,c,r);
+  }
+}
+buildGround();
+
+// 애니메이션 타일 목록(솔라·포털·수면 반짝임만 매 프레임)
+const ANIM_TILES=[];
+for(let r=0;r<MAP_H;r++)for(let c=0;c<MAP_W;c++){
+  const t=MAP[r*MAP_W+c];
+  if(t===T.SOLAR||t===T.PORTAL||t===T.OASIS)ANIM_TILES.push({t,c,r});
+}
+function drawWaterAnim(sx,sy,c,r){
+  const s=TS,t=Date.now()/1000;
+  ctx.save();ctx.beginPath();ctx.rect(sx+4,sy+4,s-8,s-8);ctx.clip();
+  for(let i=0;i<3;i++){
+    const yy=sy+4+((t*9+i*22+c*13+r*31)%(s-8));
+    const wob=Math.sin(t*1.7+i+c)*3;
+    ctx.fillStyle='rgba(190,235,255,0.10)';
+    ctx.fillRect(sx+6+wob,yy,s-12,2);
+  }
+  const sp=Math.sin(t*2.6+c*2.1+r*1.3);
+  if(sp>0.86){
+    const a=(sp-0.86)/0.14;
+    const gxp=sx+10+h2(c,Math.floor(t))*(s-20), gyp=sy+10+h2(r,Math.floor(t*1.3))*(s-20);
+    ctx.fillStyle=`rgba(255,255,240,${a*0.8})`;ctx.fillRect(gxp,gyp,2,2);
+    ctx.fillStyle=`rgba(255,255,240,${a*0.35})`;ctx.fillRect(gxp-3,gyp,8,1);ctx.fillRect(gxp,gyp-3,1,8);
+  }
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════════════════
+// 대기 연출 — 태양 블룸 · 갓레이 · 색보정 · 모래바람
+// ═══════════════════════════════════════════════════════════
+const WIND=[];
+for(let i=0;i<26;i++)WIND.push({x:Math.random()*W,y:Math.random()*H,l:8+Math.random()*10,s:1.5+Math.random()*2.2,a:.06+Math.random()*.10,ph:Math.random()*6.28});
+function drawAtmosphere(){
+  const t=Date.now()/1000;
+  ctx.save();ctx.globalCompositeOperation='screen';
+  // 갓레이 2줄기
+  for(let i=0;i<2;i++){
+    const bx=W*0.18+Math.sin(t*0.11+i*2.4)*W*0.09+i*W*0.34;
+    const grd=ctx.createLinearGradient(bx,0,bx+W*0.16,H);
+    grd.addColorStop(0,'rgba(255,205,120,0.10)');grd.addColorStop(.5,'rgba(255,190,100,0.045)');grd.addColorStop(1,'rgba(255,190,100,0)');
+    ctx.fillStyle=grd;
+    ctx.beginPath();ctx.moveTo(bx,-10);ctx.lineTo(bx+W*0.10,-10);ctx.lineTo(bx+W*0.30,H+10);ctx.lineTo(bx+W*0.13,H+10);ctx.closePath();ctx.fill();
+  }
+  // 태양 블룸(좌상단)
+  const sb=ctx.createRadialGradient(W*0.14,-30,10,W*0.14,-30,W*0.55);
+  sb.addColorStop(0,'rgba(255,214,130,0.30)');sb.addColorStop(1,'rgba(255,214,130,0)');
+  ctx.fillStyle=sb;ctx.fillRect(0,0,W,H);
+  ctx.restore();
+  // 웜/쿨 색보정
+  ctx.save();ctx.globalCompositeOperation='overlay';
+  const gr=ctx.createLinearGradient(0,0,W,H);
+  gr.addColorStop(0,'rgba(255,170,80,0.20)');gr.addColorStop(.55,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(60,40,110,0.16)');
+  ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+  ctx.restore();
+  // 가장자리 비네트
+  const vg=ctx.createRadialGradient(W/2,H*0.46,H*0.35,W/2,H*0.5,H*0.85);
+  vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(20,8,0,0.22)');
+  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+  // 모래바람
+  for(const p of WIND){
+    p.x+=p.s;p.y+=Math.sin(t*2+p.ph)*0.3;
+    if(p.x>W+20){p.x=-20;p.y=Math.random()*H;}
+    ctx.strokeStyle=`rgba(255,232,190,${p.a})`;ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-p.l,p.y+2);ctx.stroke();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
 // 타일 드로잉 (사막 테마)
 // ═══════════════════════════════════════════════════════════
 // 캐릭터 일러스트(빌보드)는 공용 모듈 eq-char.js 로 분리됨 (window.EQChar)
@@ -1044,6 +1415,12 @@ function drawTile(type,sx,sy){
         ctx.beginPath();ctx.moveTo(30,36);ctx.lineTo(44,52);ctx.stroke();
         // 먼지/녹 오버레이
         ctx.fillStyle='rgba(50,35,10,0.12)';ctx.fillRect(0,0,s,s);
+        // 유리 사선 광택 + 금속 프레임 (죽어있어도 '패널'로 보이게)
+        const shg=ctx.createLinearGradient(0,0,s,s);
+        shg.addColorStop(0,'rgba(130,150,210,0.13)');shg.addColorStop(.45,'rgba(130,150,210,0)');
+        ctx.fillStyle=shg;ctx.fillRect(3,3,s-6,s-6);
+        ctx.strokeStyle='#2e2e44';ctx.lineWidth=2;ctx.strokeRect(2,2,s-4,s-4);
+        ctx.strokeStyle='rgba(120,130,170,0.35)';ctx.lineWidth=1;ctx.strokeRect(3.5,3.5,s-7,s-7);
       } else {
         // ── 복구 후: 반짝이는 청색 패널
         const pulse=Math.sin(_t/600)*0.5+0.5;
@@ -1100,7 +1477,7 @@ function drawTile(type,sx,sy){
       } else {
         g.addColorStop(0,'#aaaacc');g.addColorStop(0.4,'rgba(100,100,200,0.4)');g.addColorStop(1,'rgba(50,50,150,0)');
       }
-      ctx.fillStyle='#c8903a';ctx.fillRect(0,0,s,s);
+      // (바닥은 프리렌더 지형이 담당 — 글로우만 얹음)
       ctx.fillStyle=g;ctx.beginPath();ctx.arc(s/2,s/2,22+Math.sin(Date.now()/500)*3,0,Math.PI*2);ctx.fill();
       ctx.fillStyle=gameState.stageComplete?'#fff':'#8888cc';
       const t2=(Date.now()/500)%1;
@@ -1563,7 +1940,8 @@ function drawNPC(npc,sx,sy){
 // ═══════════════════════════════════════════════════════════
 function drawBubbleNPC(npc,sx,sy){
   const s=TS; ctx.save(); ctx.translate(sx,sy);
-  drawNPCSprite(s/2,s-8, npc.color, '#554433', '#f5c49a', {pants:'#3a3040'});
+  if(!(window.EQChar&&EQChar.drawVillager&&EQChar.drawVillager(ctx,(npc.tx*31+npc.ty*17)|0,s/2,s-8,TS,npc.color)))
+    drawNPCSprite(s/2,s-8, npc.color, '#554433', '#f5c49a', {pants:'#3a3040'});
   ctx.restore();
   // 말풍선
   const FONT='12px '+'"Do Hyeon","Malgun Gothic","Apple SD Gothic Neo",sans-serif';
@@ -1646,13 +2024,18 @@ function gameLoop(){
   const{cx,cy}=getCam();
   ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
 
-  const sc=Math.floor(cx/TS), sr=Math.floor(cy/TS);
-  const ec=Math.min(MAP_W,sc+VIEW_COLS+2), er=Math.min(MAP_H,sr+VIEW_ROWS+2);
+  // 지형(프리렌더 blit — 한 번에)
+  ctx.save();ctx.imageSmoothingEnabled=true;
+  ctx.drawImage(ground,cx*RS,cy*RS,W*RS,H*RS,0,0,W,H);
+  ctx.restore();
 
-  // 타일
-  for(let r=sr;r<er;r++)
-    for(let c=sc;c<ec;c++)
-      drawTile(MAP[r*MAP_W+c],c*TS-cx,r*TS-cy);
+  // 애니메이션 타일(솔라 패널·포털·수면)만 매 프레임
+  for(const a of ANIM_TILES){
+    const sx=a.c*TS-cx, sy=a.r*TS-cy;
+    if(sx<-TS||sx>W||sy<-TS||sy>H)continue;
+    if(a.t===T.OASIS)drawWaterAnim(sx,sy,a.c,a.r);
+    else drawTile(a.t,sx,sy);
+  }
 
   // 말풍선 NPC (아이템보다 먼저 그려서 아이템이 위에 표시)
   for(const n of BUBBLE_NPCS){
@@ -1675,6 +2058,9 @@ function gameLoop(){
 
   // 플레이어
   drawPlayer(player.tx*TS+player.px-cx,player.ty*TS+player.py-cy);
+
+  // 대기 연출(골든아워 라이팅)
+  drawAtmosphere();
 
   // NPC 이름 레이블
   ctx.font='bold 12px "Do Hyeon","Malgun Gothic",sans-serif';ctx.textAlign='center';

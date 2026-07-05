@@ -15,8 +15,17 @@
     //    (이미지가 없으면 그냥 살짝 어두운 채로 남음 = 기존과 비슷, 안전)
     var sm = location.pathname.match(/stage(\d)/);
     if(sm){
+      // 이미지가 없어도 스테이지 무드가 나오도록 테마 그라데이션 폴백
+      var FALLBACK={
+        1:"radial-gradient(900px 420px at 20% 12%, rgba(255,190,90,0.30), rgba(0,0,0,0) 60%), linear-gradient(#3a1e08, #241206 55%, #140a04)",
+        2:"radial-gradient(700px 320px at 78% 14%, rgba(255,225,160,0.25), rgba(0,0,0,0) 60%), linear-gradient(#0d2c4a, #14547a 55%, #0a2f4a)",
+        3:"radial-gradient(800px 400px at 50% 100%, rgba(190,120,255,0.16), rgba(0,0,0,0) 65%), linear-gradient(#181030, #221545 60%, #120c26)",
+        4:"radial-gradient(900px 380px at 50% 108%, rgba(255,120,40,0.20), rgba(0,0,0,0) 60%), linear-gradient(#170e08, #241408 60%, #0e0804)",
+        5:"radial-gradient(700px 360px at 50% 30%, rgba(60,200,255,0.10), rgba(0,0,0,0) 60%), linear-gradient(#04101f, #0a1c34 60%, #040c18)",
+        6:"radial-gradient(800px 380px at 50% 0%, rgba(255,50,110,0.14), rgba(0,0,0,0) 60%), linear-gradient(#1c0616, #2a0a20 60%, #120410)"
+      };
       wrap.style.backgroundImage =
-        "linear-gradient(rgba(6,5,14,0.32), rgba(6,5,14,0.5)), url('assets/bg/bg_stage"+sm[1]+".png')";
+        "linear-gradient(rgba(6,5,14,0.10), rgba(6,5,14,0.30)), url('assets/bg/bg_stage"+sm[1]+".png'), "+(FALLBACK[+sm[1]]||"linear-gradient(#000,#000)");
       wrap.style.backgroundSize = 'cover';
       wrap.style.backgroundPosition = 'center';
       wrap.style.backgroundRepeat = 'no-repeat';

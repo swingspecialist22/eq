@@ -11,7 +11,7 @@
 body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none;}
 #game-title{display:none;}
 #game-wrapper{position:fixed;top:0;left:0;width:100dvw;height:100dvh;background:#000;overflow:hidden;}
-#game-canvas{display:block;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+#game-canvas{display:block;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:16px;box-shadow:0 28px 80px rgba(0,0,0,.6),0 6px 24px rgba(0,0,0,.45),0 0 0 1px rgba(255,170,90,.14);}
 #hud{position:absolute;top:0;left:0;right:0;padding:8px 12px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;}
 #hud-left{background:rgba(0,0,0,0.82);border:1px solid #2a1200;border-radius:4px;padding:6px 12px;font-size:11px;line-height:2;}
 #hud-left .name{color:#f97316;font-size:12px;font-weight:bold;}
@@ -253,6 +253,8 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 <script src="eq-audio.js"></script>
 <script src="eq-nav.js"></script>
 <script src="eq-char.js"></script>
+<script src="eq-terrain.js"></script>
+<script src="eq-fx.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════
 // CONSTANTS
@@ -937,6 +939,8 @@ const canvas=document.getElementById('game-canvas');
 const ctx=canvas.getContext('2d');
 const RS=(window.devicePixelRatio&&window.devicePixelRatio>1)?3:2; canvas.width=W*RS; canvas.height=H*RS; ctx.scale(RS,RS);
 ctx.imageSmoothingEnabled=false;
+// 지형 프리렌더(고품질) — eq-terrain.js
+const TERRA=EQTerrain.init({stage:4,MAP,MAP_W,MAP_H,T,TS,RS,W,H});
 
 // ══════════════════════════════════════════════════════════
 // 타일 드로잉
@@ -1000,7 +1004,7 @@ function drawTile(type,sx,sy){
       } else {
         g.addColorStop(0,'#6b5a4a');g.addColorStop(0.4,'rgba(100,70,40,0.4)');g.addColorStop(1,'rgba(50,30,10,0)');
       }
-      ctx.fillStyle='#100a04';ctx.fillRect(0,0,s,s);
+      {const pit=ctx.createRadialGradient(s/2,s/2,4,s/2,s/2,27);pit.addColorStop(0,'rgba(16,10,4,0.78)');pit.addColorStop(1,'rgba(16,10,4,0)');ctx.fillStyle=pit;ctx.fillRect(0,0,s,s);}
       ctx.fillStyle=g;ctx.beginPath();ctx.arc(s/2,s/2,20+Math.sin(Date.now()/500)*3,0,Math.PI*2);ctx.fill();
       ctx.fillStyle=gameState.stageComplete?'#fed7aa':'#7a6a5a';
       const t2=(Date.now()/500)%1;
@@ -1144,7 +1148,8 @@ function drawNPC(npc,sx,sy){
 }
 function drawBubbleNPC(npc,sx,sy){
   const s=TS; ctx.save(); ctx.translate(sx,sy);
-  drawNPCSprite(s/2,s-8, npc.color, '#554433', '#f5c49a', {pants:'#3a3040'});
+  if(!(window.EQChar&&EQChar.drawVillager&&EQChar.drawVillager(ctx,(npc.tx*31+npc.ty*17)|0,s/2,s-8,TS,npc.color)))
+    drawNPCSprite(s/2,s-8, npc.color, '#554433', '#f5c49a', {pants:'#3a3040'});
   ctx.restore();
   // 말풍선
   const FONT='12px '+'"Do Hyeon","Malgun Gothic","Apple SD Gothic Neo",sans-serif';
@@ -1566,7 +1571,16 @@ function gameLoop(){
 
   const sc=Math.floor(cx/TS),sr=Math.floor(cy/TS);
   const ec=Math.min(MAP_W,sc+VIEW_COLS+2),er=Math.min(MAP_H,sr+VIEW_ROWS+2);
-  for(let r=sr;r<er;r++) for(let c=sc;c<ec;c++) drawTile(MAP[r*MAP_W+c],c*TS-cx,r*TS-cy);
+  // 지형(프리렌더 blit) + 애니메이션 타일만 매 프레임
+  ctx.save();ctx.imageSmoothingEnabled=true;
+  ctx.drawImage(TERRA.ground,cx*RS,cy*RS,W*RS,H*RS,0,0,W,H);
+  ctx.restore();
+  for(const a of TERRA.animTiles){
+    const ax=a.c*TS-cx, ay=a.r*TS-cy;
+    if(ax<-TS*2||ax>W+TS||ay<-TS*2||ay>H+TS)continue;
+    drawTile(a.t,ax,ay);
+  }
+  TERRA.drawOverlays(ctx,cx,cy);
 
   // 로봇팔 렌더
   drawRobotArms(cx,cy);
@@ -1584,6 +1598,9 @@ function gameLoop(){
 
   // 플레이어
   drawPlayer(player.tx*TS+player.px-cx, player.ty*TS+player.py-cy);
+
+  // 대기 연출(용광로 열기)
+  TERRA.drawAtmosphere(ctx);
 
   // 이름표
   ctx.font='bold 12px "Do Hyeon","Malgun Gothic",sans-serif';ctx.textAlign='center';

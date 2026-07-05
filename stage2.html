@@ -11,7 +11,7 @@
 body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none;}
 #game-title{display:none;}
 #game-wrapper{position:fixed;top:0;left:0;width:100dvw;height:100dvh;background:#000;overflow:hidden;}
-#game-canvas{display:block;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+#game-canvas{display:block;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:16px;box-shadow:0 28px 80px rgba(0,0,0,.6),0 6px 24px rgba(0,0,0,.45),0 0 0 1px rgba(160,220,255,.14);}
 #hud{position:absolute;top:0;left:0;right:0;padding:8px 12px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;}
 #hud-left{background:rgba(0,0,0,0.78);border:1px solid #1a4a6a;border-radius:4px;padding:6px 12px;font-size:11px;line-height:2;}
 #hud-left .name{color:#44aaff;font-size:12px;font-weight:bold;}
@@ -240,6 +240,8 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 <script src="eq-audio.js"></script>
 <script src="eq-nav.js"></script>
 <script src="eq-char.js"></script>
+<script src="eq-terrain.js"></script>
+<script src="eq-fx.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════
 // CONSTANTS
@@ -778,6 +780,8 @@ const canvas=document.getElementById('game-canvas');
 const ctx=canvas.getContext('2d');
 const RS=(window.devicePixelRatio&&window.devicePixelRatio>1)?3:2; canvas.width=W*RS; canvas.height=H*RS; ctx.scale(RS,RS);
 ctx.imageSmoothingEnabled=false;
+// 지형 프리렌더(고품질) — eq-terrain.js
+const TERRA=EQTerrain.init({stage:2,MAP,MAP_W,MAP_H,T,TS,RS,W,H});
 
 // ═══════════════════════════════════════════════════════════
 // 타일 드로잉 (해안 테마)
@@ -840,7 +844,7 @@ function drawTile(type,sx,sy){
         const g=ctx.createRadialGradient(s/2,s/2,4,s/2,s/2,26);
         if(gameState.stageComplete){g.addColorStop(0,'#ccffff');g.addColorStop(0.4,`rgba(0,200,255,${0.7+0.3*pulse})`);g.addColorStop(1,'rgba(0,100,200,0)');}
         else{g.addColorStop(0,'#aaaacc');g.addColorStop(0.4,'rgba(100,100,200,0.4)');g.addColorStop(1,'rgba(50,50,150,0)');}
-        ctx.fillStyle='#0a2a4a';ctx.fillRect(0,0,s,s);
+        {const pit=ctx.createRadialGradient(s/2,s/2,4,s/2,s/2,27);pit.addColorStop(0,'rgba(6,26,46,0.78)');pit.addColorStop(1,'rgba(6,26,46,0)');ctx.fillStyle=pit;ctx.fillRect(0,0,s,s);}
         ctx.fillStyle=g;ctx.beginPath();ctx.arc(s/2,s/2,20+Math.sin(Date.now()/500)*3,0,Math.PI*2);ctx.fill();
         ctx.fillStyle=gameState.stageComplete?'#fff':'#8888cc';
         const t2=(Date.now()/500)%1;
@@ -860,9 +864,16 @@ function drawTile(type,sx,sy){
       ctx.strokeStyle='#440a0a44';ctx.lineWidth=1;ctx.strokeRect(2,2,s-4,s-4);
       break;}
     case T.TURB:{
-      // 바다 배경
-      ctx.fillStyle='#0a2a4a';ctx.fillRect(0,0,s,s);
-      ctx.fillStyle='rgba(30,80,140,0.4)';ctx.fillRect(0,10,s,8);ctx.fillRect(0,30,s,6);ctx.fillRect(0,46,s,6);
+      // 해상 플랫폼 — 프리렌더된 바다 위에 자연스럽게 얹힘
+      {
+        const wsh=ctx.createRadialGradient(s/2,s/2+12,3,s/2,s/2+12,20);
+        wsh.addColorStop(0,'rgba(8,24,40,0.7)');wsh.addColorStop(1,'rgba(8,24,40,0)');
+        ctx.fillStyle=wsh;ctx.beginPath();ctx.ellipse(s/2,s/2+12,20,12,0,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#31404e';ctx.beginPath();ctx.ellipse(s/2,s/2+10,12,6.5,0,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#4a5c6e';ctx.beginPath();ctx.ellipse(s/2,s/2+8.5,12,6.5,0,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle='rgba(255,255,255,0.45)';ctx.lineWidth=1.6;
+        ctx.beginPath();ctx.ellipse(s/2,s/2+13,15,8,0,0.25,2.9);ctx.stroke();
+      }
       // 타워 기둥
       ctx.fillStyle='#ddeeff';ctx.fillRect(s/2-3,s/2+4,6,s/2-6);
       // 허브
@@ -1330,7 +1341,8 @@ function drawNPC(npc,sx,sy){
 // ═══════════════════════════════════════════════════════════
 function drawBubbleNPC(npc,sx,sy){
   const s=TS; ctx.save(); ctx.translate(sx,sy);
-  drawNPCSprite(s/2,s-8, npc.color, '#554433', '#f5c49a', {pants:'#3a3040'});
+  if(!(window.EQChar&&EQChar.drawVillager&&EQChar.drawVillager(ctx,(npc.tx*31+npc.ty*17)|0,s/2,s-8,TS,npc.color)))
+    drawNPCSprite(s/2,s-8, npc.color, '#554433', '#f5c49a', {pants:'#3a3040'});
   ctx.restore();
   // 말풍선
   const FONT='12px '+'"Do Hyeon","Malgun Gothic","Apple SD Gothic Neo",sans-serif';
@@ -1395,7 +1407,16 @@ function gameLoop(){
   ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
   const sc=Math.floor(cx/TS),sr=Math.floor(cy/TS);
   const ec=Math.min(MAP_W,sc+VIEW_COLS+2),er=Math.min(MAP_H,sr+VIEW_ROWS+2);
-  for(let r=sr;r<er;r++) for(let c=sc;c<ec;c++) drawTile(MAP[r*MAP_W+c],c*TS-cx,r*TS-cy);
+  // 지형(프리렌더 blit) + 애니메이션 타일만 매 프레임
+  ctx.save();ctx.imageSmoothingEnabled=true;
+  ctx.drawImage(TERRA.ground,cx*RS,cy*RS,W*RS,H*RS,0,0,W,H);
+  ctx.restore();
+  for(const a of TERRA.animTiles){
+    const ax=a.c*TS-cx, ay=a.r*TS-cy;
+    if(ax<-TS*2||ax>W+TS||ay<-TS*2||ay>H+TS)continue;
+    drawTile(a.t,ax,ay);
+  }
+  TERRA.drawOverlays(ctx,cx,cy);
   for(const n of BUBBLE_NPCS){const sx=n.tx*TS-cx,sy=n.ty*TS-cy;if(sx>-TS-80&&sx<W&&sy>-TS-80&&sy<H)drawBubbleNPC(n,sx,sy);}
   for(const item of ITEMS){const sx=item.tx*TS-cx,sy=item.ty*TS-cy;if(sx>-TS&&sx<W&&sy>-TS&&sy<H)drawItemGlow(item,sx,sy);}
   for(const n of NPCS){
@@ -1404,6 +1425,9 @@ function gameLoop(){
     if(sx>-TS&&sx<W&&sy>-TS&&sy<H)drawNPC(n,sx,sy);
   }
   drawPlayer(player.tx*TS+player.px-cx,player.ty*TS+player.py-cy);
+
+  // 대기 연출(해풍 라이팅)
+  TERRA.drawAtmosphere(ctx);
 
   ctx.font='bold 12px "Do Hyeon","Malgun Gothic","Apple SD Gothic Neo",sans-serif';ctx.textAlign='center';
   for(const n of NPCS){
