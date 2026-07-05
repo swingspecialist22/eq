@@ -52,7 +52,11 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 .choice-btn.selected .choice-key,.choice-btn:hover .choice-key{background:#041828;border-color:#0ea5e9;color:#fff;}
 .choice-btn.correct .choice-key{background:#042a0a;border-color:#2aaa3a;color:#aff;}
 .choice-btn.wrong .choice-key{background:#2a1010;border-color:#aa3a3a;color:#faa;}
-#quiz-footer{padding:10px 22px 16px;display:flex;justify-content:space-between;align-items:center;}
+#quiz-footer{padding:10px 22px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+#quiz-hintbuy{background:#081420;border:1.5px solid #2a7a9a;color:#7dd8f8;font-family:inherit;font-size:12px;padding:9px 14px;border-radius:8px;cursor:pointer;letter-spacing:1px;transition:background .15s,box-shadow .15s;}
+#quiz-hintbuy:hover:not(:disabled){background:#0a2030;box-shadow:0 0 12px rgba(80,200,255,.3);}
+#quiz-hintbuy:disabled{opacity:.35;cursor:default;}
+.choice-btn.eliminated{opacity:.28;filter:grayscale(.8);pointer-events:none;text-decoration:line-through;}
 #quiz-hint{font-size:10px;color:#334;}
 #quiz-submit-btn{background:#024a6a;border:1px solid #0ea5e9;color:#bae6fd;font-family:'Do Hyeon','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:14px;padding:12px 28px;border-radius:6px;cursor:pointer;letter-spacing:1px;}
 #quiz-submit-btn:hover{background:#035a80;}
@@ -178,6 +182,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
       </div>
       <div id="quiz-footer">
         <div id="quiz-hint">1–4 숫자키 또는 클릭으로 선택 후 ENTER</div>
+        <button id="quiz-hintbuy">💡 오답 지우기 · 5☀</button>
         <button id="quiz-submit-btn" disabled>확인 [ENTER]</button>
       </div>
     </div>
@@ -662,6 +667,7 @@ function launchGateQuestion(idx){
     btn.addEventListener('click',()=>selectChoice(i));$qchoices.appendChild(btn);
   });
   $qresult.style.display='none';$submit.disabled=true;$qo.classList.add('active');
+  refreshHintBtn();
   clearInterval(quizState.timerInterval);quizState.timerVal=30;updateTimer();
   quizState.timerInterval=setInterval(()=>{
     if(quizState.answered)return;
@@ -671,6 +677,7 @@ function launchGateQuestion(idx){
 }
 function updateTimer(){$qtimer.textContent=quizState.timerVal;$qtimer.className=quizState.timerVal<=8?'urgent':'';}
 function selectChoice(idx){
+  {const _bs=document.querySelectorAll('.choice-btn');if(_bs[idx]&&_bs[idx].classList.contains('eliminated'))return;}
   if(quizState.answered)return;
   quizState.selectedIdx=idx;
   document.querySelectorAll('.choice-btn').forEach((b,i)=>b.classList.toggle('selected',i===idx));
@@ -701,6 +708,32 @@ function submitAnswer(timeout=false){
     $rexpl.textContent='💡 '+q.explanation;
   }
 }
+// ── 코인 힌트: 오답 하나 지우기 ──
+const HINT_COST=5;
+const $hintbuy=document.getElementById('quiz-hintbuy');
+function refreshHintBtn(){
+  if(!$hintbuy)return;
+  const q=GATE_QUIZZES[quizState.currentIdx];
+  const btns=[...document.querySelectorAll('.choice-btn')];
+  const wrongLeft=btns.filter((b,i)=>i!==q.answer&&!b.classList.contains('eliminated')).length;
+  $hintbuy.textContent=`💡 오답 지우기 · 5☀ (보유 ${player.coins})`;
+  $hintbuy.disabled=quizState.answered||player.coins<HINT_COST||wrongLeft<=1;
+}
+if($hintbuy)$hintbuy.addEventListener('click',()=>{
+  if(quizState.answered||player.coins<HINT_COST)return;
+  const q=GATE_QUIZZES[quizState.currentIdx];
+  const btns=[...document.querySelectorAll('.choice-btn')];
+  const cand=btns.map((b,i)=>({b,i})).filter(o=>o.i!==q.answer&&!o.b.classList.contains('eliminated'));
+  if(cand.length<=1)return;              // 마지막 오답 하나는 남겨 둠
+  const pick=cand[Math.floor(Math.random()*cand.length)];
+  pick.b.classList.add('eliminated');
+  if(quizState.selectedIdx===pick.i){quizState.selectedIdx=-1;pick.b.classList.remove('selected');$submit.disabled=true;}
+  player.coins-=HINT_COST;
+  try{localStorage.setItem('eq_coins',player.coins);}catch(e){}
+  updateHUD();
+  SFX.play('quiz_answer_npc_talk');
+  refreshHintBtn();
+});
 $submit.addEventListener('click',()=>submitAnswer(false));
 $rnext.addEventListener('click',()=>{
   const q=GATE_QUIZZES[quizState.currentIdx];

@@ -110,38 +110,80 @@
       // 그림자
       ctx.fillStyle='rgba(0,0,0,0.28)';
       ctx.beginPath(); ctx.ellipse(bx,by+2,11*u,4*u,0,0,6.283); ctx.fill();
-      // 다리·신발 (몸통 아래로 보이게)
-      ctx.fillStyle=pants;
-      rr(bx-7*u,  by-10*u,5.6*u,9*u,2.4*u); ctx.fill();
-      rr(bx+1.4*u,by-10*u,5.6*u,9*u,2.4*u); ctx.fill();
-      ctx.fillStyle='#2a2430';
-      rr(bx-8*u,  by-3.5*u,7.2*u,4.5*u,2*u); ctx.fill();
-      rr(bx+0.8*u,by-3.5*u,7.2*u,4.5*u,2*u); ctx.fill();
-      ctx.fillStyle='rgba(255,255,255,0.25)';
-      ctx.fillRect(bx-7*u,by-2.6*u,4.5*u,1.1*u); ctx.fillRect(bx+1.8*u,by-2.6*u,4.5*u,1.1*u);
-      // 몸통(재킷) — 어깨 둥근 슬림 실루엣
-      var tg=ctx.createLinearGradient(bx-9.5*u,0,bx+9.5*u,0);
-      tg.addColorStop(0,jLight); tg.addColorStop(.55,jacket); tg.addColorStop(1,jDark);
-      ctx.fillStyle=tg; rr(bx-9.5*u,by-26*u+bob,19*u,18*u,8*u); ctx.fill();
-      ctx.strokeStyle=OUT; ctx.lineWidth=1.4*u;
-      rr(bx-9.5*u,by-26*u+bob,19*u,18*u,8*u); ctx.stroke();
-      ctx.strokeStyle='rgba(0,0,0,0.18)'; ctx.lineWidth=1.2*u;          // 밑단
-      ctx.beginPath(); ctx.moveTo(bx-8*u,by-11.5*u+bob); ctx.lineTo(bx+8*u,by-11.5*u+bob); ctx.stroke();
-      ctx.strokeStyle='rgba(255,255,255,0.35)'; ctx.lineWidth=1.2*u;    // 지퍼
-      ctx.beginPath(); ctx.moveTo(bx,by-24*u+bob); ctx.lineTo(bx,by-11.5*u+bob); ctx.stroke();
-      ctx.strokeStyle='rgba(0,0,0,0.22)'; ctx.lineWidth=1.1*u;          // 주머니
-      ctx.beginPath(); ctx.moveTo(bx-6.5*u,by-15*u+bob); ctx.lineTo(bx-3.5*u,by-15*u+bob); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(bx+3.5*u,by-15*u+bob); ctx.lineTo(bx+6.5*u,by-15*u+bob); ctx.stroke();
-      ctx.fillStyle=jDark; rr(bx-5*u,by-26.5*u+bob,10*u,3*u,1.5*u); ctx.fill();   // 깃
+      var dress=!!opts.dress;
+      if(!dress){
+        // 다리·신발 (몸통 아래로 보이게)
+        ctx.fillStyle=pants;
+        rr(bx-7*u,  by-10*u,5.6*u,9*u,2.4*u); ctx.fill();
+        rr(bx+1.4*u,by-10*u,5.6*u,9*u,2.4*u); ctx.fill();
+        ctx.fillStyle='#2a2430';
+        rr(bx-8*u,  by-3.5*u,7.2*u,4.5*u,2*u); ctx.fill();
+        rr(bx+0.8*u,by-3.5*u,7.2*u,4.5*u,2*u); ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.25)';
+        ctx.fillRect(bx-7*u,by-2.6*u,4.5*u,1.1*u); ctx.fillRect(bx+1.8*u,by-2.6*u,4.5*u,1.1*u);
+        // 몸통(재킷) — 어깨 둥근 슬림 실루엣
+        var tg=ctx.createLinearGradient(bx-9.5*u,0,bx+9.5*u,0);
+        tg.addColorStop(0,jLight); tg.addColorStop(.55,jacket); tg.addColorStop(1,jDark);
+        ctx.fillStyle=tg; rr(bx-9.5*u,by-26*u+bob,19*u,18*u,8*u); ctx.fill();
+        ctx.strokeStyle=OUT; ctx.lineWidth=1.4*u;
+        rr(bx-9.5*u,by-26*u+bob,19*u,18*u,8*u); ctx.stroke();
+        ctx.strokeStyle='rgba(0,0,0,0.18)'; ctx.lineWidth=1.2*u;          // 밑단
+        ctx.beginPath(); ctx.moveTo(bx-8*u,by-11.5*u+bob); ctx.lineTo(bx+8*u,by-11.5*u+bob); ctx.stroke();
+        ctx.strokeStyle='rgba(255,255,255,0.35)'; ctx.lineWidth=1.2*u;    // 지퍼
+        ctx.beginPath(); ctx.moveTo(bx,by-24*u+bob); ctx.lineTo(bx,by-11.5*u+bob); ctx.stroke();
+        ctx.strokeStyle='rgba(0,0,0,0.22)'; ctx.lineWidth=1.1*u;          // 주머니
+        ctx.beginPath(); ctx.moveTo(bx-6.5*u,by-15*u+bob); ctx.lineTo(bx-3.5*u,by-15*u+bob); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(bx+3.5*u,by-15*u+bob); ctx.lineTo(bx+6.5*u,by-15*u+bob); ctx.stroke();
+        ctx.fillStyle=jDark; rr(bx-5*u,by-26.5*u+bob,10*u,3*u,1.5*u); ctx.fill();   // 깃
+      } else {
+        // 원피스(A라인) — 어머니·여성 주민용
+        function dressPath(){
+          ctx.beginPath();
+          ctx.moveTo(bx-6.5*u,by-26*u+bob);
+          ctx.quadraticCurveTo(bx-12*u,by-11*u+bob,bx-10.5*u,by-2.5*u);
+          ctx.lineTo(bx+10.5*u,by-2.5*u);
+          ctx.quadraticCurveTo(bx+12*u,by-11*u+bob,bx+6.5*u,by-26*u+bob);
+          ctx.closePath();
+        }
+        var dgr=ctx.createLinearGradient(bx-11*u,0,bx+11*u,0);
+        dgr.addColorStop(0,jLight); dgr.addColorStop(.55,jacket); dgr.addColorStop(1,jDark);
+        ctx.fillStyle=dgr; dressPath(); ctx.fill();
+        ctx.strokeStyle=OUT; ctx.lineWidth=1.4*u; dressPath(); ctx.stroke();
+        ctx.strokeStyle='rgba(255,255,255,0.28)'; ctx.lineWidth=1.1*u;   // 치맛단
+        ctx.beginPath(); ctx.moveTo(bx-9.3*u,by-5.5*u); ctx.quadraticCurveTo(bx,by-3.8*u,bx+9.3*u,by-5.5*u); ctx.stroke();
+        ctx.fillStyle=jDark; rr(bx-5*u,by-26.5*u+bob,10*u,3*u,1.5*u); ctx.fill();  // 깃
+        ctx.fillStyle='#4a3040';                                          // 살짝 보이는 신발
+        ctx.beginPath(); ctx.ellipse(bx-4*u,by-1.2*u,3*u,1.8*u,0,0,6.283); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(bx+4*u,by-1.2*u,3*u,1.8*u,0,0,6.283); ctx.fill();
+      }
       if(h(9)>0.62 && !opts.apron){                                     // 목도리
         ctx.fillStyle=['#e86a5a','#e8b84a','#5ab8a0'][Math.floor(h(10)*3)];
         rr(bx-7*u,by-27.5*u+bob,14*u,4.2*u,2.1*u); ctx.fill();
         ctx.strokeStyle=OUT; ctx.lineWidth=1*u; rr(bx-7*u,by-27.5*u+bob,14*u,4.2*u,2.1*u); ctx.stroke();
       }
       if(opts.apron){                                                   // 앞치마
-        ctx.fillStyle='#efe6cf'; rr(bx-6*u,by-17.5*u+bob,12*u,9.5*u,3*u); ctx.fill();
-        ctx.strokeStyle='rgba(120,90,50,0.4)'; ctx.lineWidth=1*u;
-        rr(bx-6*u,by-17.5*u+bob,12*u,9.5*u,3*u); ctx.stroke();
+        if(dress){
+          // 어깨끈 달린 큰 앞치마
+          ctx.strokeStyle='#efe6cf'; ctx.lineWidth=2.2*u;
+          ctx.beginPath(); ctx.moveTo(bx-4.5*u,by-25*u+bob); ctx.lineTo(bx-5.5*u,by-19*u+bob); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(bx+4.5*u,by-25*u+bob); ctx.lineTo(bx+5.5*u,by-19*u+bob); ctx.stroke();
+          ctx.fillStyle='#f3ecd8';
+          ctx.beginPath();
+          ctx.moveTo(bx-6*u,by-19.5*u+bob);
+          ctx.quadraticCurveTo(bx-8.5*u,by-10*u+bob,bx-7.5*u,by-4.5*u);
+          ctx.lineTo(bx+7.5*u,by-4.5*u);
+          ctx.quadraticCurveTo(bx+8.5*u,by-10*u+bob,bx+6*u,by-19.5*u+bob);
+          ctx.closePath(); ctx.fill();
+          ctx.strokeStyle='rgba(120,90,50,0.4)'; ctx.lineWidth=1*u; ctx.stroke();
+          ctx.strokeStyle='rgba(150,110,70,0.5)'; ctx.lineWidth=1*u;   // 주머니
+          ctx.beginPath(); ctx.arc(bx,by-10.5*u+bob,3.4*u,0.15,Math.PI-0.15); ctx.stroke();
+          ctx.strokeStyle='rgba(120,90,50,0.35)';                       // 허리 리본
+          ctx.beginPath(); ctx.moveTo(bx-6.5*u,by-17*u+bob); ctx.lineTo(bx+6.5*u,by-17*u+bob); ctx.stroke();
+        } else {
+          ctx.fillStyle='#efe6cf'; rr(bx-6*u,by-17.5*u+bob,12*u,9.5*u,3*u); ctx.fill();
+          ctx.strokeStyle='rgba(120,90,50,0.4)'; ctx.lineWidth=1*u;
+          rr(bx-6*u,by-17.5*u+bob,12*u,9.5*u,3*u); ctx.stroke();
+        }
       }
       // 팔·손 (살짝 벌어진 자세)
       ctx.fillStyle=jacket;
@@ -203,14 +245,26 @@
         ctx.beginPath(); ctx.arc(bx,hy-13.5*u,4.4*u,0,6.283); ctx.fill();
         ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.lineWidth=1*u;
         ctx.beginPath(); ctx.arc(bx,hy-13*u,2.4*u,0,6.283); ctx.stroke();
+        ctx.strokeStyle=hair; ctx.lineWidth=1.7*u; ctx.lineCap='round';  // 옆 잔머리
+        ctx.beginPath(); ctx.moveTo(bx-12.6*u,hy+1*u); ctx.quadraticCurveTo(bx-14.2*u,hy+5*u,bx-12.4*u,hy+8.5*u); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(bx+12.6*u,hy+1*u); ctx.quadraticCurveTo(bx+14.2*u,hy+5*u,bx+12.4*u,hy+8.5*u); ctx.stroke();
+        ctx.lineCap='butt';
       }
       // 눈·눈썹·입·볼
-      ctx.fillStyle='#241c18';
-      ctx.beginPath(); ctx.ellipse(bx-4.6*u,hy+1.8*u,2.1*u,3*u,0,0,6.283); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(bx+4.6*u,hy+1.8*u,2.1*u,3*u,0,0,6.283); ctx.fill();
-      ctx.fillStyle='#fff';
-      ctx.beginPath(); ctx.arc(bx-5.2*u,hy+0.8*u,0.85*u,0,6.283); ctx.fill();
-      ctx.beginPath(); ctx.arc(bx+4.0*u,hy+0.8*u,0.85*u,0,6.283); ctx.fill();
+      if(opts.kindEyes){
+        // 인자하게 웃는 실눈 (^ ^)
+        ctx.strokeStyle='#3a2a20'; ctx.lineWidth=1.7*u; ctx.lineCap='round';
+        ctx.beginPath(); ctx.arc(bx-4.6*u,hy+3.4*u,2.5*u,Math.PI*1.12,Math.PI*1.88); ctx.stroke();
+        ctx.beginPath(); ctx.arc(bx+4.6*u,hy+3.4*u,2.5*u,Math.PI*1.12,Math.PI*1.88); ctx.stroke();
+        ctx.lineCap='butt';
+      } else {
+        ctx.fillStyle='#241c18';
+        ctx.beginPath(); ctx.ellipse(bx-4.6*u,hy+1.8*u,2.1*u,3*u,0,0,6.283); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(bx+4.6*u,hy+1.8*u,2.1*u,3*u,0,0,6.283); ctx.fill();
+        ctx.fillStyle='#fff';
+        ctx.beginPath(); ctx.arc(bx-5.2*u,hy+0.8*u,0.85*u,0,6.283); ctx.fill();
+        ctx.beginPath(); ctx.arc(bx+4.0*u,hy+0.8*u,0.85*u,0,6.283); ctx.fill();
+      }
       ctx.strokeStyle='rgba(60,40,25,0.7)'; ctx.lineWidth=1.1*u;
       ctx.beginPath(); ctx.arc(bx-4.6*u,hy-1.4*u,2.8*u,Math.PI*1.18,Math.PI*1.82); ctx.stroke();
       ctx.beginPath(); ctx.arc(bx+4.6*u,hy-1.4*u,2.8*u,Math.PI*1.18,Math.PI*1.82); ctx.stroke();

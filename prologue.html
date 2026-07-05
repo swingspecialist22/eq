@@ -633,7 +633,7 @@ function gameLoop(){
   // 스프라이트 렌더 — 일러스트(빌보드/치비) 우선, 없으면 기존 픽셀
   if(sprites.mom.visible){
     var _mx=sprites.mom.x*TS,_my=sprites.mom.y*TS;
-    if(!(window.EQChar&&EQChar.drawVillager&&EQChar.drawVillager(ctx,7,_mx,_my,TS,'#c8783a',{hair:4,apron:true})))
+    if(!(window.EQChar&&EQChar.drawVillager&&EQChar.drawVillager(ctx,7,_mx,_my,TS,'#b5566a',{hair:4,apron:true,dress:true,kindEyes:true})))
       drawNPCMom(_mx,_my,1,0);
   }
   if(sprites.elder.visible){

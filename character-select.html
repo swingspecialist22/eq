@@ -9,19 +9,28 @@
 
 *{margin:0;padding:0;box-sizing:border-box;}
 body{
-  background:#0d0805;min-height:100vh;
+  background:
+    linear-gradient(rgba(10,6,2,0.45) 0%, rgba(10,6,2,0.62) 55%, rgba(8,5,2,0.85) 100%),
+    url('assets/bg/bg_stage1.png') center/cover no-repeat fixed,
+    radial-gradient(900px 420px at 20% 12%, rgba(255,190,90,0.30), rgba(0,0,0,0) 60%),
+    linear-gradient(#3a1e08,#241206 55%,#140a04);
+  min-height:100vh;
   font-family:"Do Hyeon","Malgun Gothic",sans-serif;color:#e0e0e0;
   user-select:none;overflow:hidden;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
 }
 #starfield{position:fixed;inset:0;pointer-events:none;z-index:0;}
 #title-area{text-align:center;margin-bottom:24px;position:relative;z-index:2;}
-#game-logo{font-size:11px;letter-spacing:8px;color:#ff8800;text-transform:uppercase;margin-bottom:6px;}
-#select-title{font-size:13px;color:#ffe8aa;letter-spacing:2px;}
+#game-logo{font-size:13px;letter-spacing:9px;color:#ff9a2a;text-transform:uppercase;margin-bottom:8px;
+  text-shadow:0 0 16px rgba(255,136,0,.6);}
+#select-title{font-size:18px;color:#ffe8c0;letter-spacing:2px;
+  text-shadow:0 0 18px rgba(255,136,0,.35),0 2px 0 rgba(60,28,0,.8);}
 #card-grid{display:flex;gap:16px;position:relative;z-index:2;}
 .char-card{
-  width:168px;background:#120e08;border:2px solid #3a2a1a;
-  border-radius:8px;cursor:pointer;overflow:hidden;position:relative;
+  width:168px;background:rgba(18,13,7,0.88);border:2px solid #3a2a1a;
+  border-radius:14px;cursor:pointer;overflow:hidden;position:relative;
+  backdrop-filter:blur(3px);
+  box-shadow:0 10px 26px rgba(0,0,0,.45);
   transition:border-color .15s,transform .15s,box-shadow .15s;
 }
 .char-card:hover{border-color:#cc6622;transform:translateY(-5px);box-shadow:0 10px 28px #00000088,0 0 18px #cc662233;}
@@ -47,22 +56,25 @@ body{
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 #name-label{font-size:10px;color:#887766;letter-spacing:2px;}
 #name-input{
-  background:#1a1208;border:1px solid #6a4a1a;border-radius:4px;
-  color:#ffe8aa;font-family:"Do Hyeon","Malgun Gothic",sans-serif;font-size:15px;
-  padding:7px 18px;text-align:center;outline:none;width:220px;letter-spacing:2px;
-  transition:border-color .15s;
+  background:rgba(26,18,8,0.9);border:1.5px solid #6a4a1a;border-radius:12px;
+  color:#ffe8aa;font-family:"Do Hyeon","Malgun Gothic",sans-serif;font-size:16px;
+  padding:9px 18px;text-align:center;outline:none;width:240px;letter-spacing:2px;
+  transition:border-color .15s, box-shadow .15s;
 }
+#name-input:focus{box-shadow:0 0 14px rgba(255,136,0,.3);}
 #name-input:focus{border-color:#ff8800;}
 #name-hint{font-size:9px;color:#443322;}
 #start-btn{
-  display:none;background:#6a2a08;border:2px solid #ff8800;color:#ffcc88;
-  font-family:"Do Hyeon","Malgun Gothic",sans-serif;font-size:13px;padding:10px 40px;
-  border-radius:5px;cursor:pointer;letter-spacing:3px;
-  transition:background .15s,box-shadow .15s,transform .1s;animation:fadeIn .3s ease-out;
+  display:none;border:none;color:#2a1200;font-weight:bold;
+  background:linear-gradient(180deg,#ffb04a,#ff8800 60%,#e86e00);
+  font-family:"Do Hyeon","Malgun Gothic",sans-serif;font-size:16px;padding:13px 46px;
+  border-radius:12px;cursor:pointer;letter-spacing:3px;
+  box-shadow:0 6px 24px rgba(255,136,0,.4),inset 0 1px 0 rgba(255,255,255,.5);
+  transition:box-shadow .15s,transform .1s;animation:fadeIn .3s ease-out;
 }
-#start-btn:hover{background:#9a3a10;box-shadow:0 0 18px #ff880055;transform:scale(1.03);}
+#start-btn:hover{box-shadow:0 8px 34px rgba(255,136,0,.6),inset 0 1px 0 rgba(255,255,255,.5);transform:scale(1.03);}
 #start-btn:active{transform:scale(0.98);}
-#key-hint{font-size:9px;color:#332211;letter-spacing:1px;margin-top:2px;}
+#key-hint{font-size:10px;color:#7a6248;letter-spacing:1px;margin-top:2px;}
 #transition{position:fixed;inset:0;background:#0d0805;opacity:0;pointer-events:none;z-index:100;transition:opacity .5s;}
 #transition.go{opacity:1;pointer-events:all;}
 /* 반응형 래퍼 */
