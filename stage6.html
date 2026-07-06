@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>에너지 퀘스트 — DEC 본부 최심부</title>
 <link rel="stylesheet" href="eq-ui.css">
@@ -297,7 +298,7 @@ const NPCS=[
    getDialog:function(){
      this._t++;
      const g=gameState.gatesCleared.size;
-     if(g===3)return['게이트가 모두 열렸어! 포털로 가!','블랙하트는 에너지 조합 전략에 약해.','재생에너지 카드를 잘 조합하면 반드시 이길 수 있어!'];
+     if(g===3)return['게이트가 모두 열렸어! 포털로 가!','블랙하트는 에너지 조합 전략에 약해.','에너지 카드를 잘 조합하면 반드시 이길 수 있어!'];
      if(this._t===1)return['DEC에 잡혀 여기 갇혀 있어요...','블랙하트가 이 코어로 전국 전력망을 독점 통제하고 있어요!',`게이트 3개를 해제해야 포털이 열려요. 지금 ${g}개 됐어요.`,'각 게이트엔 에너지 지식 퍼즐이 있어요!'];
      return[`게이트 ${g}/3 해제됐어요. 힘내요!`,'지금까지 배운 에너지 지식을 잘 생각해봐요!'];
    }},
@@ -308,7 +309,7 @@ const NPCS=[
    }},
   {tx:16,ty:7,color:'#ff8844',name:'DEC 기술자',isGuard:false,
    getDialog:function(){
-     if(gameState.gatesCleared.has('gateB'))return['...게이트까지 뚫었군. 이미 내 편이야.','블랙하트에게 전해: 재생에너지는 막을 수 없다고.','포털 바로 위에 있어.'];
+     if(gameState.gatesCleared.has('gateB'))return['...게이트까지 뚫었군. 이미 내 편이야.','블랙하트에게 전해: 에너지 자립은 막을 수 없다고.','포털 바로 위에 있어.'];
      return['...나도 이 독점 계획이 옳다고 생각 안 해.','게이트 B는 ESS 작동 순서야. 잘 생각해봐.','...이 말은 못 들은 걸로 해.'];
    }},
   {tx:13,ty:11,color:'#cc1111',name:'DEC 경비대장',isGuard:true,getDialog:()=>[]},

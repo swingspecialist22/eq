@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>에너지 퀘스트 — DEC 본부</title>
 <style>
@@ -231,7 +232,7 @@ const SCRIPT=[
     speaker:'CEO 블랙하트',
     lines:[
       '이 세계의 에너지는 전부 내 손 안에 있어.',
-      '재생에너지? 태양광? 풍력?',
+      '신재생에너지? 태양광? 풍력? 수소?',
       '전부 내가 통제하고 있지.',
     ]
   },
@@ -258,7 +259,7 @@ const SCRIPT=[
     lines:[
       '이유? 간단해.',
       '에너지를 가진 자가 세상을 지배하는 거야.',
-      '재생에너지가 퍼지면 내 독점이 끝나거든.',
+      '에너지 자립이 퍼지면 내 독점이 끝나거든.',
       '그래서 막는 거야. 영원히.',
     ]
   },
@@ -282,7 +283,7 @@ function buildFlat(){
   flatScript=[
     {phase:'intro'},
     {speaker:'CEO 블랙하트',lines:['...드디어 왔군.','여기까지 올 줄은 몰랐어.']},
-    {speaker:'CEO 블랙하트',lines:['이 세계의 에너지는 전부 내 손 안에 있어.','재생에너지? 태양광? 풍력?','전부 내가 통제하고 있지.']},
+    {speaker:'CEO 블랙하트',lines:['이 세계의 에너지는 전부 내 손 안에 있어.','신재생에너지? 태양광? 풍력? 수소?','전부 내가 통제하고 있지.']},
     {isChoice:true,choices:[
       {text:'두고 볼 수 없어. 막겠어.'},
       {text:'왜 이런 짓을 하는 거야?'},
@@ -290,7 +291,7 @@ function buildFlat(){
     // fight 응답
     {speaker:'CEO 블랙하트',lines:['흥... 막겠다고?','지금까지 배운 에너지 지식으로?','한번 해봐. 이 블랙하트를 이길 수 있다면.'],id:'fight'},
     // why 응답
-    {speaker:'CEO 블랙하트',lines:['이유? 간단해.','에너지를 가진 자가 세상을 지배하는 거야.','재생에너지가 퍼지면 내 독점이 끝나거든.','그래서 막는 거야. 영원히.'],id:'why'},
+    {speaker:'CEO 블랙하트',lines:['이유? 간단해.','에너지를 가진 자가 세상을 지배하는 거야.','에너지 자립이 퍼지면 내 독점이 끝나거든.','그래서 막는 거야. 영원히.'],id:'why'},
     {phase:'end'}
   ];
 }
