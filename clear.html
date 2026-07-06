@@ -159,76 +159,97 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh;font-family:"Do Hy
   100%{transform:scale(0.5) rotate(360deg) translateY(-60px);opacity:0;}
 }
 
-/* ── 후기 버튼 */
+/* 후기 버튼 */
 #btn-review{
   background:transparent;
   border-color:#ffd700;
   color:#ffd700;
 }
-#btn-review:hover,#btn-review:active{background:rgba(255,215,0,0.15);}
-#btn-review.done{border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.5);}
+#btn-review:hover,#btn-review:active{background:rgba(255,215,0,0.18);color:#fff;}
 
-/* ── 후기 모달 */
-#review-modal{
-  position:fixed;inset:0;z-index:200;
-  display:none;align-items:center;justify-content:center;
-  background:rgba(0,0,0,0.78);
-  padding:16px;
+/* ── 후기(설문) 모달 ─────────────────────────── */
+#survey-overlay{
+  position:fixed;inset:0;z-index:90;
+  display:none;
+  background:rgba(0,0,0,0.82);
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;
+  padding:max(20px,env(safe-area-inset-top,20px)) 14px max(28px,env(safe-area-inset-bottom,20px)) 14px;
+}
+#survey-overlay.show{display:flex;align-items:flex-start;justify-content:center;animation:sv-fade 0.25s ease;}
+@keyframes sv-fade{from{opacity:0;}to{opacity:1;}}
+
+#survey-card{
+  position:relative;width:min(560px,100%);margin:auto;
+  background:linear-gradient(180deg,rgba(18,22,20,0.98),rgba(10,12,14,0.98));
+  border:1px solid rgba(255,215,0,0.35);border-radius:10px;
+  box-shadow:0 0 50px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.04) inset;
+  padding:clamp(18px,5vw,28px);
+  animation:sv-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes sv-pop{from{transform:translateY(24px) scale(0.96);opacity:0;}to{transform:none;opacity:1;}}
+
+#survey-close{
+  position:absolute;top:8px;right:10px;
+  background:none;border:none;color:#888;font-size:26px;line-height:1;
+  width:40px;height:40px;border-radius:50%;cursor:pointer;
   -webkit-tap-highlight-color:transparent;
 }
-#review-modal.show{display:flex;}
-#review-card{
-  width:min(440px,94vw);
-  max-height:88vh;overflow-y:auto;
-  touch-action:pan-y;
-  background:#0d1117;
-  border:2px solid #ffd700;
-  border-radius:6px;
-  padding:20px clamp(16px,4vw,24px);
-  box-shadow:0 0 40px rgba(255,215,0,0.25);
+#survey-close:hover,#survey-close:active{color:#fff;background:rgba(255,255,255,0.08);}
+
+#survey-title{
+  font-size:clamp(18px,4.5vw,24px);color:#ffd700;text-align:center;letter-spacing:2px;
+  text-shadow:0 0 20px rgba(255,215,0,0.4);
 }
-#review-card h2{
-  font-size:clamp(16px,4vw,20px);
-  color:#ffd700;text-align:center;letter-spacing:2px;margin-bottom:4px;
+#survey-desc{font-size:clamp(11px,2.6vw,13px);color:#bbb;text-align:center;line-height:1.7;margin:8px 0 4px;}
+
+.sv-q{margin-top:clamp(14px,4vw,20px);}
+.sv-label{display:block;font-size:clamp(13px,3vw,15px);color:#fff;margin-bottom:9px;}
+.sv-req{color:#ff6b6b;font-size:12px;}
+
+.sv-opts{display:flex;flex-wrap:wrap;gap:7px;}
+.sv-pill{
+  position:relative;cursor:pointer;user-select:none;
+  font-size:clamp(11px,2.6vw,13px);color:#cfd6d2;
+  border:1px solid rgba(255,255,255,0.22);border-radius:20px;
+  padding:8px 14px;transition:all 0.15s;-webkit-tap-highlight-color:transparent;
 }
-#review-card .sub{font-size:11px;color:#888;text-align:center;margin-bottom:18px;}
-.rv-field{margin-bottom:16px;}
-.rv-label{display:block;font-size:13px;color:#ddd;margin-bottom:7px;letter-spacing:1px;}
-.rv-label .req{color:#ff6b6b;font-size:12px;margin-left:3px;}
-.rv-field select,.rv-field textarea{
-  width:100%;
-  font-family:"Do Hyeon","Malgun Gothic",sans-serif;
-  font-size:13px;
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.2);
-  border-radius:4px;color:#fff;padding:10px 12px;
+.sv-pill input{position:absolute;opacity:0;pointer-events:none;width:0;height:0;}
+.sv-pill:hover{border-color:rgba(68,204,136,0.6);}
+.sv-pill.on{background:rgba(68,204,136,0.22);border-color:#44cc88;color:#fff;}
+
+.sv-stars{display:flex;gap:6px;font-size:clamp(30px,9vw,42px);cursor:pointer;user-select:none;}
+.sv-stars span{color:#3a3a3a;transition:transform 0.12s,color 0.12s,text-shadow 0.12s;-webkit-tap-highlight-color:transparent;}
+.sv-stars span.on{color:#ffd700;text-shadow:0 0 14px rgba(255,215,0,0.6);}
+.sv-stars span:active{transform:scale(1.25);}
+
+.sv-ta{
+  width:100%;min-height:68px;resize:vertical;
+  font-family:inherit;font-size:14px;color:#fff;line-height:1.6;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.18);border-radius:6px;padding:10px 12px;
 }
-.rv-field select{height:44px;}
-.rv-field select:focus,.rv-field textarea:focus{outline:none;border-color:#ffd700;}
-.rv-field textarea{resize:vertical;min-height:52px;line-height:1.6;touch-action:auto;}
-.rv-field option{background:#0d1117;color:#fff;}
-#rv-stars{display:flex;gap:6px;font-size:30px;line-height:1;user-select:none;}
-#rv-stars span{color:rgba(255,255,255,0.22);cursor:pointer;transition:transform 0.1s;}
-#rv-stars span.on{color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,0.7);}
-#rv-stars span:active{transform:scale(1.25);}
-.rv-actions{display:flex;gap:10px;margin-top:6px;}
-.rv-btn{
-  flex:1;
-  font-family:"Do Hyeon","Malgun Gothic",sans-serif;
-  font-size:13px;letter-spacing:2px;
-  padding:13px;border-radius:4px;cursor:pointer;
-  border:2px solid;min-height:48px;transition:all 0.15s;
-  -webkit-tap-highlight-color:transparent;
+.sv-ta:focus{outline:none;border-color:#44cc88;background:rgba(68,204,136,0.06);}
+.sv-ta::placeholder{color:#666;}
+
+#sv-error{color:#ff6b6b;font-size:12px;text-align:center;margin-top:14px;min-height:16px;}
+#survey-submit{
+  display:block;width:100%;margin-top:12px;
+  font-family:inherit;font-size:clamp(13px,3vw,15px);letter-spacing:2px;font-weight:bold;
+  padding:14px;border-radius:6px;cursor:pointer;border:none;
+  background:linear-gradient(180deg,#ffd95a,#f0a800);color:#2a1e00;
+  -webkit-tap-highlight-color:transparent;transition:filter 0.15s;
 }
-#rv-send{background:#ffd700;border-color:#ffd700;color:#1a1a1a;font-weight:bold;}
-#rv-send:disabled{opacity:0.4;cursor:not-allowed;}
-#rv-send:not(:disabled):active{background:#ffe44d;}
-#rv-close,#rv-thanks-close{background:transparent;border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);}
-#rv-close:active,#rv-thanks-close:active{background:rgba(255,255,255,0.1);}
-#rv-thanks{display:none;text-align:center;padding:14px 0 4px;}
-#rv-thanks.show{display:block;}
-#rv-thanks .big{font-size:46px;margin-bottom:12px;}
-#rv-thanks p{color:#ddd;font-size:14px;line-height:1.9;margin-bottom:6px;}
+#survey-submit:hover,#survey-submit:active{filter:brightness(1.08);}
+#survey-submit:disabled{filter:grayscale(0.5) brightness(0.7);cursor:default;}
+
+.sv-shake{animation:sv-shake 0.4s;}
+@keyframes sv-shake{0%,100%{transform:none;}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+
+#survey-thanks{display:none;text-align:center;padding:24px 6px 6px;}
+#survey-thanks .sv-emoji{font-size:52px;animation:sv-pop 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+#survey-thanks .sv-th-title{font-size:clamp(17px,4vw,22px);color:#44cc88;margin:12px 0 8px;letter-spacing:1px;}
+#survey-thanks .sv-th-msg{font-size:13px;color:#bbb;line-height:1.8;}
 </style>
 </head>
 <body>
@@ -262,82 +283,82 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh;font-family:"Do Hy
     </div>
   </div>
   <div id="btn-wrap">
-    <button class="action-btn" id="btn-review" onclick="openReview()">[ 후기 남기기 ]</button>
-    <button class="action-btn" id="btn-replay" onclick="goReplay()">[ 다시 도전 ]</button>
+    <button class="action-btn" id="btn-review" onclick="openSurvey()">[ 후기 남기기 ]</button>
     <button class="action-btn" id="btn-title" onclick="goTitle()">[ 타이틀로 ]</button>
+    <button class="action-btn" id="btn-replay" onclick="goReplay()">[ 다시 도전 ]</button>
   </div>
 </div>
 
-<!-- ── 후기 모달 ── -->
-<div id="review-modal">
-  <div id="review-card">
-    <div id="rv-form-wrap">
-      <h2>✍️ 후기 남기기</h2>
-      <div class="sub">에너지 퀘스트를 깬 소감을 들려주세요!</div>
+<!-- ── 후기(설문) 모달 ─────────────────────────── -->
+<div id="survey-overlay" onclick="if(event.target===this)closeSurvey();">
+  <div id="survey-card">
+    <button id="survey-close" onclick="closeSurvey()" aria-label="닫기">&times;</button>
 
-      <div class="rv-field">
-        <label class="rv-label" for="rv-grade">몇 학년이세요?<span class="req">*</span></label>
-        <select id="rv-grade">
-          <option value="" disabled selected>선택하세요</option>
-          <option>중학교 1학년</option>
-          <option>중학교 2학년</option>
-          <option>중학교 3학년</option>
-          <option>고등학교 1학년</option>
-          <option>고등학교 2학년</option>
-          <option>고등학교 3학년</option>
-        </select>
+    <div id="survey-title">에너지 퀘스트 후기</div>
+    <div id="survey-desc">
+      짧은 후기를 남겨주면 다음 게임을 만드는 데 큰 힘이 돼요.<br>
+      참여해줘서 정말 고마워요! 💚
+    </div>
+
+    <form id="survey-form"
+          action="https://docs.google.com/forms/d/e/1FAIpQLSf_te9U5hXyk1komBwMY0x94KV__7xOBR3CLRF6VFK8l7A8ig/formResponse"
+          method="POST" target="sv-sink" onsubmit="return submitSurvey(event);">
+
+      <div class="sv-q">
+        <label class="sv-label">몇 학년이에요? <span class="sv-req">*</span></label>
+        <div class="sv-opts" id="sv-grade" data-name="entry.1889307555"></div>
       </div>
 
-      <div class="rv-field">
-        <label class="rv-label">게임이 재미있었나요?<span class="req">*</span></label>
-        <div id="rv-stars">
+      <div class="sv-q">
+        <label class="sv-label">게임이 재미있었나요? (별점) <span class="sv-req">*</span></label>
+        <div class="sv-stars" id="sv-stars">
           <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
         </div>
+        <input type="hidden" name="entry.17890046" id="sv-star-input">
       </div>
 
-      <div class="rv-field">
-        <label class="rv-label" for="rv-stage">가장 기억에 남는 스테이지는?<span class="req">*</span></label>
-        <select id="rv-stage">
-          <option value="" disabled selected>선택하세요</option>
-          <option>1스테이지(태양광마을)</option>
-          <option>2스테이지(바람의 항구(풍력))</option>
-          <option>3스테이지(에너지 하베스팅 도시)</option>
-          <option>4스테이지(에너지 저장소(배터리, 수소))</option>
-          <option>5스테이지(스마트 그리드)</option>
-          <option>6스테이지(블랙하트 보스전)</option>
-        </select>
+      <div class="sv-q">
+        <label class="sv-label">가장 기억에 남는 스테이지는? <span class="sv-req">*</span></label>
+        <div class="sv-opts" id="sv-stage" data-name="entry.255427643"></div>
       </div>
 
-      <div class="rv-field">
-        <label class="rv-label" for="rv-learn">이 게임으로 새로 알게 된 에너지 이야기는?</label>
-        <textarea id="rv-learn" rows="2" maxlength="500" placeholder="예: 하베스팅으로도 전기를 만들 수 있다는 걸 알았어요!"></textarea>
+      <div class="sv-q">
+        <label class="sv-label">이 게임으로 새로 알게 된 에너지 이야기는?</label>
+        <textarea class="sv-ta" name="entry.876340983" placeholder="자유롭게 적어주세요"></textarea>
       </div>
 
-      <div class="rv-field">
-        <label class="rv-label" for="rv-msg">다음에 할 친구에게 한마디!</label>
-        <textarea id="rv-msg" rows="2" maxlength="500" placeholder="응원 한마디를 남겨보세요"></textarea>
+      <div class="sv-q">
+        <label class="sv-label">다음에 할 친구에게 한마디!</label>
+        <textarea class="sv-ta" name="entry.297551879" placeholder="응원 한마디를 남겨주세요"></textarea>
       </div>
 
-      <div class="rv-field">
-        <label class="rv-label" for="rv-more">더 바라는 점 / 어려웠던 점</label>
-        <textarea id="rv-more" rows="2" maxlength="500" placeholder="자유롭게 적어주세요"></textarea>
+      <div class="sv-q">
+        <label class="sv-label">더 바라는 점 / 어려웠던 점</label>
+        <textarea class="sv-ta" name="entry.1282810332" placeholder="개선했으면 하는 점을 알려주세요"></textarea>
       </div>
 
-      <div class="rv-actions">
-        <button class="rv-btn" id="rv-close" onclick="closeReview()">닫기</button>
-        <button class="rv-btn" id="rv-send" onclick="sendReview()" disabled>보내기</button>
-      </div>
-    </div>
+      <!-- 구글 폼 단일 페이지 전송용 -->
+      <input type="hidden" name="fvv" value="1">
+      <input type="hidden" name="pageHistory" value="0">
 
-    <div id="rv-thanks">
-      <div class="big">🎉</div>
-      <p id="rv-thanks-msg">후기 고마워요!<br>여러분의 한마디가 큰 힘이 됩니다.</p>
-      <div class="rv-actions" style="margin-top:16px;">
-        <button class="rv-btn" id="rv-thanks-close" onclick="closeReview()">닫기</button>
+      <div id="sv-error"></div>
+      <button type="submit" id="survey-submit">후기 보내기 ▶</button>
+    </form>
+
+    <div id="survey-thanks">
+      <div class="sv-emoji">🌱</div>
+      <div class="sv-th-title">소중한 후기 고마워요!</div>
+      <div class="sv-th-msg">
+        여러분의 한마디가 더 좋은 게임을 만듭니다.<br>
+        에너지 자립의 여정에 함께해줘서 고마워요 💚
+      </div>
+      <div style="display:flex;justify-content:center;margin-top:22px;">
+        <button class="action-btn" style="background:transparent;border-color:#44cc88;color:#44cc88;" onclick="closeSurvey()">[ 닫기 ]</button>
       </div>
     </div>
   </div>
 </div>
+<iframe name="sv-sink" id="sv-sink" style="display:none;" title="survey-sink"></iframe>
 
 <div id="fade"></div>
 
@@ -426,69 +447,68 @@ function goReplay(){
 }
 document.getElementById('btn-title').addEventListener('touchend',function(e){e.preventDefault();goTitle();},{passive:false});
 document.getElementById('btn-replay').addEventListener('touchend',function(e){e.preventDefault();goReplay();},{passive:false});
+document.getElementById('btn-review').addEventListener('touchend',function(e){e.preventDefault();openSurvey();},{passive:false});
 
-// ══════════════════════════════════════
-//  후기 남기기 (구글 폼으로 전송)
-// ══════════════════════════════════════
-const RV_ACTION='https://docs.google.com/forms/d/e/1FAIpQLSf_te9U5hXyk1komBwMY0x94KV__7xOBR3CLRF6VFK8l7A8ig/formResponse';
-const RV_ENTRY={grade:'entry.1889307555',star:'entry.17890046',stage:'entry.255427643',learn:'entry.876340983',msg:'entry.297551879',more:'entry.1282810332'};
+// ── 후기(설문) 모달 ─────────────────────────────
+(function(){
+  const GRADE_OPTS=['중학교 1학년','중학교 2학년','중학교 3학년','고등학교 1학년','고등학교 2학년','고등학교 3학년'];
+  const STAGE_OPTS=['1스테이지(태양광마을)','2스테이지(바람의 항구(풍력))','3스테이지(에너지 하베스팅 도시)','4스테이지(에너지 저장소(배터리, 수소))','5스테이지(스마트 그리드)','6스테이지(블랙하트 보스전)'];
 
-let rvStar=0;
-const $rvStars=document.getElementById('rv-stars');
-$rvStars.querySelectorAll('span').forEach(function(s){
-  function pick(){ rvStar=parseInt(s.dataset.v); paintStars(); checkReady(); }
-  s.addEventListener('click',pick);
-  s.addEventListener('touchend',function(e){e.preventDefault();pick();},{passive:false});
-});
-function paintStars(){
-  $rvStars.querySelectorAll('span').forEach(function(s){
-    s.classList.toggle('on', parseInt(s.dataset.v)<=rvStar);
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+  function buildPills(container,opts){
+    const name=container.dataset.name;
+    opts.forEach(opt=>{
+      const lab=document.createElement('label');
+      lab.className='sv-pill';
+      lab.innerHTML='<input type="radio" name="'+name+'" value="'+esc(opt)+'">'+esc(opt);
+      lab.querySelector('input').addEventListener('change',function(){
+        container.querySelectorAll('.sv-pill').forEach(p=>p.classList.remove('on'));
+        lab.classList.add('on');
+      });
+      container.appendChild(lab);
+    });
+  }
+  buildPills(document.getElementById('sv-grade'),GRADE_OPTS);
+  buildPills(document.getElementById('sv-stage'),STAGE_OPTS);
+
+  // 별점
+  const starInput=document.getElementById('sv-star-input');
+  const stars=Array.prototype.slice.call(document.querySelectorAll('#sv-stars span'));
+  function paint(n){stars.forEach(s=>s.classList.toggle('on',parseInt(s.dataset.v)<=n));}
+  stars.forEach(function(s){
+    function set(){var n=parseInt(s.dataset.v);starInput.value='★'.repeat(n);paint(n);}
+    s.addEventListener('click',set);
+    s.addEventListener('touchend',function(e){e.preventDefault();set();},{passive:false});
   });
-}
-function checkReady(){
-  var ok=document.getElementById('rv-grade').value && rvStar>0 && document.getElementById('rv-stage').value;
-  document.getElementById('rv-send').disabled=!ok;
-}
-document.getElementById('rv-grade').addEventListener('change',checkReady);
-document.getElementById('rv-stage').addEventListener('change',checkReady);
 
-function openReview(){
-  if(localStorage.getItem('eq_review_sent')) showThanks(true);
-  document.getElementById('review-modal').classList.add('show');
-}
-function closeReview(){
-  document.getElementById('review-modal').classList.remove('show');
-}
-function showThanks(already){
-  document.getElementById('rv-form-wrap').style.display='none';
-  document.getElementById('rv-thanks').classList.add('show');
-  if(already) document.getElementById('rv-thanks-msg').innerHTML='이미 후기를 남겼어요.<br>고마워요! 😊';
-}
-function sendReview(){
-  var btn=document.getElementById('rv-send');
-  if(btn.disabled) return;
-  btn.disabled=true; btn.textContent='보내는 중…';
-  var fd=new FormData();
-  fd.append(RV_ENTRY.grade, document.getElementById('rv-grade').value);
-  fd.append(RV_ENTRY.star, '★★★★★'.slice(0,rvStar));
-  fd.append(RV_ENTRY.stage, document.getElementById('rv-stage').value);
-  var learn=document.getElementById('rv-learn').value.trim();
-  var msg=document.getElementById('rv-msg').value.trim();
-  var more=document.getElementById('rv-more').value.trim();
-  if(learn) fd.append(RV_ENTRY.learn, learn);
-  if(msg)   fd.append(RV_ENTRY.msg, msg);
-  if(more)  fd.append(RV_ENTRY.more, more);
-  function done(){ localStorage.setItem('eq_review_sent','1'); showThanks(false); }
-  fetch(RV_ACTION,{method:'POST',mode:'no-cors',body:fd}).then(done).catch(done);
-}
-document.getElementById('btn-review').addEventListener('touchend',function(e){e.preventDefault();openReview();},{passive:false});
-document.getElementById('rv-send').addEventListener('touchend',function(e){e.preventDefault();sendReview();},{passive:false});
-document.getElementById('rv-close').addEventListener('touchend',function(e){e.preventDefault();closeReview();},{passive:false});
-document.getElementById('rv-thanks-close').addEventListener('touchend',function(e){e.preventDefault();closeReview();},{passive:false});
-if(localStorage.getItem('eq_review_sent')){
-  var _b=document.getElementById('btn-review');
-  _b.textContent='[ 후기 완료 ✓ ]'; _b.classList.add('done');
-}
+  const overlay=document.getElementById('survey-overlay');
+  window.openSurvey=function(){overlay.classList.add('show');overlay.scrollTop=0;};
+  window.closeSurvey=function(){overlay.classList.remove('show');};
+
+  window.submitSurvey=function(e){
+    const form=document.getElementById('survey-form');
+    const err=document.getElementById('sv-error');
+    const need=[['entry.1889307555','학년'],['entry.17890046','별점'],['entry.255427643','기억에 남는 스테이지']];
+    for(var i=0;i<need.length;i++){
+      var n=need[i][0], label=need[i][1];
+      var el=form.querySelector('[name="'+n+'"]');
+      var ok = el && el.type==='hidden' ? !!el.value : !!form.querySelector('[name="'+n+'"]:checked');
+      if(!ok){
+        e.preventDefault();
+        err.textContent='필수 항목 "'+label+'"을(를) 선택해 주세요.';
+        var card=document.getElementById('survey-card');
+        card.classList.remove('sv-shake');void card.offsetWidth;card.classList.add('sv-shake');
+        return false;
+      }
+    }
+    // 검증 통과 → 폼은 숨은 iframe(sv-sink)으로 전송되어 구글 폼에 수합됨
+    err.textContent='';
+    form.style.display='none';
+    document.getElementById('survey-thanks').style.display='block';
+    overlay.scrollTop=0;
+    return true; // 기본 submit 동작 유지(iframe 전송)
+  };
+})();
 </script>
 </body>
 </html>
