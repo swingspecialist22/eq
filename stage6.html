@@ -1230,9 +1230,12 @@ function getCam(){
 // ═══════════════════════════════════════════════════════
 // 게임 루프 — stage2와 동일 구조
 // ═══════════════════════════════════════════════════════
-function gameLoop(){
+let _lastFrameT=0, DT=1; // Δt 보정 — 120Hz 등 고주사율 화면에서도 이동 속도 일정
+function gameLoop(now){
+  DT=(now&&_lastFrameT)?Math.min((now-_lastFrameT)/16.667,3):1;
+  _lastFrameT=now||0;
   if(player.moving){
-    player.moveProgress+=1/STEP_FRAMES;
+    player.moveProgress+=DT/STEP_FRAMES;
     // 이동 중 실시간 animFrame 업데이트 (보행 사이클)
     player.animFrame=Math.floor(player.moveProgress*4)%2;
     if(player.moveProgress>=1){
@@ -1245,7 +1248,7 @@ function gameLoop(){
     }
   } else {player.animFrame=0;processMovementInput();}
   if(confirmPressed){confirmPressed=false;interact();}
-  if(dialogActive&&!twDone){twIdx+=TW_SPEED;if(twIdx>=twText.length){twIdx=twText.length;twDone=true;}$dt.textContent=twText.slice(0,Math.floor(twIdx));}
+  if(dialogActive&&!twDone){twIdx+=TW_SPEED*DT;if(twIdx>=twText.length){twIdx=twText.length;twDone=true;}$dt.textContent=twText.slice(0,Math.floor(twIdx));}
 
   const{cx,cy}=getCam();
   ctx.fillStyle='#06020e';ctx.fillRect(0,0,W,H);

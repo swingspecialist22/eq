@@ -486,7 +486,7 @@ function processAutoMove(){
     if(m.cb) m.cb();
     return;
   }
-  var speed=0.04;
+  var speed=0.04*DT;
   sp.x+=dx/dist*speed;
   sp.y+=dy/dist*speed;
 }
@@ -609,7 +609,10 @@ function goToGame(){
 // 게임 루프
 // ═══════════════════════════════════════════════════════
 var globalTick=0, walkFr=0;
-function gameLoop(){
+var _lastFrameT=0, DT=1; // Δt 보정 — 120Hz 등 고주사율 화면에서도 이동 속도 일정
+function gameLoop(now){
+  DT=(now&&_lastFrameT)?Math.min((now-_lastFrameT)/16.667,3):1;
+  _lastFrameT=now||0;
   globalTick++;
   if(globalTick%18===0) walkFr=(walkFr+2)%4;
 
@@ -622,7 +625,7 @@ function gameLoop(){
 
   // 드론 이동
   if(drone.visible){
-    drone.x+=drone.speed;
+    drone.x+=drone.speed*DT;
     if(drone.x>COLS+2) drone.visible=false;
   }
 
@@ -677,7 +680,7 @@ function gameLoop(){
 
   // 타이핑 효과
   if(dialogActive && !twDone){
-    twIdx+=TW_SPEED;
+    twIdx+=TW_SPEED*DT;
     if(twIdx>=twText.length){twIdx=twText.length;twDone=true;}
     $dt.textContent=twText.slice(0,Math.floor(twIdx));
   }
