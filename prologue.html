@@ -88,6 +88,7 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 <script src="eq-audio.js"></script>
 <script src="eq-char.js"></script>
 <script src="eq-terrain.js"></script>
+<script src="eq-perf.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
 // 캔버스 / 상수
@@ -96,7 +97,7 @@ var TS=48, COLS=17, ROWS=11;
 var W=COLS*TS, H=ROWS*TS;
 var canvas=document.getElementById('game-canvas');
 var ctx=canvas.getContext('2d');
-var RS=(window.devicePixelRatio&&window.devicePixelRatio>1)?3:2;   // 슈퍼샘플링(선명화)
+var RS=EQPerf.rs();   // 렌더 배율(1.5~2배, 저사양 기기는 1배) — 3배 슈퍼샘플링은 렉 유발로 폐기
 canvas.width=W*RS; canvas.height=H*RS; ctx.scale(RS,RS);
 canvas.style.width=W+'px'; canvas.style.height=H+'px';
 ctx.imageSmoothingEnabled=true;
@@ -612,6 +613,7 @@ var globalTick=0, walkFr=0;
 var _lastFrameT=0, DT=1; // Δt 보정 — 120Hz 등 고주사율 화면에서도 이동 속도 일정
 function gameLoop(now){
   DT=(now&&_lastFrameT)?Math.min((now-_lastFrameT)/16.667,3):1;
+  EQPerf.tick(now); // FPS 측정 → 느린 기기면 다음 화면부터 라이트 모드
   _lastFrameT=now||0;
   globalTick++;
   if(globalTick%18===0) walkFr=(walkFr+2)%4;

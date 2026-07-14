@@ -1187,6 +1187,9 @@ function makeAtmo(o,th){
   }
   return function(ctx){
     const t=Date.now()/1000;
+    // 라이트 모드(저사양 기기): 전체 화면 덧칠(블룸·색보정·비네트)은 생략하고
+    // 가벼운 파티클만 그린다. 블렌드 연산 풀스크린 패스가 저사양 GPU 렉의 주범.
+    if(!(window.EQPerf&&window.EQPerf.low)){
     // 블룸/글로우
     if(th.bloom){
       ctx.save();ctx.globalCompositeOperation='screen';
@@ -1256,6 +1259,7 @@ function makeAtmo(o,th){
     const vg=ctx.createRadialGradient(W/2,H*0.46,H*0.35,W/2,H*0.5,H*0.85);
     vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(8,4,10,'+(th.vig||0.22)+')');
     ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+    } // ← 라이트 모드 가드 끝
     // 파티클
     for(const p of parts){
       if(mode==='wind'){
