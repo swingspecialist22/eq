@@ -224,6 +224,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   </div>
 </div>
 
+<script src="eq-log.js"></script>
 <script>
 /* ═══════════════════════════════════════
    카드 풀 (8종)
@@ -583,6 +584,7 @@ $('btn-submit').addEventListener('click',()=>{
 
   $('btn-submit').disabled = true;
   S.results.push({ correctPicks, wrongPicks, netScore, total: ans.length });
+  if(window.EQLog)EQLog.boss(S.roundIdx+1,correctPicks,ans.length,netScore);
 
   if(netScore > 0){
     // 보스 HP 감소

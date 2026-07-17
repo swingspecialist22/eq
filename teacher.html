@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>에너지 퀘스트 — 교사용 결과 취합</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Do Hyeon','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+  background:radial-gradient(circle at 50% 0%,#13203a 0%,#0a0e18 60%,#06080e 100%);
+  color:#e8e8e8; min-height:100vh; padding:clamp(16px,3vh,40px) 14px;
+  display:flex; flex-direction:column; align-items:center;
+}
+h1{ font-size:clamp(22px,3.4vw,34px); color:#ffe8c0; letter-spacing:3px;
+  text-shadow:0 0 24px rgba(255,136,0,.55),0 3px 0 #5a2a00; text-align:center; }
+.sub{ font-size:clamp(10px,1.3vw,14px); color:#7790b0; letter-spacing:4px; margin-top:6px; text-align:center; }
+#guide{ width:min(860px,96vw); margin-top:18px; background:rgba(16,24,40,0.85); border:1px solid #2c3a58;
+  border-radius:12px; padding:14px 18px; font-size:clamp(12px,1.5vw,15px); line-height:1.9; color:#aabbd0; }
+#guide b{ color:#ffcc66; }
+#drop{
+  width:min(860px,96vw); margin-top:14px; border:2px dashed #44aaff; border-radius:14px;
+  background:rgba(10,26,48,0.45); padding:clamp(24px,5vh,44px) 16px; text-align:center; cursor:pointer;
+  transition:background .15s, border-color .15s;
+}
+#drop.hover{ background:rgba(68,170,255,0.14); border-color:#7cc2ff; }
+#drop .big{ font-size:clamp(15px,2.2vw,20px); color:#7cc2ff; }
+#drop .small{ font-size:clamp(11px,1.4vw,13px); color:#667f9f; margin-top:8px; }
+#file-input{ display:none; }
+#status{ margin-top:10px; font-size:clamp(11px,1.4vw,14px); color:#7df7a0; min-height:20px; }
+section{ width:min(860px,96vw); margin-top:22px; display:none; }
+section h2{ font-size:clamp(15px,2vw,19px); color:#ffcc66; letter-spacing:1px; margin-bottom:10px; }
+.tbl-wrap{ overflow-x:auto; border:1px solid #2c3a58; border-radius:10px; background:rgba(13,19,33,0.9); }
+table{ border-collapse:collapse; width:100%; font-size:clamp(11px,1.4vw,14px); white-space:nowrap; }
+th,td{ padding:8px 12px; border-bottom:1px solid #1e2a44; text-align:center; }
+th{ background:#16223c; color:#9fc0e8; letter-spacing:1px; position:sticky; top:0; }
+tr:last-child td{ border-bottom:none; }
+td.name{ color:#fff; font-weight:bold; }
+.ok{ color:#7df7a0; } .bad{ color:#ff8888; } .dim{ color:#667f9f; }
+.rate-hi{ color:#7df7a0; } .rate-mid{ color:#ffcc66; } .rate-lo{ color:#ff8888; }
+#btns{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
+.btn{
+  font-family:inherit; font-size:clamp(12px,1.5vw,15px); letter-spacing:1px; cursor:pointer;
+  background:rgba(10,26,48,0.5); border:2px solid #44aaff; color:#7cc2ff;
+  border-radius:12px; padding:10px 22px; transition:background .15s;
+}
+.btn:hover{ background:rgba(68,170,255,0.15); }
+#foot{ margin-top:26px; font-size:11px; color:#556; text-align:center; line-height:1.8; }
+</style>
+</head>
+<body>
+  <h1>⚡ 교사용 결과 취합</h1>
+  <div class="sub">ENERGY QUEST · TEACHER TOOL</div>
+
+  <div id="guide">
+    <b>사용법</b> — ① 학생들이 게임의 <b>[📥 결과 저장]</b> 버튼(월드맵·클리어 화면)으로 받은
+    CSV 파일을 과제방·메신저 등으로 제출받으세요. ② 받은 파일들을 아래 상자에 한꺼번에
+    끌어다 놓으면(또는 클릭해서 선택) 학급 전체 요약표가 만들어집니다. ③ [통합 CSV 다운로드]로
+    엑셀에서 열 수 있는 통합 파일을 저장하세요. <b>모든 처리는 이 화면 안에서만 이뤄지고
+    어디에도 전송되지 않습니다.</b>
+  </div>
+
+  <div id="drop">
+    <div class="big">📂 학생 CSV 파일들을 여기에 끌어다 놓기</div>
+    <div class="small">또는 클릭해서 파일 선택 (여러 개 한꺼번에 가능)</div>
+  </div>
+  <input type="file" id="file-input" accept=".csv,text/csv" multiple>
+  <div id="status"></div>
+
+  <section id="sec-summary">
+    <h2>📊 학생별 요약</h2>
+    <div class="tbl-wrap"><table id="tbl-summary">
+      <thead><tr>
+        <th>이름</th><th>퀴즈 정답</th><th>정답률</th><th>퍼즐(6단계)</th>
+        <th>보스전</th><th>클리어</th><th>최종 등급</th><th>마지막 기록</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <div id="btns">
+      <button class="btn" id="btn-merge">📥 통합 CSV 다운로드</button>
+      <button class="btn" id="btn-clear">🗑 비우기</button>
+    </div>
+  </section>
+
+  <section id="sec-detail">
+    <h2>📋 전체 기록</h2>
+    <div class="tbl-wrap" style="max-height:420px;overflow-y:auto;"><table id="tbl-detail">
+      <thead><tr>
+        <th>이름</th><th>시각</th><th>구분</th><th>스테이지</th><th>내용</th><th>결과</th><th>소요(초)</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+
+  <div id="foot">
+    에너지 퀘스트 교사용 도구 · 인터넷 연결 없이 동작합니다<br>
+    같은 학생 파일을 두 번 넣으면 중복 기록은 자동으로 걸러집니다
+  </div>
+
+<script>
+'use strict';
+const HEAD = ['이름','시각','구분','스테이지','내용','결과','소요(초)'];
+let rows = [];           // {name,t,k,s,d,r,sec}
+const seen = new Set();  // 중복 제거 키
+
+// ── CSV 한 줄 파서(따옴표 필드 지원) ──
+function parseLine(line){
+  const out=[]; let cur='', q=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(q){
+      if(c==='"'){ if(line[i+1]==='"'){cur+='"';i++;} else q=false; }
+      else cur+=c;
+    } else {
+      if(c==='"')q=true;
+      else if(c===','){out.push(cur);cur='';}
+      else cur+=c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+function parseCSV(text){
+  text=text.replace(/^\uFEFF/,'');
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  if(!lines.length)return [];
+  const first=parseLine(lines[0]);
+  const hasHead = first[0]===HEAD[0];
+  const body = hasHead ? lines.slice(1) : lines;
+  const out=[];
+  for(const line of body){
+    const f=parseLine(line);
+    if(f.length<6)continue;
+    out.push({name:f[0],t:f[1],k:f[2],s:f[3],d:f[4],r:f[5],sec:f[6]||''});
+  }
+  return out;
+}
+
+// ── 파일 적재 ──
+function addFiles(files){
+  const list=[...files].filter(f=>/\.csv$/i.test(f.name)||f.type==='text/csv');
+  if(!list.length){setStatus('CSV 파일이 아니에요. 게임에서 저장한 .csv 파일을 넣어주세요.',true);return;}
+  let done=0, added=0;
+  list.forEach(f=>{
+    const rd=new FileReader();
+    rd.onload=()=>{
+      for(const r of parseCSV(rd.result)){
+        const key=[r.name,r.t,r.k,r.s,r.d].join('|');
+        if(seen.has(key))continue;
+        seen.add(key); rows.push(r); added++;
+      }
+      if(++done===list.length){render();setStatus(`파일 ${list.length}개에서 기록 ${added}건 추가 (총 ${rows.length}건)`);}
+    };
+    rd.onerror=()=>{ if(++done===list.length){render();} };
+    rd.readAsText(f,'utf-8');
+  });
+}
+function setStatus(msg,bad){
+  const el=document.getElementById('status');
+  el.textContent=msg; el.style.color=bad?'#ff8888':'#7df7a0';
+}
+
+// ── 렌더 ──
+function render(){
+  const byName=new Map();
+  for(const r of rows){
+    if(!byName.has(r.name))byName.set(r.name,[]);
+    byName.get(r.name).push(r);
+  }
+  const sb=document.querySelector('#tbl-summary tbody'); sb.innerHTML='';
+  [...byName.keys()].sort((a,b)=>a.localeCompare(b,'ko')).forEach(name=>{
+    const rs=byName.get(name);
+    const quiz=rs.filter(r=>r.k==='퀴즈');
+    const qok=quiz.filter(r=>r.r==='정답').length;
+    const rate=quiz.length?Math.round(qok/quiz.length*100):null;
+    const pz=rs.filter(r=>r.k==='퍼즐');
+    const pzok=pz.filter(r=>r.r==='성공').length;
+    const boss=rs.filter(r=>r.k==='보스전').length;
+    const clearN=new Set(rs.filter(r=>r.k==='클리어').map(r=>r.s)).size;
+    const end=rs.find(r=>r.k==='엔딩');
+    const last=rs.reduce((m,r)=>r.t>m?r.t:m,'');
+    const rateCls=rate==null?'dim':rate>=80?'rate-hi':rate>=50?'rate-mid':'rate-lo';
+    const tr=document.createElement('tr');
+    tr.innerHTML=
+      `<td class="name">${escapeHtml(name)}</td>`+
+      `<td>${quiz.length?`<span class="ok">${qok}</span> / ${quiz.length}`:'<span class="dim">—</span>'}</td>`+
+      `<td class="${rateCls}">${rate==null?'—':rate+'%'}</td>`+
+      `<td>${pz.length?`${pzok}/${pz.length}`:'<span class="dim">—</span>'}</td>`+
+      `<td>${boss?boss+'라운드':'<span class="dim">—</span>'}</td>`+
+      `<td>${clearN?`<span class="ok">${clearN}단계 ✓</span>`:'<span class="dim">—</span>'}</td>`+
+      `<td>${end?`<b class="ok">${escapeHtml(end.r)}</b>`:'<span class="dim">—</span>'}</td>`+
+      `<td class="dim">${escapeHtml(last)}</td>`;
+    sb.appendChild(tr);
+  });
+  const db=document.querySelector('#tbl-detail tbody'); db.innerHTML='';
+  [...rows].sort((a,b)=>(a.name+a.t).localeCompare(b.name+b.t,'ko')).forEach(r=>{
+    const tr=document.createElement('tr');
+    const cls=r.r==='정답'||r.r==='성공'||r.r==='✓'?'ok':(r.r==='오답'||r.r==='실패'?'bad':'');
+    tr.innerHTML=
+      `<td class="name">${escapeHtml(r.name)}</td><td class="dim">${escapeHtml(r.t)}</td>`+
+      `<td>${escapeHtml(r.k)}</td><td>${escapeHtml(r.s)}</td><td style="white-space:normal;text-align:left;">${escapeHtml(r.d)}</td>`+
+      `<td class="${cls}">${escapeHtml(r.r)}</td><td class="dim">${escapeHtml(r.sec)}</td>`;
+    db.appendChild(tr);
+  });
+  document.getElementById('sec-summary').style.display=rows.length?'block':'none';
+  document.getElementById('sec-detail').style.display=rows.length?'block':'none';
+}
+function escapeHtml(v){
+  return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ── 통합 CSV ──
+function esc(v){ v=String(v==null?'':v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+document.getElementById('btn-merge').addEventListener('click',()=>{
+  if(!rows.length)return;
+  const lines=[HEAD.join(',')];
+  for(const r of rows)lines.push([r.name,r.t,r.k,r.s,r.d,r.r,r.sec].map(esc).join(','));
+  const d=new Date(), pad=n=>(n<10?'0':'')+n;
+  const blob=new Blob(['\uFEFF'+lines.join('\r\n')+'\r\n'],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`에너지퀘스트_학급통합_${pad(d.getMonth()+1)}${pad(d.getDate())}.csv`;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},300);
+});
+document.getElementById('btn-clear').addEventListener('click',()=>{
+  rows=[]; seen.clear(); render(); setStatus('비웠습니다. 다시 파일을 넣어주세요.');
+});
+
+// ── 드롭존 ──
+const drop=document.getElementById('drop'), fi=document.getElementById('file-input');
+drop.addEventListener('click',()=>fi.click());
+fi.addEventListener('change',()=>{addFiles(fi.files);fi.value='';});
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('hover');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hover');}));
+drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+</script>
+</body>
+</html>

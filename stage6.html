@@ -180,6 +180,7 @@ body{margin:0;padding:0;background:#06020e;overflow:hidden;user-select:none;-web
 <script src="eq-terrain.js"></script>
 <script src="eq-fx.js"></script>
 <script src="eq-perf.js"></script>
+<script src="eq-log.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
 // CONSTANTS — stage2와 동일 스케일
@@ -546,6 +547,7 @@ function checkPuzzleReady(p){document.getElementById('puzzle-submit').disabled=p
 document.getElementById('puzzle-submit').addEventListener('click',()=>{
   const p=PUZZLES[currentPuzzleId];
   const ok=p.answer.every((a,i)=>puzzleSlotData[i]===a);
+  if(window.EQLog)EQLog.puzzle(6,(p.gateLabel||'게이트').split('—')[0].trim(),ok);
   const fb=document.getElementById('puzzle-feedback');
   if(ok){
     fb.textContent='✓ 시퀀스 일치! 게이트 해제!';fb.className='ok';
@@ -649,6 +651,7 @@ function saveToLocalStorage(){
   localStorage.setItem('eq_exp',player.exp);
   localStorage.setItem('eq_coins',player.coins);
   localStorage.setItem('eq_stage6_map_cleared','1');
+  if(window.EQLog)EQLog.stageClearOnce(6);
   localStorage.setItem('eq_char_id',player.charId||'haetsal');
   localStorage.setItem('eq_char_name',player.charName||'공학자');
   localStorage.setItem('eq_char_job',player.charJob||'에너지 공학자');

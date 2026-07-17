@@ -91,9 +91,11 @@ body{
   <div id="footer">
     <button class="btn" onclick="go('dogam.html')">📚 에너지 도감</button>
     <button class="btn" onclick="go('index.html')">🏠 타이틀로</button>
+    <button class="btn" onclick="if(window.EQLog)EQLog.download()">📥 결과 저장</button>
   </div>
   <div id="hint">잠긴 곳(🔒)은 앞 스테이지를 깨야 열려요 · 깬 곳은 다시 들어갈 수 있어요</div>
 
+<script src="eq-log.js"></script>
 <script>
 // ── 에너지 여정 스테이지 정의 (설계: 태양광→풍력→하베스팅→저장→스마트그리드→본부) ──
 const STAGES = [

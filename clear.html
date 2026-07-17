@@ -285,6 +285,7 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh;font-family:"Do Hy
   </div>
   <div id="btn-wrap">
     <button class="action-btn" id="btn-review" onclick="openSurvey()">[ 후기 남기기 ]</button>
+    <button class="action-btn" id="btn-savelog" onclick="if(window.EQLog)EQLog.download()">[ 📥 결과 저장 ]</button>
     <button class="action-btn" id="btn-title" onclick="goTitle()">[ 타이틀로 ]</button>
     <button class="action-btn" id="btn-replay" onclick="goReplay()">[ 다시 도전 ]</button>
   </div>
@@ -363,6 +364,7 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh;font-family:"Do Hy
 
 <div id="fade"></div>
 
+<script src="eq-log.js"></script>
 <script>
 // ── 파티클 (녹색/황금 계열 — 희망적 분위기)
 (function(){
@@ -404,6 +406,7 @@ const data      = GRADES[grade];
 const $grade = document.getElementById('grade');
 $grade.textContent = grade;
 $grade.style.color = data.color;
+if(window.EQLog)EQLog.ending(grade+'등급');
 
 document.getElementById('clear-title').textContent = data.title;
 document.getElementById('story-text').textContent  = data.story;

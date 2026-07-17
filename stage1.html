@@ -268,6 +268,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 <script src="eq-char.js"></script>
 <script src="eq-fx.js"></script>
 <script src="eq-perf.js"></script>
+<script src="eq-log.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════
 // CONSTANTS
@@ -757,6 +758,7 @@ function submitAnswer(timeout=false){
   $submit.disabled=true;
   const q=GATE_QUIZZES[quizState.currentIdx];
   const ok=!timeout&&quizState.selectedIdx===q.answer;
+  if(window.EQLog)EQLog.quiz(1,q.topic,ok,Math.max(0,30-quizState.timerVal));
   document.querySelectorAll('.choice-btn').forEach((b,i)=>{
     if(i===q.answer)b.classList.add('correct');
     else if(i===quizState.selectedIdx&&!ok)b.classList.add('wrong');
@@ -911,6 +913,7 @@ function saveToLocalStorage(){
   localStorage.setItem('eq_expmax', player.expMax);
   localStorage.setItem('eq_coins', player.coins);
   localStorage.setItem('eq_stage1_cleared','1');
+  if(window.EQLog)EQLog.stageClearOnce(1);
 }
 function loadFromLocalStorage(){
   const lv=parseInt(localStorage.getItem('eq_level'))||1;

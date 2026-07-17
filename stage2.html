@@ -249,6 +249,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 <script src="eq-terrain.js"></script>
 <script src="eq-fx.js"></script>
 <script src="eq-perf.js"></script>
+<script src="eq-log.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════
 // CONSTANTS
@@ -640,6 +641,7 @@ function submitAnswer(timeout=false){
   clearInterval(quizState.timerInterval);quizState.answered=true;$submit.disabled=true;
   const q=GATE_QUIZZES[quizState.currentIdx];
   const ok=!timeout&&quizState.selectedIdx===q.answer;
+  if(window.EQLog)EQLog.quiz(2,q.topic,ok,Math.max(0,30-quizState.timerVal));
   document.querySelectorAll('.choice-btn').forEach((b,i)=>{
     if(i===q.answer)b.classList.add('correct');
     else if(i===quizState.selectedIdx&&!ok)b.classList.add('wrong');
@@ -1519,6 +1521,7 @@ function saveToLocalStorage(){
   localStorage.setItem('eq_expmax', player.expMax);
   localStorage.setItem('eq_coins', player.coins);
   localStorage.setItem('eq_stage2_cleared','1');
+  if(window.EQLog)EQLog.stageClearOnce(2);
   localStorage.setItem('eq_char_id',   player.charId||'haetsal');
   localStorage.setItem('eq_char_name', player.charName||'햇살');
   localStorage.setItem('eq_char_job',  player.charJob||'에너지 공학자');
