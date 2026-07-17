@@ -6,10 +6,12 @@
 // ════════════════════════════════════════════════════════════
 const SFX = (function(){
   const BASE = 'audio/';
+  // 기본 확장자는 .mp3, 자체 제작(합성) 효과음은 .wav
+  const EXT = { quiz_answer_npc_talk: '.wav' };
   const cache = {};
   function get(name){
     if(!cache[name]){
-      cache[name] = new Audio(BASE + name + '.mp3');
+      cache[name] = new Audio(BASE + name + (EXT[name] || '.mp3'));
       cache[name].preload = 'auto';
     }
     return cache[name];
