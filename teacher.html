@@ -17,9 +17,35 @@ body{
 h1{ font-family:'Do Hyeon','Noto Sans KR',sans-serif; font-size:clamp(22px,3.4vw,34px); color:#ffe8c0; letter-spacing:3px;
   text-shadow:0 0 24px rgba(255,136,0,.55),0 3px 0 #5a2a00; text-align:center; }
 .sub{ font-family:'Do Hyeon','Noto Sans KR',sans-serif; font-size:clamp(10px,1.3vw,14px); color:#7790b0; letter-spacing:4px; margin-top:6px; text-align:center; }
-#guide{ width:min(860px,96vw); margin-top:18px; background:rgba(16,24,40,0.85); border:1px solid #2c3a58;
-  border-radius:12px; padding:14px 18px; font-size:clamp(12px,1.5vw,15px); line-height:1.9; color:#aabbd0; }
-#guide b{ color:#ffcc66; }
+#guide{ width:min(860px,96vw); margin-top:18px; }
+#steps{ display:flex; align-items:stretch; gap:10px; }
+.step{
+  flex:1; background:rgba(16,24,40,0.85); border:1px solid #2c3a58; border-radius:12px;
+  padding:14px 16px; font-size:clamp(12px,1.4vw,14px); line-height:1.75; color:#aabbd0;
+  display:flex; flex-direction:column; gap:8px;
+}
+.step b{ color:#ffcc66; }
+.step-head{ display:flex; align-items:center; gap:8px; }
+.step-num{
+  flex-shrink:0; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:14px; color:#0a0e18; background:linear-gradient(180deg,#ffd873,#ff9a2a);
+  box-shadow:0 0 10px rgba(255,154,42,.45);
+}
+.step-title{ font-weight:700; color:#fff; font-size:clamp(13px,1.6vw,16px); }
+.step-arrow{
+  align-self:center; flex-shrink:0; font-size:clamp(18px,2.4vw,24px); color:#44aaff;
+  text-shadow:0 0 12px rgba(68,170,255,.6); animation:arrowPulse 1.8s ease-in-out infinite;
+}
+@keyframes arrowPulse{0%,100%{opacity:.45;transform:translateX(0)}50%{opacity:1;transform:translateX(3px)}}
+#guide-note{
+  margin-top:10px; text-align:center; font-size:clamp(11px,1.3vw,13px); color:#7790b0;
+  background:rgba(10,26,20,0.5); border:1px solid #2a6a44; border-radius:10px; padding:8px 14px;
+}
+#guide-note b{ color:#7df7a0; }
+@media (max-width:680px){
+  #steps{ flex-direction:column; }
+  .step-arrow{ transform:rotate(90deg); animation:none; opacity:.8; margin:-2px 0; }
+}
 #drop{
   width:min(860px,96vw); margin-top:14px; border:2px dashed #44aaff; border-radius:14px;
   background:rgba(10,26,48,0.45); padding:clamp(24px,5vh,44px) 16px; text-align:center; cursor:pointer;
@@ -55,11 +81,23 @@ td.name{ color:#fff; font-weight:bold; }
   <div class="sub">ENERGY QUEST · TEACHER TOOL</div>
 
   <div id="guide">
-    <b>사용법</b> — ① 학생들이 게임의 <b>[📥 결과 저장]</b> 버튼(월드맵·클리어 화면)으로 받은
-    CSV 파일을 과제방·메신저 등으로 제출받으세요. ② 받은 파일들을 아래 상자에 한꺼번에
-    끌어다 놓으면(또는 클릭해서 선택) 학급 전체 요약표가 만들어집니다. ③ [통합 CSV 다운로드]로
-    엑셀에서 열 수 있는 통합 파일을 저장하세요. <b>모든 처리는 이 화면 안에서만 이뤄지고
-    어디에도 전송되지 않습니다.</b>
+    <div id="steps">
+      <div class="step">
+        <div class="step-head"><span class="step-num">1</span><span class="step-title">학생이 저장</span></div>
+        <div>게임의 <b>[📥 결과 저장]</b> 버튼(월드맵·클리어 화면)으로 CSV 파일을 받아 과제방·메신저로 제출해요.</div>
+      </div>
+      <div class="step-arrow">➜</div>
+      <div class="step">
+        <div class="step-head"><span class="step-num">2</span><span class="step-title">교사가 취합</span></div>
+        <div>받은 파일들을 아래 상자에 <b>한꺼번에 끌어다 놓으면</b>(또는 클릭해서 선택) 학급 요약표가 자동으로 만들어져요.</div>
+      </div>
+      <div class="step-arrow">➜</div>
+      <div class="step">
+        <div class="step-head"><span class="step-num">3</span><span class="step-title">엑셀로 저장</span></div>
+        <div><b>[통합 CSV 다운로드]</b>를 누르면 학급 전체를 엑셀에서 바로 열 수 있는 한 파일로 저장해요.</div>
+      </div>
+    </div>
+    <div id="guide-note">🔒 <b>모든 처리는 이 화면 안에서만</b> 이뤄지고 어디에도 전송되지 않습니다</div>
   </div>
 
   <div id="drop">
