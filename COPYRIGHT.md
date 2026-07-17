@@ -37,20 +37,24 @@
 
 | 파일 | 용도 | 출처 | 라이선스 |
 |---|---|---|---|
-| `quiz_false.mp3` | 오답 효과음 | Freesound.org — Beetlemuse 작 "Wrong! No!" (2023, 파일 메타데이터로 확인) | CC (원본 페이지 확인 후 확정) |
-| `quiz_true.mp3` | 정답 효과음 | Freesound.org (추정) | 확인 예정 |
-| `item_collect.mp3` | 아이템 획득 | Freesound.org (추정) | 확인 예정 |
-| `stage_clear.mp3` | 스테이지 클리어 | Freesound.org (추정) | 확인 예정 |
-| `victory.mp3` | 승리 | Freesound.org (추정) | 확인 예정 |
-| `warp.mp3` | 포털 이동 | Freesound.org (추정) | 확인 예정 |
-| `wind.mp3` | 환경음 | Freesound.org (추정) | 확인 예정 |
-| `bgm.mp3` | 배경 음악 | Vrew(보이저엑스)에서 내보내기(파일 메타데이터 "vrew Audio Export"로 확인) | Vrew 콘텐츠 이용 정책 확인 예정 |
-| `quiz_answer_npc_talk.wav` | 대화·선택 효과음 | **출품자 자체 합성 제작**(사인파 합성 프로그램 작성) | 자작 |
+| `quiz_false.mp3` | 오답 효과음 | Freesound — Beetlemuse, "False C" — https://freesound.org/people/Beetlemuse/sounds/692847/ (길이 1.53초 일치 확인) | **CC0** |
+| `quiz_true.mp3` | 정답 효과음 | Freesound — oggraphics, "Good answer harp glissando" — https://freesound.org/people/oggraphics/sounds/610703/ (원본 6.7초 중 3초 발췌 편집) | **CC0** |
+| `item_collect.mp3` | 아이템 획득 | Freesound — Leszek_Szary, "3 up 1" — https://freesound.org/people/Leszek_Szary/sounds/171580/ (길이 2.18초 일치 확인) | **CC0** |
+| `stage_clear.mp3` | 스테이지 클리어 | Freesound — FunWithSound, "Success Fanfare Trumpets" — https://freesound.org/people/FunWithSound/sounds/456966/ (길이 4.44초 일치 확인) | **CC0** |
+| `victory.mp3` | 승리 | Freesound — JoanStar, "Victory Jingle" — https://freesound.org/people/JoanStar/sounds/844831/ (길이 4.00초 일치 확인) | **CC0** |
+| `warp.mp3` | 포털 이동 | Freesound — colorsCrimsonTears, "Time Travel - Future" — https://freesound.org/people/colorsCrimsonTears/sounds/585801/ (길이 4.33초 일치 확인) | **CC0** |
+| `wind.mp3` | 환경음(10초 발췌) | Freesound 풍력 터빈 실녹음 — ①Funkelfang, "Wind Turbine - Rhythmic Swoosh and Mechanical Hum" https://freesound.org/people/Funkelfang/sounds/845351/ (**CC BY 4.0**) ②nicola_ariutti, "wind_turbine" https://freesound.org/people/nicola_ariutti/sounds/648493/ (CC0) 중 발췌 편집 | CC BY 4.0 기준 준수 |
+| `bgm.mp3` | 배경 음악(60초 루프) | Vrew(보이저엑스)에서 내보내기(파일 메타데이터 "vrew Audio Export"로 확인) | Vrew 콘텐츠 이용 정책 |
+| `quiz_answer_npc_talk.wav` | 대화·선택 효과음 | **출품자 자체 합성 제작**(사인파 합성 프로그램으로 생성) | 자작 |
 
-- Freesound.org 음원은 대부분 CC0(출처 표기 불요)이나 CC-BY(출처 표기 필요) 음원도 있으므로,
-  **다운로드 계정의 기록에서 각 음원의 원본 페이지 URL과 라이선스를 확인해 최종본에 확정 기재한다.**
-- 기존 `quiz_answer_npc_talk.mp3`는 메타데이터에서 상용 서비스(Facebook) 알림음으로 확인되어
-  **2026-07-17 자체 제작 음원으로 교체·삭제함** (저작권 위험 제거).
+### 저작자 표시 (CC BY 4.0 준수)
+
+> 풍력 환경음: "Wind Turbine - Rhythmic Swoosh and Mechanical Hum (Close Perspective)" by **Funkelfang** (freesound.org), licensed under **CC BY 4.0** (https://creativecommons.org/licenses/by/4.0/). 원본에서 10초 발췌·편집.
+
+- 위 표의 길이 일치 확인 = 게임 파일을 디코딩해 실측한 재생 시간과 원본 페이지 표기 시간의 대조 결과.
+- wind.mp3는 후보 원본이 2건이라 확정이 어려워, **더 엄격한 라이선스(CC BY 4.0) 기준으로 저작자 표시를 포함**함. CC0 쪽이 원본이어도 표시가 불이익이 되지 않음.
+- 기존 `quiz_answer_npc_talk.mp3`(Freesound — Alexhanj, "Facebook Pop.m4a", CC0, https://freesound.org/people/Alexhanj/sounds/449861/)는 CC0로 적법하게 사용 가능했으나,
+  제목이 상용 서비스명을 포함해 심사 과정에서 오해 소지가 있어 **2026-07-17 자체 제작 음원으로 교체함**.
 
 ## 5. 소스 코드
 
