@@ -500,10 +500,17 @@ function selectChar(id){
   var na=document.getElementById('name-area');
   var ni=document.getElementById('name-input');
   na.style.display='flex';
-  ni.value=ch.defaultName;
-  ni.focus(); ni.select();
+  // 사용자가 직접 고친 이름은 캐릭터를 바꿔도 유지
+  if(!nameEdited||!ni.value.trim()){
+    ni.value=ch.defaultName; nameEdited=false;
+    ni.focus(); ni.select();
+  } else {
+    ni.focus();
+  }
   document.getElementById('start-btn').style.display='block';
 }
+var nameEdited=false;
+document.getElementById('name-input').addEventListener('input',function(){nameEdited=true;});
 
 function startGame(){
   if(!selectedId) return;
@@ -525,9 +532,11 @@ function startGame(){
 
 document.getElementById('start-btn').addEventListener('click',startGame);
 document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&selectedId){ startGame(); return; }
+  // 이름 입력창에 포커스가 있으면 숫자키는 글자 입력으로만 쓴다(캐릭터 전환 방지)
+  if(e.target&&e.target.id==='name-input') return;
   var map={'1':0,'2':1,'3':2,'4':3};
   if(e.key in map) selectChar(CHARS[map[e.key]].id);
-  if(e.key==='Enter'&&selectedId) startGame();
 });
 
 // ══════════════════════════════════════════════════════════

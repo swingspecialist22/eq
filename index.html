@@ -151,7 +151,13 @@ window.onload=function(){
 };
 function newGame(){
   if(hasSave && !confirm('저장된 기록이 있습니다.\n새 게임을 시작하면 기존 기록이 삭제됩니다. 계속할까요?'))return;
+  // 기기 성능 판정·후기 제출 여부는 게임 기록이 아니므로 새 게임에도 보존
+  var keep={};
+  ['eq_perf','eq_review_sent'].forEach(function(k){
+    var v=localStorage.getItem(k); if(v!==null)keep[k]=v;
+  });
   localStorage.clear();
+  for(var k in keep)localStorage.setItem(k,keep[k]);
   window.location.href='character-select.html';
 }
 function continueGame(){
