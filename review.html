@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>에너지 퀘스트 — 오답 노트</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+  background:radial-gradient(circle at 50% 0%,#13203a 0%,#0a0e18 60%,#06080e 100%);
+  color:#e8e8e8; min-height:100vh; padding:clamp(16px,3vh,40px) 14px;
+  display:flex; flex-direction:column; align-items:center;
+}
+h1{ font-family:'Do Hyeon','Noto Sans KR',sans-serif; font-size:clamp(22px,3.4vw,34px); color:#ffe8c0; letter-spacing:3px;
+  text-shadow:0 0 24px rgba(255,136,0,.55),0 3px 0 #5a2a00; text-align:center; }
+.sub{ font-family:'Do Hyeon','Noto Sans KR',sans-serif; font-size:clamp(10px,1.3vw,14px); color:#7790b0; letter-spacing:4px; margin-top:6px; text-align:center; }
+#tip{ width:min(760px,96vw); margin-top:14px; text-align:center; font-size:clamp(11px,1.4vw,13px); color:#7790b0;
+  background:rgba(10,26,20,0.5); border:1px solid #2a6a44; border-radius:10px; padding:8px 14px; }
+#tip b{ color:#7df7a0; }
+#list{ width:min(760px,96vw); margin-top:16px; display:flex; flex-direction:column; gap:12px; }
+.note{
+  background:rgba(16,24,40,0.9); border:1px solid #2c3a58; border-radius:12px; padding:14px 16px;
+  font-size:clamp(12px,1.5vw,14px); line-height:1.8;
+}
+.note-head{ display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+.stage-badge{
+  font-weight:700; font-size:12px; color:#0a0e18; background:linear-gradient(180deg,#ffd873,#ff9a2a);
+  border-radius:8px; padding:2px 10px;
+}
+.note-q{ font-weight:700; color:#fff; }
+.row{ display:flex; gap:8px; align-items:flex-start; }
+.tag{ flex-shrink:0; font-size:11px; font-weight:700; border-radius:6px; padding:1px 8px; margin-top:4px; }
+.tag.my{ color:#ff8888; border:1px solid #aa4444; background:rgba(230,57,70,0.08); }
+.tag.ans{ color:#7df7a0; border:1px solid #2a6a44; background:rgba(46,196,182,0.08); }
+.my-text{ color:#dba0a0; }
+.ans-text{ color:#b9f0cd; }
+.note-ex{ margin-top:8px; color:#9fb0c8; border-left:2px solid #44aaff; padding-left:10px; white-space:pre-line; }
+#empty{
+  width:min(760px,96vw); margin-top:40px; text-align:center; color:#7790b0; font-size:clamp(13px,1.8vw,16px);
+  line-height:2; display:none;
+}
+#empty .big{ font-size:clamp(34px,6vw,52px); }
+#btns{ width:min(760px,96vw); margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+.btn{
+  font-family:inherit; font-size:clamp(12px,1.5vw,15px); letter-spacing:1px; cursor:pointer;
+  background:rgba(10,26,48,0.5); border:2px solid #44aaff; color:#7cc2ff;
+  border-radius:12px; padding:10px 22px; transition:background .15s;
+}
+.btn:hover{ background:rgba(68,170,255,0.15); }
+</style>
+</head>
+<body>
+  <h1>📖 오답 노트</h1>
+  <div class="sub">ENERGY QUEST · REVIEW</div>
+  <div id="tip">틀렸던 문제만 모아 보여줘요 · 나중에 관문 퀴즈에서 같은 문제를 <b>맞히면 자동으로 지워집니다</b></div>
+
+  <div id="list"></div>
+  <div id="empty">
+    <div class="big">🎉</div>
+    남아 있는 오답이 없어요!<br>모든 문제를 정복했네요, 공학자!
+  </div>
+
+  <div id="btns">
+    <button class="btn" onclick="location.href='worldmap.html'">🗺 월드맵으로</button>
+  </div>
+
+<script>
+'use strict';
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function escapeHtml(v){
+  return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+}
+var notes=[];
+try{ notes=JSON.parse(lsGet('eq_wrong_notes')||'[]'); }catch(e){}
+var list=document.getElementById('list');
+if(!notes.length){
+  document.getElementById('empty').style.display='block';
+} else {
+  // 최근에 틀린 것부터
+  notes.slice().reverse().forEach(function(n){
+    var el=document.createElement('div');
+    el.className='note';
+    el.innerHTML=
+      '<div class="note-head"><span class="stage-badge">'+escapeHtml(n.s)+'단계</span>'+
+      '<span class="note-q">'+escapeHtml(n.q)+'</span></div>'+
+      '<div class="row"><span class="tag my">내 답</span><span class="my-text">'+escapeHtml(n.my)+'</span></div>'+
+      '<div class="row"><span class="tag ans">정답</span><span class="ans-text">'+escapeHtml(n.ans)+'</span></div>'+
+      (n.ex?'<div class="note-ex">💡 '+escapeHtml(n.ex)+'</div>':'');
+    list.appendChild(el);
+  });
+}
+</script>
+</body>
+</html>

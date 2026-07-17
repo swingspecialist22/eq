@@ -57,8 +57,28 @@ window.EQLog=(function(){
     setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},300);
     return true;
   }
+  // ── 오답 노트: 틀린 문항을 저장, 나중에 같은 문항을 맞히면 자동 삭제 ──
+  var WKEY='eq_wrong_notes';
+  function updateWrongNote(stage,ok,q,picked){
+    if(!q)return;
+    try{
+      var notes=JSON.parse(localStorage.getItem(WKEY)||'[]');
+      notes=notes.filter(function(n){return n.q!==q.question;});
+      if(!ok){
+        notes.push({
+          t:now(), s:String(stage), q:q.question,
+          my:(picked>=0&&q.choices[picked]!=null)?q.choices[picked]:'(시간 초과)',
+          ans:q.choices[q.answer], ex:q.explanation||''
+        });
+      }
+      localStorage.setItem(WKEY,JSON.stringify(notes));
+    }catch(e){}
+  }
   return{
-    quiz:function(stage,topic,ok,sec){add('퀴즈',stage,topic,ok?'정답':'오답',sec);},
+    quiz:function(stage,topic,ok,sec,q,picked){
+      add('퀴즈',stage,topic,ok?'정답':'오답',sec);
+      updateWrongNote(stage,ok,q,picked);
+    },
     puzzle:function(stage,label,ok){add('퍼즐',stage,label,ok?'성공':'실패');},
     // 같은 스테이지 클리어는 1회만 기록(저장 함수가 반복 호출돼도 안전)
     stageClearOnce:function(stage){

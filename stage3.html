@@ -326,7 +326,7 @@ const ITEMS=[
 // ══════════════════════════════════════════════════════════
 // QUIZZES
 // ══════════════════════════════════════════════════════════
-const GATE_QUIZZES=[
+const GATE_QUIZ_POOL=[
   {
     topic:'에너지 하베스팅',
     question:'밟거나 누르는 압력으로 전기를 만들어, 버려지는 자투리 에너지를 모으는 기술은?',
@@ -348,7 +348,30 @@ const GATE_QUIZZES=[
     answer:2, exp:35, coins:6,
     explanation:'수소차는 수소(H₂)와 산소(O₂)의 전기화학 반응으로 전기를 만들며\n유일한 부산물은 물(H₂O)입니다. 진정한 무공해 차량이에요.',
   },
+  {
+    topic:'열전 소자',
+    question:'따뜻한 쪽과 차가운 쪽의 온도 차이를 이용해, 버려지는 열에서 전기를 얻는 부품은?',
+    choices:['① 열전 소자','② 태양전지','③ 풍력 터빈','④ 변압기'],
+    answer:0, exp:30, coins:5,
+    explanation:'열전 소자는 양쪽의 온도 차가 클수록 더 많은 전기를 만들어요.\n공장 폐열, 자동차 배기열 같은 버려지는 열을 전기로 되살릴 수 있습니다.',
+  },
+  {
+    topic:'진동 에너지 수확',
+    question:'다리·기계·차량이 흔들릴 때 생기는 진동으로 전기를 만드는 에너지 하베스팅 방식은?',
+    choices:['① 진동 수확 장치','② 수력 발전','③ 조력 발전','④ 지열 발전'],
+    answer:0, exp:30, coins:5,
+    explanation:'진동 수확 장치는 흔들림(운동 에너지)을 전기로 바꿉니다.\n다리의 흔들림, 기계의 떨림처럼 버려지던 에너지가 자원이 돼요.',
+  },
+  {
+    topic:'하베스팅의 쓰임새',
+    question:'에너지 하베스팅이 특히 유용하게 쓰이는 곳으로 가장 알맞은 것은?',
+    choices:['① 배터리 교체가 어려운 소형 센서','② 대형 제철소 용광로 가동','③ 우주 로켓 발사','④ 대도시 전체 전력 공급'],
+    answer:0, exp:35, coins:6,
+    explanation:'하베스팅은 작지만 꾸준한 전기를 만드는 기술이에요.\n다리 안전 센서처럼 배터리를 갈기 힘든 곳에서 진가를 발휘합니다.',
+  },
 ];
+const GATE_QUIZZES=[]; // 매 도전마다 GATE_QUIZ_POOL에서 3문항 무작위 선발
+
 
 // ══════════════════════════════════════════════════════════
 // NPCs
@@ -793,7 +816,15 @@ const $rexpl=document.getElementById('result-explanation');
 const $rnext=document.getElementById('result-next-btn');
 const $submit=document.getElementById('quiz-submit-btn');
 
-function startGateQuiz(){quizState.currentIdx=0;launchGateQuestion(0);}
+function startGateQuiz(){
+  // 문항 풀에서 무작위 3개 선발 — 재도전 때마다 새 조합
+  const pool=GATE_QUIZ_POOL.slice();
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=pool[i];pool[i]=pool[j];pool[j]=t;}
+  GATE_QUIZZES.length=0;
+  GATE_QUIZZES.push(pool[0],pool[1],pool[2]);
+  quizState.currentIdx=0;
+  launchGateQuestion(0);
+}
 function launchGateQuestion(idx){
   const q=GATE_QUIZZES[idx];
   quizState.active=true;quizState.currentIdx=idx;quizState.selectedIdx=-1;quizState.answered=false;
@@ -829,7 +860,7 @@ function submitAnswer(timeout=false){
   clearInterval(quizState.timerInterval);quizState.answered=true;$submit.disabled=true;
   const q=GATE_QUIZZES[quizState.currentIdx];
   const ok=!timeout&&quizState.selectedIdx===q.answer;
-  if(window.EQLog)EQLog.quiz(3,q.topic,ok,Math.max(0,30-quizState.timerVal));
+  if(window.EQLog)EQLog.quiz(3,q.topic,ok,Math.max(0,30-quizState.timerVal),q,quizState.selectedIdx);
   document.querySelectorAll('.choice-btn').forEach((b,i)=>{
     if(i===q.answer)b.classList.add('correct');
     else if(i===quizState.selectedIdx&&!ok)b.classList.add('wrong');

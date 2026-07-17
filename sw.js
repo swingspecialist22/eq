@@ -7,7 +7,7 @@ const FILES = [
   '/character-select.html',
   '/prologue.html',
   '/stage1.html', '/stage2.html', '/stage3.html', '/stage4.html', '/stage5.html', '/stage6.html',
-  '/worldmap.html', '/dogam.html',
+  '/worldmap.html', '/dogam.html', '/review.html',
   '/eq-audio.js', '/eq-nav.js', '/eq-char.js', '/eq-fx.js', '/eq-terrain.js', '/eq-perf.js', '/eq-log.js', '/eq-ui.css',
   '/teacher.html',
   '/manifest.json',

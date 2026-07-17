@@ -350,7 +350,7 @@ const ITEMS=[
 // ═══════════════════════════════════════════════════════════
 // DEC 관문 퀴즈 3문제 (대화에서 확정된 내용)
 // ═══════════════════════════════════════════════════════════
-const GATE_QUIZZES=[
+const GATE_QUIZ_POOL=[
   {
     topic:'태양광 vs 태양열',
     question:'태양광 발전과 태양열 발전의 차이로 올바른 것은?',
@@ -390,7 +390,48 @@ const GATE_QUIZZES=[
     exp:35, coins:6,
     explanation:'해바라기처럼 태양을 따라 회전하여 패널이 항상 직각으로\n빛을 받아 발전 효율을 최대 30% 이상 높입니다.',
   },
+  {
+    topic:'광전 효과',
+    question:'태양전지 패널에 빛이 닿으면 반도체 속 전자가 움직여 전기가 흐릅니다. 이 현상의 이름은?',
+    choices:[
+      '광전 효과',
+      '관성의 법칙',
+      '도플러 효과',
+      '부력의 원리',
+    ],
+    answer:0,
+    exp:30, coins:5,
+    explanation:'빛(광자)이 반도체에 닿아 전자를 움직이게 하는 현상이 광전 효과입니다.\n태양광 발전의 심장과 같은 원리예요.',
+  },
+  {
+    topic:'태양광의 약점 보완',
+    question:'태양광 발전은 밤이나 흐린 날엔 전기를 못 만들어요. 이 약점을 보완하는 가장 좋은 방법은?',
+    choices:[
+      '낮에 만든 전기를 축전지에 저장해 둔다',
+      '밤에 전등을 켜서 패널을 비춘다',
+      '패널을 더 세게 문지른다',
+      '밤에는 전기 쓰는 것을 포기한다',
+    ],
+    answer:0,
+    exp:30, coins:5,
+    explanation:'낮에 남는 전기를 축전지(배터리)에 모아 두면 밤에도 쓸 수 있어요.\n"발전 + 저장"이 함께해야 진짜 에너지 자립이 됩니다.',
+  },
+  {
+    topic:'패널 설치 장소',
+    question:'태양전지 패널을 설치하기에 가장 알맞은 곳은?',
+    choices:[
+      '그늘진 지하실',
+      '햇빛이 잘 드는 남향 지붕',
+      '빛이 안 드는 동굴 속',
+      '키 큰 나무 바로 아래',
+    ],
+    answer:1,
+    exp:35, coins:6,
+    explanation:'우리나라에서는 남향이 해를 가장 오래, 많이 받습니다.\n그림자가 지면 발전량이 뚝 떨어지므로 그늘 없는 곳이 중요해요.',
+  },
 ];
+const GATE_QUIZZES=[]; // 매 도전마다 GATE_QUIZ_POOL에서 3문항 무작위 선발
+
 
 // ═══════════════════════════════════════════════════════════
 // NPC ─ 대화 가능 NPC
@@ -703,6 +744,11 @@ const $rnext=document.getElementById('result-next-btn');
 const $submit=document.getElementById('quiz-submit-btn');
 
 function startGateQuiz(){
+  // 문항 풀에서 무작위 3개 선발 — 재도전 때마다 새 조합
+  const pool=GATE_QUIZ_POOL.slice();
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=pool[i];pool[i]=pool[j];pool[j]=t;}
+  GATE_QUIZZES.length=0;
+  GATE_QUIZZES.push(pool[0],pool[1],pool[2]);
   quizState.currentIdx=0;
   launchGateQuestion(0);
 }
@@ -758,7 +804,7 @@ function submitAnswer(timeout=false){
   $submit.disabled=true;
   const q=GATE_QUIZZES[quizState.currentIdx];
   const ok=!timeout&&quizState.selectedIdx===q.answer;
-  if(window.EQLog)EQLog.quiz(1,q.topic,ok,Math.max(0,30-quizState.timerVal));
+  if(window.EQLog)EQLog.quiz(1,q.topic,ok,Math.max(0,30-quizState.timerVal),q,quizState.selectedIdx);
   document.querySelectorAll('.choice-btn').forEach((b,i)=>{
     if(i===q.answer)b.classList.add('correct');
     else if(i===quizState.selectedIdx&&!ok)b.classList.add('wrong');

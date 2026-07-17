@@ -329,7 +329,7 @@ const ITEMS=[
 // ═══════════════════════════════════════════════════════════
 // QUIZZES — 풍력 에너지 3문제
 // ═══════════════════════════════════════════════════════════
-const GATE_QUIZZES=[
+const GATE_QUIZ_POOL=[
   {
     topic:'터빈 날개 개수',
     question:'풍력 발전기의 날개(블레이드)는 보통 몇 개인가요?',
@@ -364,7 +364,48 @@ const GATE_QUIZZES=[
     exp:35, coins:6,
     explanation:'해안과 산등성이는 바람이 강하고 꾸준히 부는 곳입니다.\n바람이 셀수록 발전량이 증가하기 때문에 최적의 입지예요.',
   },
+  {
+    topic:'바람의 근원',
+    question:'풍력 발전의 "연료"인 바람은 어떻게 만들어질까요?',
+    choices:[
+      '태양열로 데워진 공기의 온도 차 때문에',
+      '달이 지구를 끌어당겨서',
+      '지구 속 마그마가 뿜어져 나와서',
+      '자동차들이 달리면서 일으켜서',
+    ],
+    answer:0,
+    exp:30, coins:5,
+    explanation:'태양이 땅과 바다를 다르게 데우면 공기가 이동하는데, 그것이 바람이에요.\n결국 풍력도 태양에서 온 에너지인 셈이죠!',
+  },
+  {
+    topic:'해상 풍력',
+    question:'풍력 발전기를 바다 위에 세우는 해상풍력의 장점으로 알맞은 것은?',
+    choices:[
+      '바다 위는 바람이 더 세고 꾸준히 분다',
+      '물고기들이 날개를 돌려 준다',
+      '전선이 필요 없어진다',
+      '파도가 전기를 대신 만들어 준다',
+    ],
+    answer:0,
+    exp:30, coins:5,
+    explanation:'바다 위는 막힘이 없어 바람이 강하고 일정하게 불어요.\n소음 걱정도 적어서 세계적으로 해상풍력이 빠르게 늘고 있습니다.',
+  },
+  {
+    topic:'풍력 발전 원리',
+    question:'풍력 발전기가 전기를 만드는 순서로 올바른 것은?',
+    choices:[
+      '바람 → 날개 회전 → 발전기 회전 → 전기',
+      '바람 → 열 발생 → 물 끓이기 → 전기',
+      '바람 → 빛 발생 → 반도체 → 전기',
+      '바람 → 압력 저장 → 폭발 → 전기',
+    ],
+    answer:0,
+    exp:35, coins:6,
+    explanation:'바람이 날개(블레이드)를 돌리면, 그 회전이 발전기를 돌려 전기를 만듭니다.\n운동 에너지가 전기 에너지로 바뀌는 거예요.',
+  },
 ];
+const GATE_QUIZZES=[]; // 매 도전마다 GATE_QUIZ_POOL에서 3문항 무작위 선발
+
 
 // ═══════════════════════════════════════════════════════════
 // NPCs
@@ -605,7 +646,15 @@ const $rexpl=document.getElementById('result-explanation');
 const $rnext=document.getElementById('result-next-btn');
 const $submit=document.getElementById('quiz-submit-btn');
 
-function startGateQuiz(){quizState.currentIdx=0;launchGateQuestion(0);}
+function startGateQuiz(){
+  // 문항 풀에서 무작위 3개 선발 — 재도전 때마다 새 조합
+  const pool=GATE_QUIZ_POOL.slice();
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=pool[i];pool[i]=pool[j];pool[j]=t;}
+  GATE_QUIZZES.length=0;
+  GATE_QUIZZES.push(pool[0],pool[1],pool[2]);
+  quizState.currentIdx=0;
+  launchGateQuestion(0);
+}
 function launchGateQuestion(idx){
   const q=GATE_QUIZZES[idx];
   quizState.active=true;quizState.currentIdx=idx;quizState.selectedIdx=-1;quizState.answered=false;
@@ -641,7 +690,7 @@ function submitAnswer(timeout=false){
   clearInterval(quizState.timerInterval);quizState.answered=true;$submit.disabled=true;
   const q=GATE_QUIZZES[quizState.currentIdx];
   const ok=!timeout&&quizState.selectedIdx===q.answer;
-  if(window.EQLog)EQLog.quiz(2,q.topic,ok,Math.max(0,30-quizState.timerVal));
+  if(window.EQLog)EQLog.quiz(2,q.topic,ok,Math.max(0,30-quizState.timerVal),q,quizState.selectedIdx);
   document.querySelectorAll('.choice-btn').forEach((b,i)=>{
     if(i===q.answer)b.classList.add('correct');
     else if(i===quizState.selectedIdx&&!ok)b.classList.add('wrong');

@@ -329,7 +329,7 @@ const ITEMS=[
 // ══════════════════════════════════════════════════════════
 // 관문 퀴즈 (에너지 저장: 배터리·양수발전·수소)
 // ══════════════════════════════════════════════════════════
-const GATE_QUIZZES=[
+const GATE_QUIZ_POOL=[
   {
     topic:'에너지 저장이 필요한 이유',
     question:'태양광·풍력은 햇빛과 바람에 따라 들쭉날쭉해요. 남는 전기를 모아 밤이나 흐린 날에도 쓰려면 꼭 필요한 것은?',
@@ -351,7 +351,30 @@ const GATE_QUIZZES=[
     answer:0, exp:40, coins:7,
     explanation:'남는 전기로 물을 전기분해하면 수소(H₂)를 얻고, 이를 "그린수소"라 해요.\n저장해 두었다가 연료전지로 다시 전기를 만들 수 있어 오래·많이 저장하기 좋아요.\n배터리(빠른 저장)와 수소(장기 저장)는 서로 보완하는 짝꿍이에요!',
   },
+  {
+    topic:'ESS(에너지 저장 시스템)',
+    question:'태양광 발전소 옆에 대형 배터리를 세워, 남는 전기를 모아 두는 설비를 무엇이라 할까요?',
+    choices:['① ESS(에너지 저장 시스템)','② 에어컨','③ 변압기','④ 송전탑'],
+    answer:0, exp:35, coins:6,
+    explanation:'ESS는 Energy Storage System, 즉 에너지 저장 시스템이에요.\n낮에 남은 태양광 전기를 모았다가 밤에 꺼내 쓰는 거대한 배터리 창고입니다.',
+  },
+  {
+    topic:'배터리와 수소의 짝꿍',
+    question:'에너지 저장 방법인 배터리와 수소의 특징을 바르게 짝지은 것은?',
+    choices:['① 배터리=빠른 충전과 방전, 수소=대용량 장기 저장','② 배터리=장기 저장, 수소=빠른 충전','③ 둘 다 전기를 저장할 수 없다','④ 둘 다 석유로 만든다'],
+    answer:0, exp:35, coins:6,
+    explanation:'배터리는 빠르게 넣고 빼는 단기 저장, 수소는 오래·많이 모으는 장기 저장에 강해요.\n서로 다른 장점으로 보완하는 에너지 저장의 짝꿍입니다.',
+  },
+  {
+    topic:'저장과 에너지 자립',
+    question:'에너지 저장 장치가 "에너지 자립"에 꼭 필요한 이유는?',
+    choices:['① 해가 지거나 바람이 멎어도 모아 둔 전기로 버틸 수 있어서','② 전기 요금이 무조건 공짜가 되어서','③ 발전소가 저절로 커져서','④ 전선이 필요 없어져서'],
+    answer:0, exp:40, coins:7,
+    explanation:'신재생에너지는 날씨에 따라 들쭉날쭉하죠.\n저장 장치가 있으면 생산이 멈춰도 버틸 수 있어, 누구에게도 기대지 않는 자립이 완성돼요.',
+  },
 ];
+const GATE_QUIZZES=[]; // 매 도전마다 GATE_QUIZ_POOL에서 3문항 무작위 선발
+
 
 // ══════════════════════════════════════════════════════════
 // NPCs
@@ -752,7 +775,15 @@ const $rexpl=document.getElementById('result-explanation');
 const $rnext=document.getElementById('result-next-btn');
 const $submit=document.getElementById('quiz-submit-btn');
 
-function startGateQuiz(){quizState.currentIdx=0;launchGateQuestion(0);}
+function startGateQuiz(){
+  // 문항 풀에서 무작위 3개 선발 — 재도전 때마다 새 조합
+  const pool=GATE_QUIZ_POOL.slice();
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=pool[i];pool[i]=pool[j];pool[j]=t;}
+  GATE_QUIZZES.length=0;
+  GATE_QUIZZES.push(pool[0],pool[1],pool[2]);
+  quizState.currentIdx=0;
+  launchGateQuestion(0);
+}
 function launchGateQuestion(idx){
   const q=GATE_QUIZZES[idx];
   quizState.active=true;quizState.currentIdx=idx;quizState.selectedIdx=-1;quizState.answered=false;
@@ -788,7 +819,7 @@ function submitAnswer(timeout=false){
   clearInterval(quizState.timerInterval);quizState.answered=true;$submit.disabled=true;
   const q=GATE_QUIZZES[quizState.currentIdx];
   const ok=!timeout&&quizState.selectedIdx===q.answer;
-  if(window.EQLog)EQLog.quiz(4,q.topic,ok,Math.max(0,30-quizState.timerVal));
+  if(window.EQLog)EQLog.quiz(4,q.topic,ok,Math.max(0,30-quizState.timerVal),q,quizState.selectedIdx);
   document.querySelectorAll('.choice-btn').forEach((b,i)=>{
     if(i===q.answer)b.classList.add('correct');
     else if(i===quizState.selectedIdx&&!ok)b.classList.add('wrong');
