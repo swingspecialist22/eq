@@ -75,7 +75,34 @@
     host.insertBefore(box, lvLine || host.firstChild);
   }
 
-  function init(){ addBtn(); setupRank(); }
+  // ── HUD 컴팩트 모드: 캔버스 좌우 여백이 좁으면 HUD를 축소해 맵 가림 최소화 ──
+  // 일반 모드 우측 패널 실폭이 최대 ~330px이므로, 여백이 340px 미만이면 compact,
+  // 80px 미만(모바일 등 캔버스가 화면을 꽉 채움)이면 mini까지 적용.
+  function setupHudCompact(){
+    if(!document.getElementById('hud')) return;   // HUD 없는 화면은 패스
+    function upd(){
+      // 각 스테이지의 fit()이 캔버스 크기를 먼저 잡도록 한 박자 늦게 측정
+      setTimeout(function(){
+        var cv = document.getElementById('game-canvas');
+        if(!cv) return;
+        // 캔버스가 아직 크기를 못 받았으면 스테이지 화면비(960:704)로 추정
+        var cw = cv.clientWidth || Math.min(window.innerWidth, window.innerHeight * (960/704));
+        var margin = (window.innerWidth - cw) / 2;
+        document.body.classList.toggle('eq-hud-compact', margin < 340);
+        document.body.classList.toggle('eq-hud-mini',    margin < 80);
+      }, 80);
+    }
+    // 컴팩트 모드에선 버튼이 아이콘만 보이므로 툴팁으로 이름을 보존
+    var tips = { 'inv-toggle':'아이템 목록', 'bgm-toggle':'배경 음악 켜기/끄기', 'sfx-toggle':'효과음 켜기/끄기' };
+    setTimeout(function(){
+      for(var id in tips){ var b=document.getElementById(id); if(b && !b.title) b.title = tips[id]; }
+    }, 300);
+    window.addEventListener('resize', upd);
+    window.addEventListener('orientationchange', upd);
+    upd();
+  }
+
+  function init(){ addBtn(); setupRank(); setupHudCompact(); }
   if (document.body) init();
   else document.addEventListener('DOMContentLoaded', init);
 })();

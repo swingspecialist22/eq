@@ -48,3 +48,30 @@
    → 아이템 획득 시 뜨던 "+EXP" 표시와 옛 레벨업 팝업을 숨긴다(개별 아이템으론 등급 안 오름). */
 .ip-exp{ display:none !important; }
 #levelup-popup{ display:none !important; }
+
+/* ════════════════════════════════════════════════════════════
+   HUD 컴팩트 모드 — 캔버스 좌우 여백이 좁은 화면(작은 모니터·태블릿·모바일)에서
+   HUD 패널이 맵을 가리는 면적을 최소화한다.
+   eq-nav.js가 여백을 측정해 body에 .eq-hud-compact / .eq-hud-mini 를 붙인다.
+   ════════════════════════════════════════════════════════════ */
+body.eq-hud-compact #hud{ padding:4px 6px; }
+body.eq-hud-compact #hud-left{ font-size:9px; line-height:1.6; padding:4px 8px; }
+body.eq-hud-compact #hud-left .name{ font-size:10px; }
+body.eq-hud-compact #hud-mission{ font-size:9px; line-height:1.5; padding:4px 8px; }
+body.eq-hud-compact #hud-right{ font-size:9px; line-height:1.6; padding:4px 6px; }
+body.eq-hud-compact #hud-right .zone{ font-size:10px; }
+body.eq-hud-compact #hud-coords{ display:none; }
+/* 버튼은 아이콘만 보이게 가로 한 줄로 축소(텍스트는 넘침 클립) */
+body.eq-hud-compact #inv-toggle,
+body.eq-hud-compact #bgm-toggle,
+body.eq-hud-compact #sfx-toggle{
+  width:32px; height:26px; overflow:hidden; white-space:nowrap;
+  font-size:12px; padding:3px 0 3px 6px; margin:4px 0 0 4px;
+  display:inline-block; vertical-align:top; text-align:left;
+}
+/* 초소형(모바일 등 여백 0): 등급 게이지 줄까지 접고 패널을 살짝 투명하게 */
+body.eq-hud-mini #eq-rank-box div:nth-child(2),
+body.eq-hud-mini #eq-rank-box div:nth-child(3){ display:none; }
+body.eq-hud-mini #hud-left,
+body.eq-hud-mini #hud-mission,
+body.eq-hud-mini #hud-right{ opacity:.92; }
