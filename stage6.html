@@ -288,17 +288,19 @@ const PUZZLES={
 
 // ═══════════════════════════════════════════════════════
 // ITEMS — 에너지 결정체 3개
+// 게이트 인증 키이므로 반드시 게이트 없이 닿는 열린 복도에 둘 것
+// (시작 시 접근 가능 = 좌측 세로 복도 col5 · 북서 복도 R1 5~8 · 남쪽 복도 R11 5~12)
 // ═══════════════════════════════════════════════════════
 const ITEMS=[
-  {id:'crystal_solar',tx:3,ty:5,icon:'💎',name:'태양 에너지 결정체',
+  {id:'crystal_solar',tx:7,ty:1,icon:'💎',name:'태양 에너지 결정체',
    story:'DEC가 압수한 태양광 연구 데이터.',
    desc:'"태양광 패널 1㎡는 하루 약 4~6kWh를 생산해.\n지구 1시간 햇빛 = 인류 1년치 에너지."',
    exp:20,coins:4,color:'#ffcc44'},
-  {id:'crystal_wind',tx:2,ty:7,icon:'🔷',name:'풍력 에너지 결정체',
+  {id:'crystal_wind',tx:5,ty:6,icon:'🔷',name:'풍력 에너지 결정체',
    story:'DEC 서버에 봉인된 풍력 발전 데이터.',
    desc:'"풍력 발전량은 풍속의 세제곱에 비례해.\n바람이 2배 빠르면 발전량은 8배!"',
    exp:20,coins:4,color:'#44ccff'},
-  {id:'crystal_ess',tx:17,ty:8,icon:'🔮',name:'ESS 제어 결정체',
+  {id:'crystal_ess',tx:12,ty:11,icon:'🔮',name:'ESS 제어 결정체',
    story:'DEC가 독점한 에너지 저장 기술 코드.',
    desc:'"ESS는 재생에너지의 간헐성을 보완해.\n낮에 모은 태양광을 밤에 쓸 수 있게 해줘."',
    exp:20,coins:4,color:'#cc44ff'},
