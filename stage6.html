@@ -163,6 +163,7 @@ body{margin:0;padding:0;background:#06020e;overflow:hidden;user-select:none;-web
       <div id="puzzle-header">
         <div id="puzzle-gate-tag">보안 게이트</div>
         <div id="puzzle-title">에너지 시퀀스 해제</div>
+        <button id="puzzle-close" type="button" title="나가기 (ESC)">✕</button>
       </div>
       <div id="puzzle-body">
         <div id="puzzle-desc"></div>
@@ -605,6 +606,7 @@ document.getElementById('puzzle-submit').addEventListener('click',()=>{
   }
 });
 function closePuzzle(){puzzleActive=false;document.getElementById('puzzle-overlay').classList.remove('active');}
+document.getElementById('puzzle-close').addEventListener('click',closePuzzle);
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&puzzleActive)closePuzzle();});
 
 // ═══════════════════════════════════════════════════════

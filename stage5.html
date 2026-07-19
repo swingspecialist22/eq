@@ -181,6 +181,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
         <div id="quiz-topic-tag">관문 퀴즈</div>
         <div id="quiz-progress">문제 1/3</div>
         <div>&#x23F1; <span id="quiz-timer">30</span></div>
+        <button id="quiz-exit" type="button" title="나가기 (ESC)">✕</button>
       </div>
       <div id="quiz-body">
         <div id="quiz-q-num">Q.1</div>
@@ -805,6 +806,9 @@ document.addEventListener('keydown',e=>{
     if(quizState.selectedIdx!==-1)submitAnswer(false);
   }
 });
+// 관문 퀴즈 나가기(✕/ESC) — 도전 취소, 감시병에게 다시 말 걸면 재도전
+document.getElementById('quiz-exit').addEventListener('click',()=>closeQuizOverlay());
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&quizState.active)closeQuizOverlay();});
 function closeQuizOverlay(){clearInterval(quizState.timerInterval);quizState.active=false;$qo.classList.remove('active');}
 
 // ═══════════════════════════════════════════════════════════

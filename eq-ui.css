@@ -44,6 +44,15 @@
 }
 #sfx-toggle.off{ color:#555; border-color:#333; }
 
+/* ── 관문 퀴즈/시퀀스 퍼즐 나가기 버튼(✕) — 도전 중 언제든 취소 가능 ── */
+#quiz-exit,#puzzle-close{
+  flex-shrink:0; width:36px; height:36px; margin-left:10px;
+  border-radius:50%; border:1px solid #666; background:rgba(0,0,0,.45);
+  color:#bbb; font-size:16px; line-height:1; cursor:pointer;
+  font-family:inherit; padding:0;
+}
+#quiz-exit:hover,#puzzle-close:hover{ border-color:#ccc; color:#fff; }
+
 /* 레벨/EXP는 '에너지 지식 등급'(eq-nav.js)으로 대체됨
    → 아이템 획득 시 뜨던 "+EXP" 표시와 옛 레벨업 팝업을 숨긴다(개별 아이템으론 등급 안 오름). */
 .ip-exp{ display:none !important; }
