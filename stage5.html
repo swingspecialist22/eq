@@ -85,7 +85,19 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
 #clear-overlay.show{background:rgba(0,0,0,0.75);pointer-events:auto;}
 #clear-box{transform:scale(0);opacity:0;transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .5s;text-align:center;background:linear-gradient(135deg,#020c1a,#041828);border:2px solid #38bdf8;border-radius:12px;padding:32px 48px;}
 #clear-overlay.show #clear-box{transform:scale(1);opacity:1;}
-#joystick-base{position:fixed;width:18vmin;height:18vmin;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.22);display:none;pointer-events:none;z-index:200;transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(255,255,255,0.05);}
+#joystick-base{position:fixed;width:18vmin;height:18vmin;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.22);display:none;pointer-events:none;z-index:200;transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(255,255,255,0.05);transition:opacity .15s;}
+#joystick-base.idle{opacity:.55;}
+.joy-ar{
+  position:absolute;left:50%;top:50%;
+  color:rgba(255,255,255,.6);
+  font-size:3vmin;line-height:1;
+  pointer-events:none;
+  text-shadow:0 1px 3px rgba(0,0,0,.7);
+}
+.ja-u{transform:translate(-50%,-50%) translateY(-6.2vmin);}
+.ja-d{transform:translate(-50%,-50%) translateY(6.2vmin);}
+.ja-l{transform:translate(-50%,-50%) translateX(-6.2vmin);}
+.ja-r{transform:translate(-50%,-50%) translateX(6.2vmin);}
 #joystick-knob{width:42%;height:42%;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(255,255,255,0.60),rgba(255,255,255,0.18));border:2px solid rgba(255,255,255,0.42);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,0.5);}
 #btn-confirm{position:fixed;right:5vmin;bottom:28%;width:14vmin;height:14vmin;min-width:54px;min-height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6.5vmin;cursor:pointer;pointer-events:all;touch-action:none;user-select:none;-webkit-user-select:none;background:rgba(14,165,233,0.42);border:2.5px solid rgba(14,165,233,0.68);backdrop-filter:blur(4px);box-shadow:0 3px 16px rgba(0,0,0,0.45);transition:transform .08s,background .08s;z-index:200;}
 #btn-confirm:active{transform:scale(0.88);background:rgba(14,165,233,0.78);}
@@ -202,7 +214,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
     </div>
   </div>
   <button id="quest-log-btn" onclick="showQuestLog()">📋 퀘스트</button>
-  <div id="joystick-base"><div id="joystick-knob"></div></div>
+  <div id="joystick-base"><span class="joy-ar ja-u">▲</span><span class="joy-ar ja-d">▼</span><span class="joy-ar ja-l">◀</span><span class="joy-ar ja-r">▶</span><div id="joystick-knob"></div></div>
   <div id="btn-confirm">✅</div>
 </div>
 <div id="controls-hint"><span>↑↓←→ / WASD</span> 이동 &nbsp;|&nbsp; <span>SPACE / ENTER</span> 대화·확인 &nbsp;|&nbsp; <span>1-4</span> 퀴즈 선택</div>
@@ -630,6 +642,7 @@ function interact(){
   const tx=player.tx+dx, ty=player.ty+dy;
   for(const n of NPCS){
     if(n.tx===tx&&n.ty===ty){
+      if(n.isGuard&&gameState.gateCleared)continue; // 관문 통과 후 해커 완전 퇴장 — 대화도 불가
       if(n.isGuard){handleGuardInteract();return;}
       const dlg=n.getDialog();if(dlg.length)openDialog(n.name,dlg);return;
     }
@@ -648,7 +661,6 @@ function interact(){
 // 관문
 // ═══════════════════════════════════════════════════════════
 function handleGuardInteract(){
-  if(gameState.gateCleared){openDialog('DEC 해커',['...이미 통과됐군. 어차피 넌 끝이야.']);return;}
   if(player.inventory.size<3){
     openDialog('DEC 해커',[
       '여기서 멈춰! DEC 관제실에 무단 접근 금지!',
@@ -1637,8 +1649,10 @@ requestAnimationFrame(gameLoop);
   const DIRS=[{dir:'up',key:'ArrowUp'},{dir:'down',key:'ArrowDown'},{dir:'left',key:'ArrowLeft'},{dir:'right',key:'ArrowRight'}];
   let jTid=null,jOx=0,jOy=0,curDir=null,moveTimer=null;
   function getR(){return base.offsetWidth/2||window.innerWidth*0.09;}
-  function showAt(cx,cy){base.style.left=cx+'px';base.style.top=cy+'px';base.style.display='block';}
-  function hide(){base.style.display='none';knob.style.transform='translate(-50%,-50%)';}
+  function showAt(cx,cy){base.style.left=cx+'px';base.style.top=cy+'px';base.style.display='block';base.classList.remove('idle');}
+  // 홈 위치(좌측 하단, 확인 버튼과 대칭) — 평상시에도 반투명으로 표시해 조작법 안내
+  function homePos(){const vmin=Math.min(window.innerWidth,window.innerHeight)/100;return {x:12*vmin,y:window.innerHeight*0.72-7*vmin};}
+  function goHome(){const p=homePos();base.style.left=p.x+'px';base.style.top=p.y+'px';base.style.display='block';base.classList.add('idle');knob.style.transform='translate(-50%,-50%)';}
   function classifyDir(dx,dy){if(Math.sqrt(dx*dx+dy*dy)<DEAD)return null;return Math.abs(dx)>=Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up');}
   function applyDir(dir){
     if(dir===curDir)return;
@@ -1654,7 +1668,7 @@ requestAnimationFrame(gameLoop);
     knob.style.transform=`translate(calc(-50% + ${dx*R*0.52}px),calc(-50% + ${dy*R*0.52}px))`;
     applyDir(classifyDir(dx,dy));
   }
-  function joyEnd(){jTid=null;hide();applyDir(null);clearInterval(moveTimer);}
+  function joyEnd(){jTid=null;goHome();applyDir(null);clearInterval(moveTimer);}
   document.addEventListener('touchstart',e=>{
     for(const t of e.changedTouches){
       if(jTid!==null)break;
@@ -1675,6 +1689,9 @@ requestAnimationFrame(gameLoop);
     confirmBtn.addEventListener('touchstart',e=>{e.stopPropagation();e.preventDefault();confirmPressed=true;},{passive:false});
     confirmBtn.addEventListener('mousedown',e=>{e.preventDefault();confirmPressed=true;});
   }
+  // 시작 시 홈 위치에 표시 (데스크톱 마우스 환경은 CSS 미디어쿼리가 숨김)
+  goHome();
+  window.addEventListener('resize',()=>{if(jTid===null)goHome();});
 })();
 
   // ── 오디오 엔진(SFX/BGM)은 공용 파일 eq-audio.js 로 분리됨 ──

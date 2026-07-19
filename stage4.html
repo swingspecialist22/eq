@@ -101,7 +101,20 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
   z-index:200;
   transform:translate(-50%,-50%);
   box-shadow:0 0 0 3px rgba(255,255,255,0.05);
+  transition:opacity .15s;
 }
+#joystick-base.idle{opacity:.55;}
+.joy-ar{
+  position:absolute;left:50%;top:50%;
+  color:rgba(255,255,255,.6);
+  font-size:3vmin;line-height:1;
+  pointer-events:none;
+  text-shadow:0 1px 3px rgba(0,0,0,.7);
+}
+.ja-u{transform:translate(-50%,-50%) translateY(-6.2vmin);}
+.ja-d{transform:translate(-50%,-50%) translateY(6.2vmin);}
+.ja-l{transform:translate(-50%,-50%) translateX(-6.2vmin);}
+.ja-r{transform:translate(-50%,-50%) translateX(6.2vmin);}
 #joystick-knob{
   width:42%;height:42%;
   border-radius:50%;
@@ -249,7 +262,7 @@ body{margin:0;padding:0;background:#000;overflow:hidden;user-select:none;-webkit
   </div>
   <button id="quest-log-btn" onclick="showQuestLog()">📋 퀘스트</button>
     <!-- 다이나믹 조이스틱 -->
-  <div id="joystick-base"><div id="joystick-knob"></div></div>
+  <div id="joystick-base"><span class="joy-ar ja-u">▲</span><span class="joy-ar ja-d">▼</span><span class="joy-ar ja-l">◀</span><span class="joy-ar ja-r">▶</span><div id="joystick-knob"></div></div>
   <!-- 확인 버튼 -->
   <div id="btn-confirm">✅</div>
 </div>
@@ -729,6 +742,7 @@ function interact(){
   const tx=player.tx+dx, ty=player.ty+dy;
   for(const n of NPCS){
     if((n.tx===tx&&n.ty===ty)||(n.tx===player.tx&&n.ty===player.ty)){
+      if(n.isGuard&&gameState.gateCleared)continue; // 관문 통과 후 MANU-9 완전 퇴장 — 대화도 불가
       if(n.isGuard){handleGuardInteract();return;}
       const dlg=n.getDialog();if(dlg.length)openDialog(n.name,dlg);return;
     }
@@ -742,7 +756,6 @@ function interact(){
 // 관문 (MANU-9)
 // ══════════════════════════════════════════════════════════
 function handleGuardInteract(){
-  if(gameState.gateCleared){openDialog('MANU-9',['...시스템 오버라이드 확인. 통과 허가.','포털 활성화됨. 이동하라.']);return;}
   if(gameState.npcMet.size<3){
     openDialog('MANU-9',[
       '경고. 무단 침입 감지.',
@@ -1793,9 +1806,19 @@ requestAnimationFrame(gameLoop);
     base.style.left=cx+'px';
     base.style.top=cy+'px';
     base.style.display='block';
+    base.classList.remove('idle');
   }
-  function hide(){
-    base.style.display='none';
+  // 홈 위치(좌측 하단, 확인 버튼과 대칭) — 평상시에도 반투명으로 표시해 조작법 안내
+  function homePos(){
+    const vmin=Math.min(window.innerWidth,window.innerHeight)/100;
+    return {x:12*vmin, y:window.innerHeight*0.72-7*vmin};
+  }
+  function goHome(){
+    const p=homePos();
+    base.style.left=p.x+'px';
+    base.style.top=p.y+'px';
+    base.style.display='block';
+    base.classList.add('idle');
     knob.style.transform='translate(-50%,-50%)';
   }
 
@@ -1824,7 +1847,7 @@ requestAnimationFrame(gameLoop);
   }
 
   function joyEnd(){
-    jTid=null; hide(); applyDir(null); clearInterval(moveTimer);
+    jTid=null; goHome(); applyDir(null); clearInterval(moveTimer);
   }
 
   // 화면 전체 터치 감지
@@ -1867,6 +1890,10 @@ requestAnimationFrame(gameLoop);
     },{passive:false});
     confirmBtn.addEventListener('mousedown',e=>{ e.preventDefault(); confirmPressed=true; });
   }
+
+  // 시작 시 홈 위치에 표시 (데스크톱 마우스 환경은 CSS 미디어쿼리가 숨김)
+  goHome();
+  window.addEventListener('resize',()=>{ if(jTid===null) goHome(); });
 })();
 
 
