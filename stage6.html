@@ -65,7 +65,7 @@ body{margin:0;padding:0;background:#06020e;overflow:hidden;user-select:none;-web
 #restore-overlay.flash{background:rgba(180,60,255,0.3);}
 @keyframes expFloat{0%{transform:translateY(0);opacity:1;}100%{transform:translateY(-60px);opacity:0;}}
 #controls-hint{display:none;}
-#quest-log-btn{position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.6);border:1px solid #3a1a4a;color:#8a4aaa;font-size:9px;padding:8px 12px;border-radius:3px;cursor:pointer;letter-spacing:1px;font-family:'Courier New',monospace;min-height:36px;}
+#quest-log-btn{position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.6);border:1px solid #3a1a4a;color:#8a4aaa;font-size:clamp(10px,1.3vw,14px);padding:8px 12px;border-radius:3px;cursor:pointer;letter-spacing:1px;font-family:'Courier New',monospace;min-height:36px;}
 #quest-log-btn:hover{border-color:#8a3aaa;color:#cc88ff;}
 #joystick-base{position:fixed;width:18vmin;height:18vmin;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.22);display:none;pointer-events:none;z-index:200;transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(255,255,255,0.05);transition:opacity .15s;}
 #joystick-base.idle{opacity:.55;}

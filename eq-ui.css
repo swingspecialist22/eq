@@ -75,3 +75,26 @@ body.eq-hud-mini #eq-rank-box div:nth-child(3){ display:none; }
 body.eq-hud-mini #hud-left,
 body.eq-hud-mini #hud-mission,
 body.eq-hud-mini #hud-right{ opacity:.92; }
+
+/* ════════════════════════════════════════════════════════════
+   터치 기기(태블릿·모바일) 확대 — 심사·수업용 태블릿에서 글자가 안 보인다는
+   피드백 반영. 컴팩트/미니 축소가 걸려도 우상단(코인·BGM·효과음) 패널과
+   하단 지도·퀘스트 버튼은 읽히는 크기를 유지한다.
+   (#eq-map-btn은 eq-nav.js가 인라인 스타일로 주입하므로 !important 필요)
+   ════════════════════════════════════════════════════════════ */
+@media (hover:none) and (pointer:coarse){
+  #hud-right,
+  body.eq-hud-compact #hud-right{ font-size:13px; line-height:1.8; padding:8px 12px; }
+  #hud-right .zone,
+  body.eq-hud-compact #hud-right .zone{ font-size:14px; }
+  #inv-toggle,#bgm-toggle,#sfx-toggle,
+  body.eq-hud-compact #inv-toggle,
+  body.eq-hud-compact #bgm-toggle,
+  body.eq-hud-compact #sfx-toggle{
+    width:46px; height:40px; overflow:hidden; white-space:nowrap;
+    font-size:19px; padding:7px 0 7px 10px; margin:5px 0 0 5px;
+    display:inline-block; vertical-align:top; text-align:left;
+  }
+  #quest-log-btn{ font-size:15px !important; padding:10px 14px !important; }
+  #eq-map-btn{ font-size:15px !important; padding:10px 14px !important; bottom:62px !important; }
+}

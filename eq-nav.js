@@ -1,6 +1,7 @@
 // ════════════════════════════════════════════════════════════
 // 에너지 퀘스트 — 공용 내비게이션 (eq-nav.js)
-// 모든 스테이지 좌하단에 "🗺 지도" 버튼 주입.
+// 모든 스테이지 우하단(퀘스트 버튼 위)에 "🗺 지도" 버튼 주입.
+// ⚠ 좌측 하단 금지: 좌측 60%는 조이스틱 터치 캡처 영역이라 버튼 탭이 먹힌다.
 // 누르면 현재 스테이지는 그대로 둔 채, 월드맵을 "모달(엿보기)"로 띄운다.
 //  - ✕ 또는 바깥 클릭 → 닫고 스테이지로 복귀 (진행 유지!)
 //  - 지도에서 스테이지 칸을 누르면 그때 비로소 이동(여행) — worldmap이 top 창을 이동
@@ -37,7 +38,7 @@
     btn.type = 'button';
     btn.textContent = '🗺 지도';
     btn.style.cssText = [
-      'position:fixed', 'left:10px', 'bottom:10px', 'z-index:300',
+      'position:fixed', 'right:10px', 'bottom:52px', 'z-index:300',
       'font-family:inherit', 'font-size:clamp(10px,1.3vw,14px)', 'letter-spacing:1px',
       'background:rgba(20,28,46,0.9)', 'color:#9fc2ff', 'border:1px solid #44aaff',
       'border-radius:6px', 'padding:6px 12px', 'cursor:pointer', 'pointer-events:all',
