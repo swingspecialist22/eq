@@ -279,7 +279,7 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh;font-family:"Do Hy
       <div class="stat-value" id="stat-coin">0</div>
     </div>
     <div class="stat-chip">
-      <div class="stat-label">HP</div>
+      <div class="stat-label">보스전 적중률</div>
       <div class="stat-value" id="stat-hp">100</div>
     </div>
   </div>
@@ -412,7 +412,7 @@ document.getElementById('clear-title').textContent = data.title;
 document.getElementById('story-text').textContent  = data.story;
 document.getElementById('stat-lv').textContent     = (function(){var R=['견습 공학자','수습 공학자','정식 공학자','숙련 공학자','전문 공학자','베테랑 공학자','에너지 마스터'];var c=0;for(var i=1;i<=6;i++)if(localStorage.getItem('eq_stage'+i+'_cleared'))c++;return R[Math.min(c,R.length-1)];})();
 document.getElementById('stat-coin').textContent   = savedCoin;
-document.getElementById('stat-hp').textContent     = savedHp + '/100';
+document.getElementById('stat-hp').textContent     = savedHp + '%';
 
 // 등급별 테두리 색상
 document.querySelectorAll('.stat-chip').forEach(el=>{

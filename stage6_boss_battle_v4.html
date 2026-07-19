@@ -660,9 +660,22 @@ $('btn-next').addEventListener('click',()=>{
    엔딩
 ═══════════════════════════════════════ */
 function showEnding(){
-  // 결과를 localStorage에 저장 후 clear.html로 이동
-  localStorage.setItem('eq_boss_hp', S.playerHp);
-  // 기존 레벨/코인은 이미 저장돼 있음
+  // ── 미격파(라운드 소진, 보스 HP 잔존): 승리가 아니므로 재도전 안내 ──
+  if(S.bossHp > 0){
+    ['hud','cutscene','cond-wrap','card-section','progress'].forEach(id=>{const el=$(id);if(el)el.style.display='none';});
+    $('end-grade').textContent = '⚡';
+    $('end-title').textContent = '코어가 아직 버티고 있다!';
+    $('end-story').textContent = '블랙하트의 방어막이 남아 있어.\n라운드마다 나온 해설을 떠올리며 다시 도전해서\n정답 카드를 더 많이 맞혀 보자!';
+    $('ending').classList.add('show');
+    return;
+  }
+  // ── 승리: 카드 적중률(정답 카드 적중 비율)을 엔딩 등급 산출용으로 저장 ──
+  let tot=0, hit=0;
+  S.results.forEach(r=>{ tot+=r.total; hit+=r.correctPicks; });
+  const acc = tot ? Math.round(hit/tot*100) : 100;
+  localStorage.setItem('eq_boss_hp', acc);
+  // 최종 스테이지 완료 기록 — 도감 피날레 카드·에너지 마스터 등급·월드맵 6단계의 기준 키
+  localStorage.setItem('eq_stage6_cleared','1');
   const fade = document.createElement('div');
   fade.style.cssText='position:fixed;inset:0;background:#000;opacity:0;z-index:999;transition:opacity 1s ease;pointer-events:none;';
   document.body.appendChild(fade);
