@@ -53,6 +53,50 @@
 }
 #quiz-exit:hover,#puzzle-close:hover{ border-color:#ccc; color:#fff; }
 
+/* ════════════════════════════════════════════════════════════
+   퀴즈 결과의 [다음 문제 Qn →] 버튼 — 눈에 띄게.
+   원래는 투명 배경 + 1px 테두리 + 흐린 갈색(#cc8855) 글씨라 바로 위 해설
+   문장에 묻혀서, 다음으로 넘어가는 길을 못 찾는다는 피드백. 게임에서 이미
+   '주요 행동'을 뜻하는 골드(등급 게이지·후기 버튼)로 꽉 채우고, 시선을
+   끌도록 천천히 맥동시킨다.
+   선택자에 #quiz-result를 붙인 이유: eq-ui.css가 각 스테이지의 인라인
+   <style>보다 먼저 로드되므로 ID 2개로 특이성을 높여야 인라인 규칙을 이긴다.
+   ════════════════════════════════════════════════════════════ */
+#quiz-result #result-next-btn{
+  margin-top:16px;
+  background:linear-gradient(180deg,#ffd257,#ff9410);
+  border:2px solid #ffe9a8;
+  color:#3a2200;
+  font-size:clamp(15px,1.6vw,19px);
+  letter-spacing:1px;
+  padding:13px 34px;
+  border-radius:8px;
+  animation:eq-next-pulse 1.6s ease-in-out infinite;
+}
+/* 퍼지는 링 + 살짝 커졌다 작아지기 (그림자는 항상 유지) */
+@keyframes eq-next-pulse{
+  0%,100%{ transform:scale(1);    box-shadow:0 0 0 0 rgba(255,190,60,.55), 0 4px 14px rgba(0,0,0,.45); }
+  50%    { transform:scale(1.045); box-shadow:0 0 0 10px rgba(255,190,60,0), 0 4px 14px rgba(0,0,0,.45); }
+}
+#quiz-result #result-next-btn:hover,
+#quiz-result #result-next-btn:focus-visible{
+  background:linear-gradient(180deg,#ffe488,#ffab35);
+  color:#2a1800;
+  animation-play-state:paused;   /* 이미 찾았으면 흔들 필요 없음 */
+  transform:scale(1.045);
+}
+/* 터치 기기: 손가락 목표 크기 확보(모바일 → 태블릿 순으로 한 단계씩) */
+@media (hover:none) and (pointer:coarse){
+  #quiz-result #result-next-btn{ font-size:17px; padding:15px 38px; }
+}
+@media (hover:none) and (pointer:coarse) and (min-width:600px) and (min-height:600px){
+  #quiz-result #result-next-btn{ font-size:19px; padding:17px 44px; }
+}
+/* 화면 움직임을 줄이도록 설정한 사용자는 맥동 없이 색만 (접근성) */
+@media (prefers-reduced-motion:reduce){
+  #quiz-result #result-next-btn{ animation:none; }
+}
+
 /* 레벨/EXP는 '에너지 지식 등급'(eq-nav.js)으로 대체됨
    → 아이템 획득 시 뜨던 "+EXP" 표시와 옛 레벨업 팝업을 숨긴다(개별 아이템으론 등급 안 오름). */
 .ip-exp{ display:none !important; }
