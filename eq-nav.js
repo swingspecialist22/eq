@@ -77,8 +77,9 @@
   }
 
   // ── HUD 컴팩트 모드: 캔버스 좌우 여백이 좁으면 HUD를 축소해 맵 가림 최소화 ──
-  // 일반 모드 우측 패널 실폭이 최대 ~330px이므로, 여백이 340px 미만이면 compact,
-  // 80px 미만(모바일 등 캔버스가 화면을 꽉 채움)이면 mini까지 적용.
+  // 일반 모드 우측 패널(기본 14px, eq-ui.css)의 실폭이 최대 ~400px이므로,
+  // 여백이 410px 미만이면 compact, 80px 미만(모바일 등 캔버스가 화면을
+  // 꽉 채움)이면 mini까지 적용.
   function setupHudCompact(){
     if(!document.getElementById('hud')) return;   // HUD 없는 화면은 패스
     function upd(){
@@ -89,7 +90,7 @@
         // 캔버스가 아직 크기를 못 받았으면 스테이지 화면비(960:704)로 추정
         var cw = cv.clientWidth || Math.min(window.innerWidth, window.innerHeight * (960/704));
         var margin = (window.innerWidth - cw) / 2;
-        document.body.classList.toggle('eq-hud-compact', margin < 340);
+        document.body.classList.toggle('eq-hud-compact', margin < 410);
         document.body.classList.toggle('eq-hud-mini',    margin < 80);
       }, 80);
     }
