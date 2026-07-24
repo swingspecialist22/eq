@@ -405,8 +405,7 @@ const NPCS=[
     isGuard:false, _talkCount:0,
     getDialog:function(){
       if(player.inventory.has('cpu_data')){
-        this._talkCount++;
-        if(this._talkCount===1) return [
+        const DEEP=[
           '스마트미터를 찾았군! 그럼 스마트그리드를 제대로 설명해줄게.',
           '이 타워는 원래 DEC가 전력을 통제하던 곳 — 우리가 "스마트그리드"로 바꿀 거야!',
           '【스마트그리드】— 전력망에 컴퓨터·통신 기술을 더한 "똑똑한 전력망"이야.',
@@ -416,10 +415,15 @@ const NPCS=[
           '특히 태양광·풍력처럼 들쭉날쭉한 신재생에너지를 다루려면 이런 똑똑한 관리가 꼭 필요해!',
           '한마디로 — 전력망에 "두뇌"를 다는 거야. 그게 스마트그리드의 시작이지!',
         ];
-        return [
+        const SHORT=[
           '스마트그리드가 있으면 신재생에너지를 버리지 않고 알뜰하게 쓸 수 있어!',
           'DEC가 이 관제탑을 독점하던 걸, 이제 우리 손으로 똑똑하게 되돌리는 거야!',
+          '(다시 말 걸면 스마트그리드를 처음부터 다시 설명해줄게!)',
         ];
+        this._talkCount++;
+        if(this._talkCount===1) return DEEP;
+        // 이후엔 짧은 마무리와 심화 강의를 번갈아 — 언제든 복습 가능
+        return (this._talkCount % 2 === 0) ? SHORT : DEEP;
       }
       this._talkCount=0;
       return [
@@ -437,8 +441,7 @@ const NPCS=[
     isGuard:false, _talkCount:0,
     getDialog:function(){
       if(player.inventory.has('net_data')){
-        this._talkCount++;
-        if(this._talkCount===1) return [
+        const DEEP=[
           '전력망 연결 모듈을 찾았군요! 잘했어요!',
           '스마트그리드의 핵심은 "연결"이에요. 인터넷이 컴퓨터를 잇듯, 전력망은 발전소들을 잇죠.',
           '예전엔 큰 발전소 한 곳이 전기를 다 만들었어요. 그 한 곳이 멈추면? 전부 정전이죠.',
@@ -451,10 +454,15 @@ const NPCS=[
           '그래서 전력망이 닿지 않는 산속 오지나, 재난으로 전력망이 마비된 곳에서 특히 강력하답니다.',
           'DEC의 중앙 독점 vs 우리의 분산 연결. 미래는 분산형이에요!',
         ];
-        return [
+        const SHORT=[
           '분산형은 마치 "여러 개의 작은 심장"을 가진 것과 같아요.',
           '하나가 멎어도 나머지가 뛰니까, 도시 전체가 안전하죠. 그게 자립의 힘이에요!',
+          '(다시 말 걸면 분산형·마이크로그리드를 처음부터 다시 설명해줄게요!)',
         ];
+        this._talkCount++;
+        if(this._talkCount===1) return DEEP;
+        // 이후엔 짧은 마무리와 심화 강의를 번갈아 — 언제든 복습 가능
+        return (this._talkCount % 2 === 0) ? SHORT : DEEP;
       }
       this._talkCount=0;
       return [
@@ -472,8 +480,7 @@ const NPCS=[
     isGuard:false, _talkCount:0,
     getDialog:function(){
       if(player.inventory.has('ai_data')){
-        this._talkCount++;
-        if(this._talkCount===1) return [
+        const DEEP=[
           'AI 수요예측 모델을 가져왔군요! 핵심을 설명할게요.',
           '스마트그리드의 마지막 조각은 "AI"예요 — 전력을 똑똑하게 관리하는 두뇌죠.',
           '【AI 수요 예측】— AI가 과거 사용량과 날씨를 학습해 "내일 전기가 얼마나 쓰일지" 맞혀요.',
@@ -486,10 +493,15 @@ const NPCS=[
           '공급을 늘리는 것만큼, 수요를 똑똑하게 줄이는 것도 중요한 에너지 관리랍니다!',
           '신재생에너지 + 스마트그리드 + AI = 버릴 것 없는 완벽한 에너지 자립이에요!',
         ];
-        return [
+        const SHORT=[
           'AI로 에너지를 아끼고, 그 에너지로 AI를 돌리는 선순환이 목표예요.',
           'DEC의 독점을 끝내고 그 똑똑한 미래를 우리 손으로 열어요!',
+          '(다시 말 걸면 AI 수요예측·수요관리를 처음부터 다시 설명해줄게요!)',
         ];
+        this._talkCount++;
+        if(this._talkCount===1) return DEEP;
+        // 이후엔 짧은 마무리와 심화 강의를 번갈아 — 언제든 복습 가능
+        return (this._talkCount % 2 === 0) ? SHORT : DEEP;
       }
       this._talkCount=0;
       return [
