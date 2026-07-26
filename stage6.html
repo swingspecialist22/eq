@@ -31,31 +31,40 @@ body{margin:0;padding:0;background:#06020e;overflow:hidden;user-select:none;-web
 #item-popup .ip-desc{font-size:clamp(13px,1.4vw,20px);color:#7a5a88;line-height:1.6;white-space:pre-wrap;}
 #item-popup .ip-exp{font-size:clamp(14px,1.5vw,22px);color:#cc44ff;margin-top:clamp(8px,1vh,14px);}
 /* 자물쇠 퍼즐 오버레이 */
-#puzzle-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px);z-index:1000;overflow-y:auto;}
+#puzzle-overlay{position:fixed;inset:0;background:rgba(2,0,6,0.97);display:none;align-items:center;justify-content:center;z-index:1000;overflow-y:auto;}
 #puzzle-overlay.active{display:flex;}
-#puzzle-panel{width:min(760px,96%);background:#08020e;border:2px solid #7a1a9a;border-radius:8px;box-shadow:0 0 40px #cc44ff33;overflow:hidden;animation:qIn .22s ease-out;max-height:90vh;overflow-y:auto;}
+#puzzle-panel{width:min(880px,96%);background:#0c0418;border:3px solid #b96cff;border-radius:12px;box-shadow:0 0 48px #cc44ff55;overflow:hidden;animation:qIn .22s ease-out;max-height:92vh;overflow-y:auto;font-family:'Do Hyeon','Malgun Gothic','Apple SD Gothic Neo',sans-serif;}
 @keyframes qIn{from{transform:scale(.92) translateY(20px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
-#puzzle-header{background:linear-gradient(135deg,#060112,#0e0820);border-bottom:1px solid #7a1a9a;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;}
-#puzzle-gate-tag{font-size:clamp(10px,1.1vw,14px);letter-spacing:2px;color:#cc44ff;background:#100020;border:1px solid #7a1a9a;padding:3px 10px;border-radius:12px;}
-#puzzle-title{font-size:clamp(13px,1.5vw,20px);color:#eeccff;}
-#puzzle-body{padding:18px 20px 16px;}
-#puzzle-desc{font-size:clamp(12px,1.4vw,17px);color:#cc99ee;line-height:1.7;margin-bottom:14px;border-left:2px solid #7a1a9a;padding-left:12px;}
-#puzzle-slots{display:flex;gap:8px;justify-content:center;margin-bottom:14px;flex-wrap:wrap;}
-.pz-slot{width:clamp(96px,11vw,150px);min-height:clamp(54px,6vw,72px);border:2px dashed #3a1a4a;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:clamp(11px,1.2vw,15px);color:#5a3a6a;font-family:'Courier New',monospace;transition:border-color .15s,background .15s;position:relative;cursor:pointer;}
-.pz-slot.highlight{border-color:#cc44ff;background:rgba(204,68,255,0.08);}
-.pz-slot.filled{border-style:solid;border-color:#9933cc;background:rgba(153,51,204,0.1);}
-.pz-slot .slot-label{position:absolute;top:3px;left:6px;font-size:clamp(9px,0.9vw,12px);color:#5a3a6a;font-family:'Courier New',monospace;}
-.pz-slot .slot-content{font-size:clamp(11px,1.2vw,15px);color:#cc99ff;text-align:center;padding:4px;font-family:'Courier New',monospace;}
-#puzzle-cards{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:14px;}
-.pz-card{background:#100820;border:1px solid #3a1a4a;border-radius:6px;padding:10px 12px;font-size:clamp(11px,1.2vw,15px);color:#cc99ee;font-family:'Courier New',monospace;cursor:pointer;text-align:center;min-width:clamp(84px,10vw,120px);transition:transform .1s,border-color .12s;user-select:none;line-height:1.5;-webkit-tap-highlight-color:transparent;}
-.pz-card:hover{border-color:#cc44ff;background:#1a0a2a;transform:translateY(-2px);}
-.pz-card.used{opacity:.25;pointer-events:none;}
-#puzzle-feedback{font-size:clamp(11px,1.2vw,15px);text-align:center;min-height:18px;margin-bottom:10px;color:#5a3a6a;font-family:'Courier New',monospace;}
-#puzzle-feedback.ok{color:#66ffaa;}
-#puzzle-feedback.ng{color:#ff6688;}
-#puzzle-submit{display:block;margin:0 auto;background:transparent;border:1px solid #7a1a9a;color:#cc44ff;font-family:'Courier New',monospace;font-size:clamp(12px,1.3vw,17px);padding:11px 28px;border-radius:4px;cursor:pointer;letter-spacing:1px;min-height:44px;}
-#puzzle-submit:hover{background:#180828;}
-#puzzle-submit:disabled{opacity:.3;cursor:default;}
+#puzzle-header{background:linear-gradient(135deg,#1c0733,#2b0d4a);border-bottom:3px solid #b96cff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+#puzzle-gate-tag{font-size:clamp(13px,1.5vw,18px);letter-spacing:1px;color:#ffffff;background:#6a1a9a;border:2px solid #e0a6ff;padding:5px 14px;border-radius:14px;white-space:nowrap;}
+#puzzle-title{font-size:clamp(19px,2.3vw,29px);color:#ffffff;text-shadow:0 0 12px #cc44ff88;}
+#puzzle-body{padding:22px 24px 20px;}
+#puzzle-desc{font-size:clamp(17px,1.8vw,22px);color:#f3e6ff;line-height:1.65;margin-bottom:20px;border-left:6px solid #cc44ff;padding-left:14px;white-space:pre-line;word-break:keep-all;}
+/* ── 순서 슬롯 ── */
+#puzzle-slots{display:flex;gap:6px;justify-content:center;align-items:stretch;margin-bottom:18px;flex-wrap:wrap;}
+.pz-arrow{display:flex;align-items:center;color:#e0a6ff;font-size:clamp(20px,2.4vw,30px);line-height:1;}
+.pz-slot{width:clamp(128px,15vw,186px);min-height:clamp(88px,10vw,116px);padding-top:clamp(26px,2.6vw,32px);border:3px dashed #8a52b5;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);transition:border-color .15s,background .15s;position:relative;cursor:pointer;overflow:hidden;-webkit-tap-highlight-color:transparent;}
+.pz-slot.highlight{border-color:#ffd166;background:rgba(255,209,102,0.16);}
+.pz-slot.filled{border-style:solid;border-color:#e0a6ff;background:linear-gradient(180deg,#3d1160,#26093f);box-shadow:inset 0 0 20px #cc44ff33;padding-bottom:clamp(16px,1.7vw,21px);}
+.pz-slot .slot-label{position:absolute;top:0;left:0;right:0;background:#6a1a9a;color:#ffffff;font-size:clamp(14px,1.5vw,18px);padding:3px 0;text-align:center;letter-spacing:1px;}
+.pz-slot.filled .slot-label{background:#9b30d0;}
+.pz-slot .slot-content{font-size:clamp(16px,1.7vw,21px);color:#a98cc4;text-align:center;padding:6px 8px;line-height:1.35;word-break:keep-all;}
+.pz-slot.filled .slot-content{color:#ffffff;text-shadow:0 0 10px #cc44ff66;}
+.pz-slot.filled::after{content:'탭하면 빼기';position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:clamp(11px,1.1vw,13px);color:#d9b8f0;}
+/* ── 보기 카드 ── */
+#puzzle-cards{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:18px;}
+.pz-card{background:linear-gradient(180deg,#2e1148,#1a0830);border:3px solid #b96cff;border-radius:10px;padding:14px 18px;font-size:clamp(17px,1.8vw,22px);color:#ffffff;cursor:pointer;text-align:center;min-width:clamp(110px,12vw,160px);min-height:56px;display:flex;align-items:center;justify-content:center;transition:transform .1s,border-color .12s,background .12s;user-select:none;line-height:1.4;word-break:keep-all;box-shadow:0 4px 0 #12061f;-webkit-tap-highlight-color:transparent;}
+.pz-card:hover{border-color:#ffd166;background:linear-gradient(180deg,#431a66,#26103f);transform:translateY(-2px);}
+.pz-card.used{background:#150c22;border-style:dashed;border-color:#4f3a68;color:#7d6a92;box-shadow:none;pointer-events:none;}
+/* ── 힌트 / 결과 ── */
+#puzzle-hint{font-size:clamp(16px,1.7vw,21px);text-align:center;color:#ffe0a3;background:rgba(255,209,102,0.12);border:2px solid #ffd16688;border-radius:8px;padding:10px 14px;margin-bottom:14px;line-height:1.5;word-break:keep-all;}
+#puzzle-feedback{font-size:clamp(17px,2vw,24px);text-align:center;min-height:30px;margin-bottom:12px;color:#c9b3dd;}
+#puzzle-feedback.ok{color:#5cffb0;text-shadow:0 0 14px #5cffb066;}
+#puzzle-feedback.ng{color:#ff7a95;text-shadow:0 0 14px #ff7a9566;}
+#puzzle-submit{display:block;margin:0 auto;background:linear-gradient(180deg,#c94cff,#8a1fd0);border:none;color:#ffffff;font-family:inherit;font-size:clamp(18px,2.1vw,25px);padding:14px 44px;border-radius:10px;cursor:pointer;letter-spacing:2px;min-height:58px;box-shadow:0 5px 0 #4a0d70;}
+#puzzle-submit:hover{background:linear-gradient(180deg,#d868ff,#9b2ee0);}
+#puzzle-submit:active{transform:translateY(3px);box-shadow:0 2px 0 #4a0d70;}
+#puzzle-submit:disabled{background:#33243f;color:#b0a2c4;box-shadow:none;cursor:default;}
 #levelup-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,#0a0118,#180828);border:2px solid #cc44ff;border-radius:8px;padding:20px 40px;text-align:center;z-index:1001;box-shadow:0 0 40px #cc44ff66;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;pointer-events:none;}
 #levelup-popup.show{transform:translate(-50%,-50%) scale(1);opacity:1;}
 #levelup-popup .lu-title{font-size:11px;letter-spacing:3px;color:#cc44ff;margin-bottom:6px;}
@@ -169,6 +178,7 @@ body{margin:0;padding:0;background:#06020e;overflow:hidden;user-select:none;-web
         <div id="puzzle-desc"></div>
         <div id="puzzle-slots"></div>
         <div id="puzzle-cards"></div>
+        <div id="puzzle-hint"></div>
         <div id="puzzle-feedback"></div>
         <button id="puzzle-submit" disabled>[ 시퀀스 실행 ]</button>
       </div>
@@ -527,7 +537,8 @@ function openPuzzle(gateId){
   const p=PUZZLES[gateId];
   document.getElementById('puzzle-gate-tag').textContent=p.gateLabel;
   document.getElementById('puzzle-desc').textContent=p.desc;
-  document.getElementById('puzzle-feedback').textContent='힌트: '+p.hint;
+  document.getElementById('puzzle-hint').textContent='💡 힌트 — '+p.hint;
+  document.getElementById('puzzle-feedback').textContent='아래 카드를 눌러 순서대로 채워 넣으세요.';
   document.getElementById('puzzle-feedback').className='';
   document.getElementById('puzzle-submit').disabled=true;
   puzzleSlotData=new Array(p.slots.length).fill(null);
@@ -537,9 +548,10 @@ function openPuzzle(gateId){
 function renderPuzzleSlots(p){
   const wrap=document.getElementById('puzzle-slots');wrap.innerHTML='';
   p.slots.forEach((label,i)=>{
+    if(i>0){const ar=document.createElement('span');ar.className='pz-arrow';ar.textContent='▶';wrap.appendChild(ar);}
     const slot=document.createElement('div');
     slot.className='pz-slot'+(puzzleSlotData[i]?' filled':'');
-    slot.innerHTML=`<span class="slot-label">${label}</span><span class="slot-content">${puzzleSlotData[i]||'[ 비어있음 ]'}</span>`;
+    slot.innerHTML=`<span class="slot-label">${label}</span><span class="slot-content">${puzzleSlotData[i]||'비어 있음'}</span>`;
     slot.addEventListener('click',()=>{if(puzzleSlotData[i]){puzzleSlotData[i]=null;renderPuzzleSlots(p);renderPuzzleCards(p);checkPuzzleReady(p);}});
     slot.addEventListener('dragover',e=>{e.preventDefault();slot.classList.add('highlight');});
     slot.addEventListener('dragleave',()=>slot.classList.remove('highlight'));
@@ -600,7 +612,7 @@ document.getElementById('puzzle-submit').addEventListener('click',()=>{
     setTimeout(()=>{
       puzzleSlotData=new Array(p.slots.length).fill(null);
       renderPuzzleSlots(p);renderPuzzleCards(p);
-      fb.textContent='힌트: '+p.hint;fb.className='';
+      fb.textContent='다시 순서대로 채워 넣으세요.';fb.className='';
       document.getElementById('puzzle-submit').disabled=true;
     },1000);
   }
