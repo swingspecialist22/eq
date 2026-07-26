@@ -251,6 +251,66 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh;font-family:"Do Hy
 #survey-thanks .sv-emoji{font-size:52px;animation:sv-pop 0.5s cubic-bezier(0.34,1.56,0.64,1);}
 #survey-thanks .sv-th-title{font-size:clamp(17px,4vw,22px);color:#44cc88;margin:12px 0 8px;letter-spacing:1px;}
 #survey-thanks .sv-th-msg{font-size:13px;color:#bbb;line-height:1.8;}
+
+/* ── 시연 모드 배지 ─────────────────────────── */
+#demo-badge{
+  display:none;
+  position:fixed;top:max(10px,env(safe-area-inset-top,10px));left:50%;transform:translateX(-50%);
+  z-index:20;
+  font-size:clamp(10px,2.4vw,12px);letter-spacing:1px;white-space:nowrap;
+  color:#ffd873;background:rgba(0,0,0,0.62);
+  border:1px solid rgba(255,216,115,0.45);border-radius:20px;
+  padding:6px 14px;
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+}
+
+/* ── 수료증 모달 ─────────────────────────────── */
+#btn-cert{
+  background:transparent;
+  border-color:#8ab4ff;
+  color:#8ab4ff;
+}
+#btn-cert:hover,#btn-cert:active{background:rgba(138,180,255,0.18);color:#fff;}
+
+#cert-overlay{
+  position:fixed;inset:0;z-index:95;
+  display:none;
+  background:rgba(0,0,0,0.88);
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;
+  padding:max(16px,env(safe-area-inset-top,16px)) 12px max(24px,env(safe-area-inset-bottom,16px)) 12px;
+}
+#cert-overlay.show{display:flex;align-items:flex-start;justify-content:center;animation:sv-fade 0.25s ease;}
+
+#cert-card{
+  position:relative;width:min(760px,100%);margin:auto;
+  background:linear-gradient(180deg,rgba(14,20,32,0.98),rgba(8,12,20,0.98));
+  border:1px solid rgba(138,180,255,0.32);border-radius:10px;
+  box-shadow:0 0 50px rgba(0,0,0,0.7);
+  padding:clamp(14px,4vw,22px);
+  animation:sv-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  text-align:center;
+}
+#cert-close{
+  position:absolute;top:6px;right:8px;
+  background:none;border:none;color:#888;font-size:26px;line-height:1;
+  width:40px;height:40px;border-radius:50%;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+#cert-close:hover,#cert-close:active{color:#fff;background:rgba(255,255,255,0.08);}
+#cert-title{font-size:clamp(16px,4vw,21px);color:#8ab4ff;letter-spacing:2px;margin-bottom:10px;}
+#cert-img{width:100%;height:auto;border-radius:6px;border:1px solid rgba(255,255,255,0.12);display:block;}
+#cert-loading{font-size:13px;color:#8fa3b8;padding:40px 0;}
+#cert-hint{font-size:clamp(10px,2.4vw,12px);color:#7f93a8;line-height:1.8;margin-top:10px;}
+#cert-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px;}
+#cert-save{
+  font-family:inherit;font-size:clamp(12px,2.8vw,14px);letter-spacing:2px;
+  padding:12px 26px;border-radius:6px;cursor:pointer;border:none;text-decoration:none;
+  background:linear-gradient(180deg,#a8c8ff,#5b8ce0);color:#0a1224;font-weight:bold;
+  -webkit-tap-highlight-color:transparent;transition:filter 0.15s;
+  display:inline-flex;align-items:center;min-height:48px;
+}
+#cert-save:hover,#cert-save:active{filter:brightness(1.08);}
 </style>
 </head>
 <body>
@@ -259,6 +319,7 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh;font-family:"Do Hy
 <div id="overlay"></div>
 <div id="scanline"></div>
 <div id="particles"></div>
+<div id="demo-badge">🔎 시연 화면 · 실제 플레이 기록이 아닙니다</div>
 
 <div id="main">
   <div id="grade-wrap">
@@ -285,6 +346,7 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh;font-family:"Do Hy
   </div>
   <div id="btn-wrap">
     <button class="action-btn" id="btn-review" onclick="openSurvey()">[ 후기 남기기 ]</button>
+    <button class="action-btn" id="btn-cert" onclick="openCert()">[ 🏅 수료증 ]</button>
     <button class="action-btn" id="btn-savelog" onclick="if(window.EQLog)EQLog.download()">[ 📥 결과 저장 ]</button>
     <button class="action-btn" id="btn-title" onclick="goTitle()">[ 타이틀로 ]</button>
     <button class="action-btn" id="btn-replay" onclick="goReplay()">[ 다시 도전 ]</button>
@@ -362,6 +424,24 @@ body{background:#000;overflow:hidden;width:100vw;height:100vh;font-family:"Do Hy
 </div>
 <iframe name="sv-sink" id="sv-sink" style="display:none;" title="survey-sink"></iframe>
 
+<!-- ── 수료증 모달 ─────────────────────────────── -->
+<div id="cert-overlay" onclick="if(event.target===this)closeCert();">
+  <div id="cert-card">
+    <button id="cert-close" onclick="closeCert()" aria-label="닫기">&times;</button>
+    <div id="cert-title">🏅 에너지 퀘스트 수료증</div>
+    <div id="cert-loading">수료증을 만드는 중…</div>
+    <img id="cert-img" alt="에너지 퀘스트 수료증" style="display:none;">
+    <div id="cert-hint">
+      [ 이미지 저장 ]을 누르면 그림 파일로 저장됩니다.<br>
+      저장이 안 되면 수료증을 <b>길게 눌러</b> 저장하세요.
+    </div>
+    <div id="cert-actions">
+      <a id="cert-save" download>이미지 저장 ▼</a>
+      <button class="action-btn" style="background:transparent;border-color:rgba(255,255,255,0.35);color:rgba(255,255,255,0.75);" onclick="closeCert()">[ 닫기 ]</button>
+    </div>
+  </div>
+</div>
+
 <div id="fade"></div>
 
 <script src="eq-log.js"></script>
@@ -389,28 +469,54 @@ const GRADES={
 };
 
 // ── localStorage에서 결과 읽기
+// [등급 컷 산출 근거]
+// 보스전은 정답 카드 1장당 50 데미지 · 보스 HP 300이므로 '정답 카드 6장 이상'을
+// 맞혀야 승리해서 이 화면에 도달한다. 3라운드의 정답 카드 총합은 9~12장이므로
+// 승리 시 적중률은 아무리 낮아도 50%. 예전 컷(80/50/20)에서는 B·C 엔딩에
+// 도달할 방법이 아예 없었다. 그래서 '정답 카드를 몇 장 놓쳤는가'를 기준으로 잡는다.
+//   S = 한 장도 안 놓침(퍼펙트, 100%)
+//   A = 1장 놓침 (총합에 따라 89~92%)
+//   B = 2장 놓침 (78~83%)
+//   C = 3장 이상 놓침 (승리 최저선 ~75%)
 function getGrade(hp){
-  if(hp>=80) return 'S';
-  if(hp>=50) return 'A';
-  if(hp>=20) return 'B';
+  if(hp>=100) return 'S';
+  if(hp>=88)  return 'A';
+  if(hp>=76)  return 'B';
   return 'C';
 }
 
-const savedHp   = parseInt(localStorage.getItem('eq_boss_hp'))||60;
-const savedLv   = parseInt(localStorage.getItem('eq_level'))||1;
-const savedCoin = parseInt(localStorage.getItem('eq_coins'))||0;
-const grade     = getGrade(savedHp);
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+
+// ── 시연(심사·발표용) 모드 ────────────────────────────
+// 이 화면은 보스전 기록(eq_boss_hp)으로 등급을 계산한다. 그런데 링크만 받아
+// 바로 들어오는 사람은 그 기록이 없어 기본값이 쓰이고, 반대로 예전에 플레이한
+// 브라우저에서는 옛 기록이 그대로 보여 실제 성적처럼 오해된다.
+// 그래서 '기록이 없는 접속'과 '?demo=' 접속은 표본 화면으로 처리하고,
+// 화면에 시연 모드임을 명시한다. 이 모드에서는 학습 기록을 남기지 않는다.
+//   링크 예) clear.html?demo=S · ?demo=A · ?demo=B · ?demo=C
+const DEMO_PARAM = (function(){
+  var m=location.search.match(/[?&]demo=([^&]*)/i);
+  return m ? decodeURIComponent(m[1]).toUpperCase() : '';
+})();
+const IS_DEMO   = (DEMO_PARAM !== '') || (lsGet('eq_boss_hp') === null);
+const DEMO_GRADE= (['S','A','B','C'].indexOf(DEMO_PARAM)>=0) ? DEMO_PARAM : 'S';
+const DEMO_HP   = {S:100, A:92, B:83, C:75};
+
+const savedHp   = IS_DEMO ? DEMO_HP[DEMO_GRADE] : (parseInt(lsGet('eq_boss_hp'))||60);
+const savedCoin = IS_DEMO ? 240 : (parseInt(lsGet('eq_coins'))||0);
+const grade     = IS_DEMO ? DEMO_GRADE : getGrade(savedHp);
 const data      = GRADES[grade];
 
 // ── UI 세팅
 const $grade = document.getElementById('grade');
 $grade.textContent = grade;
 $grade.style.color = data.color;
-if(window.EQLog)EQLog.ending(grade+'등급');
+if(window.EQLog && !IS_DEMO) EQLog.ending(grade+'등급');   // 시연 모드는 기록하지 않음
 
 document.getElementById('clear-title').textContent = data.title;
 document.getElementById('story-text').textContent  = data.story;
-document.getElementById('stat-lv').textContent     = (function(){var R=['견습 공학자','수습 공학자','정식 공학자','숙련 공학자','전문 공학자','베테랑 공학자','에너지 마스터'];var c=0;for(var i=1;i<=6;i++)if(localStorage.getItem('eq_stage'+i+'_cleared'))c++;return R[Math.min(c,R.length-1)];})();
+document.getElementById('stat-lv').textContent     = (function(){var R=['견습 공학자','수습 공학자','정식 공학자','숙련 공학자','전문 공학자','베테랑 공학자','에너지 마스터'];if(IS_DEMO)return R[R.length-1];var c=0;for(var i=1;i<=6;i++)if(lsGet('eq_stage'+i+'_cleared'))c++;return R[Math.min(c,R.length-1)];})();
+if(IS_DEMO) document.getElementById('demo-badge').style.display='block';
 document.getElementById('stat-coin').textContent   = savedCoin;
 document.getElementById('stat-hp').textContent     = savedHp + '%';
 
@@ -512,6 +618,152 @@ document.getElementById('btn-review').addEventListener('touchend',function(e){e.
     overlay.scrollTop=0;
     return true; // 기본 submit 동작 유지(iframe 전송)
   };
+})();
+
+// ── 수료증 이미지 ───────────────────────────────
+// 캔버스에 직접 그려 PNG로 저장한다(외부 라이브러리·서버 없음 → 오프라인에서도 동작).
+(function(){
+  const W=1240, H=877;                 // A4 가로 비율
+  let cachedUrl=null;                  // 한 번 그린 뒤 재사용
+
+  function playerName(){ return lsGet('eq_char_name') || (IS_DEMO ? '공학자' : '이름없음'); }
+  function clearedCount(){
+    if(IS_DEMO) return 6;
+    let c=0; for(let i=1;i<=6;i++) if(lsGet('eq_stage'+i+'_cleared')) c++; return c;
+  }
+  function pad(n){ return (n<10?'0':'')+n; }
+
+  function rr(g,x,y,w,h,r){
+    if(g.roundRect){ g.beginPath(); g.roundRect(x,y,w,h,r); return; }
+    g.beginPath();
+    g.moveTo(x+r,y);
+    g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r);
+    g.arcTo(x,y+h,x,y,r);     g.arcTo(x,y,x+w,y,r);
+    g.closePath();
+  }
+
+  // 자간을 벌려 가운데 정렬로 그리기 (구형 브라우저는 ctx.letterSpacing 미지원)
+  function spaced(g,text,cx,y,gap){
+    const ch=text.split(''), w=[];
+    let total=0;
+    for(let i=0;i<ch.length;i++){ w[i]=g.measureText(ch[i]).width; total+=w[i]; }
+    total+=gap*(ch.length-1);
+    let x=cx-total/2;
+    for(let i=0;i<ch.length;i++){ g.fillText(ch[i], x+w[i]/2, y); x+=w[i]+gap; }
+  }
+
+  function draw(){
+    const cv=document.createElement('canvas');
+    cv.width=W; cv.height=H;
+    const g=cv.getContext('2d');
+    const cx=W/2, C=data.color;
+    g.textAlign='center'; g.textBaseline='middle';
+    const F=(px,weight)=>{ g.font=(weight||'')+' '+px+'px "Do Hyeon","Malgun Gothic",sans-serif'; };
+
+    // 배경
+    const bg=g.createLinearGradient(0,0,W,H);
+    bg.addColorStop(0,'#0d1526'); bg.addColorStop(0.55,'#0a1420'); bg.addColorStop(1,'#0a1a18');
+    g.fillStyle=bg; g.fillRect(0,0,W,H);
+    const glow=g.createRadialGradient(cx,H*0.10,0,cx,H*0.10,W*0.62);
+    glow.addColorStop(0,C+'2e'); glow.addColorStop(1,'rgba(0,0,0,0)');
+    g.fillStyle=glow; g.fillRect(0,0,W,H);
+
+    // 테두리
+    g.strokeStyle=C+'99'; g.lineWidth=3; rr(g,28,28,W-56,H-56,18); g.stroke();
+    g.strokeStyle='rgba(255,255,255,0.13)'; g.lineWidth=1; rr(g,44,44,W-88,H-88,12); g.stroke();
+
+    // 머리말 · 제목
+    F(22); g.fillStyle='#8fa3b8';
+    spaced(g,'ENERGY QUEST',cx,110,7);
+    F(74); g.fillStyle='#ffffff';
+    spaced(g,'수료증',cx,192,16);
+    g.strokeStyle=C; g.lineWidth=3;
+    g.beginPath(); g.moveTo(cx-110,238); g.lineTo(cx+110,238); g.stroke();
+
+    // 이름
+    F(20); g.fillStyle='#7f93a8'; spaced(g,'이 름',cx,292,3);
+    const nm=playerName();
+    let nmPx=52;                                    // 이름이 길면 밑줄 폭(420px) 안으로 줄인다
+    F(nmPx); while(nmPx>28 && g.measureText(nm).width>400){ nmPx-=2; F(nmPx); }
+    g.fillStyle='#ffffff'; g.fillText(nm,cx,342);
+    g.strokeStyle='rgba(255,255,255,0.22)'; g.lineWidth=1;
+    g.beginPath(); g.moveTo(cx-210,376); g.lineTo(cx+210,376); g.stroke();
+
+    // 본문
+    F(23); g.fillStyle='#c3d0de';
+    const body=[
+      '위 학생은 「에너지 퀘스트」의 신재생에너지 6개 스테이지를 모두 통과하고,',
+      '최종 보스전에서 도시의 에너지 문제를 스스로 분석·설계하여 해결하였으며,',
+      '에너지 자립의 원리를 깨닫고 에너지 소양을 갖추었기에 이 증서를 수여합니다.'
+    ];
+    body.forEach((line,i)=>g.fillText(line,cx,428+i*40));
+
+    // 등급 뱃지
+    const by=600, r=58;
+    g.fillStyle=C+'1a'; g.beginPath(); g.arc(cx,by,r,0,Math.PI*2); g.fill();
+    g.strokeStyle=C; g.lineWidth=3; g.beginPath(); g.arc(cx,by,r,0,Math.PI*2); g.stroke();
+    F(58); g.fillStyle=C; g.fillText(grade,cx,by+4);
+    F(19); g.fillStyle=C; spaced(g,data.title,cx,by+92,5);
+
+    // 성과 4종
+    const stats=[
+      ['지식 등급',      document.getElementById('stat-lv').textContent],
+      ['클리어 스테이지', clearedCount()+' / 6'],
+      ['보스전 적중률',   savedHp+'%'],
+      ['획득 에너지 코인', String(savedCoin)]
+    ];
+    stats.forEach((s,i)=>{
+      const x=W*(0.2+i*0.2);
+      F(17); g.fillStyle='#7f93a8'; g.fillText(s[0],x,728);
+      F(26); g.fillStyle='#ffffff'; g.fillText(s[1],x,764);
+    });
+
+    // 꼬리말 (구분선으로 성과 영역과 분리)
+    g.strokeStyle='rgba(255,255,255,0.10)'; g.lineWidth=1;
+    g.beginPath(); g.moveTo(72,792); g.lineTo(W-72,792); g.stroke();
+    const d=new Date();
+    F(16); g.fillStyle='#6b7f93';
+    g.textAlign='left';  g.fillText('에너지 퀘스트 · the-energy.quest',72,810);
+    g.textAlign='right'; g.fillText(d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일',W-72,810);
+
+    return cv;
+  }
+
+  async function build(){
+    // 웹폰트가 로드되기 전에 그리면 기본 글꼴로 찍히므로 먼저 기다린다
+    try{
+      if(document.fonts){
+        await document.fonts.load('74px "Do Hyeon"');
+        await document.fonts.ready;
+      }
+    }catch(e){}
+    return draw().toDataURL('image/png');
+  }
+
+  const overlay=document.getElementById('cert-overlay');
+
+  window.openCert=async function(){
+    overlay.classList.add('show'); overlay.scrollTop=0;
+    if(cachedUrl) return;
+    const img=document.getElementById('cert-img');
+    const loading=document.getElementById('cert-loading');
+    try{
+      cachedUrl=await build();
+    }catch(e){
+      loading.textContent='수료증을 만들지 못했어요. 잠시 후 다시 시도해 주세요.';
+      return;
+    }
+    const d=new Date();
+    img.src=cachedUrl; img.style.display='block';
+    loading.style.display='none';
+    const a=document.getElementById('cert-save');
+    a.href=cachedUrl;
+    a.download='에너지퀘스트_수료증_'+playerName()+'_'+pad(d.getMonth()+1)+pad(d.getDate())+'.png';
+  };
+  window.closeCert=function(){ overlay.classList.remove('show'); };
+
+  document.getElementById('btn-cert')
+    .addEventListener('touchend',function(e){ e.preventDefault(); openCert(); },{passive:false});
 })();
 </script>
 </body>
