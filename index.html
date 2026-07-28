@@ -71,6 +71,11 @@ body{
 }
 #btn-continue:hover{background:rgba(30,70,120,0.55);}
 #save-info{font-size:12.5px;color:#9c8b72;letter-spacing:1px;min-height:16px;}
+#btn-credits{
+  width:auto;padding:9px 18px;font-size:13px;letter-spacing:1px;min-height:44px;
+  border:1px solid rgba(255,190,110,.35);color:#c2ab8c;background:rgba(20,12,4,.45);
+}
+#btn-credits:hover{background:rgba(60,38,12,.55);color:#ffd9a8;}
 
 /* ── 캐릭터 라인업 ── */
 #cast{
@@ -103,7 +108,7 @@ footer{
   #menu{margin-top:24px;}
 }
 </style>
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -124,6 +129,7 @@ footer{
     <button class="btn" id="btn-new" onclick="newGame()">▶ 새 게임</button>
     <button class="btn" id="btn-continue" onclick="continueGame()">이어하기</button>
     <div id="save-info"></div>
+    <button class="btn" id="btn-credits" onclick="location.href='credits.html'">📜 출처 · 저작권</button>
   </div>
 
   <div id="cast">
@@ -200,6 +206,13 @@ document.addEventListener('keydown',function(e){
   })();
 })();
 </script>
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
+<script>
+// 상대 경로로 등록해야 USB·하위 폴더에서 열어도 어긋나지 않는다.
+// file:// 로 여는 경우(심사용 USB 실행 등)는 서비스워커가 지원되지 않으므로
+// 실패를 조용히 넘긴다 — 게임 동작에는 영향이 없다.
+if("serviceWorker"in navigator&&location.protocol!=="file:"){
+  navigator.serviceWorker.register("sw.js").catch(function(){});
+}
+</script>
 </body>
 </html>

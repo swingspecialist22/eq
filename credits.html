@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>에너지 퀘스트 — 출처 및 저작권</title>
+<style>
+@import url('fonts/eq-fonts.css');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+  background:radial-gradient(circle at 50% 0%,#1a1530 0%,#0c0a14 60%,#06060a 100%);
+  color:#e2e6f0; min-height:100vh; padding:clamp(16px,3vh,40px) 14px;
+  display:flex; flex-direction:column; align-items:center;
+}
+h1{
+  font-family:'Do Hyeon','Noto Sans KR',sans-serif; font-size:clamp(21px,3.4vw,32px);
+  color:#ffcc44; letter-spacing:3px; text-shadow:0 0 18px rgba(255,204,68,.45); text-align:center;
+}
+.sub{
+  font-family:'Do Hyeon','Noto Sans KR',sans-serif; font-size:clamp(10px,1.3vw,13px);
+  color:#8a90b0; letter-spacing:4px; margin-top:6px; text-align:center;
+}
+#intro{
+  width:min(820px,96vw); margin-top:16px; text-align:center;
+  font-size:clamp(11px,1.5vw,13.5px); line-height:1.9; color:#a8b0cc;
+  background:rgba(16,14,32,.6); border:1px solid #2c2a48; border-radius:12px; padding:12px 16px;
+}
+section{ width:min(820px,96vw); margin-top:clamp(18px,3vh,28px); }
+h2{
+  font-family:'Do Hyeon','Noto Sans KR',sans-serif; font-size:clamp(15px,2.2vw,20px);
+  color:#7cc2ff; letter-spacing:2px; margin-bottom:10px;
+  border-left:4px solid #44aaff; padding-left:10px;
+}
+.card{
+  background:rgba(20,18,38,.9); border:1px solid #2c2a48; border-radius:12px;
+  padding:clamp(11px,1.8vh,16px) clamp(12px,2vw,18px); margin-bottom:9px;
+}
+.card .name{ font-weight:700; color:#fff; font-size:clamp(12.5px,1.6vw,15px); margin-bottom:4px; }
+.card .meta{ font-size:clamp(11px,1.35vw,13px); color:#aab2cc; line-height:1.75; word-break:break-all; }
+.card .meta b{ color:#e2e6f0; }
+.lic{
+  display:inline-block; font-size:11px; font-weight:700; letter-spacing:.5px;
+  border-radius:7px; padding:1px 8px; margin-left:6px; vertical-align:2px;
+}
+.lic.cc0{ color:#7df7a0; border:1px solid #2a6a44; background:rgba(46,196,182,.08); }
+.lic.by{ color:#ffd873; border:1px solid #8a6a2a; background:rgba(255,216,115,.08); }
+.lic.ofl{ color:#a9c6ff; border:1px solid #33507f; background:rgba(68,170,255,.08); }
+.lic.own{ color:#c9b6ff; border:1px solid #4a3a7a; background:rgba(168,85,247,.10); }
+a{ color:#7cc2ff; }
+.note{
+  font-size:clamp(10.5px,1.3vw,12.5px); color:#8a90b0; line-height:1.85;
+  background:rgba(10,26,20,.4); border:1px solid #2a4a6a; border-radius:10px;
+  padding:10px 14px; margin-top:8px;
+}
+#btns{ width:min(820px,96vw); margin:clamp(20px,3vh,32px) 0 8px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+.btn{
+  font-family:inherit; font-size:clamp(12px,1.5vw,15px); letter-spacing:1px; cursor:pointer;
+  background:rgba(10,26,48,.5); border:2px solid #44aaff; color:#7cc2ff;
+  border-radius:12px; padding:11px 24px; transition:background .15s; min-height:48px;
+}
+.btn:hover,.btn:active{ background:rgba(68,170,255,.15); }
+</style>
+</head>
+<body>
+  <h1>📜 출처 및 저작권</h1>
+  <div class="sub">CREDITS &amp; LICENSES</div>
+
+  <div id="intro">
+    「에너지 퀘스트」에 사용된 모든 자료의 출처와 이용 권한을 자료 단위로 밝힙니다.<br>
+    아래에 표기되지 않은 그래픽·코드는 모두 출품자가 직접 제작한 것입니다.
+  </div>
+
+  <section>
+    <h2>1. 이미지</h2>
+    <div class="card">
+      <div class="name">캐릭터·NPC·배경 일러스트 40여 점 <span class="lic own">출품자 생성</span></div>
+      <div class="meta">
+        생성 도구: <b>ChatGPT (OpenAI) 이미지 생성 기능</b><br>
+        출품자 본인 계정으로 직접 생성하였으며, 학생의 생성형 AI 이용은 없습니다.<br>
+        OpenAI 이용약관에 따라 생성 결과물(Output)에 대한 권리는 이용자에게 귀속됩니다.<br>
+        해당 파일: 주인공 4인 × 3방향 치비 일러스트 12점, NPC 23점, 보스·컷신·배경 5점
+      </div>
+    </div>
+    <div class="card">
+      <div class="name">타일·이펙트·UI 그래픽 <span class="lic own">자체 제작</span></div>
+      <div class="meta">외부 이미지가 아니라 <b>코드(Canvas API)로 실행 중 그려내는 방식</b>으로 제작하였습니다.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. 글꼴</h2>
+    <div class="card">
+      <div class="name">Do Hyeon (도현) <span class="lic ofl">SIL OFL 1.1</span></div>
+      <div class="meta">
+        저작권자: The Do Hyeon Project Authors (우아한형제들)<br>
+        사용처: 게임 전 화면 · 라이선스 전문: <a href="fonts/OFL-DoHyeon.txt">fonts/OFL-DoHyeon.txt</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="name">Noto Sans KR <span class="lic ofl">SIL OFL 1.1</span></div>
+      <div class="meta">
+        저작권자: Adobe / Google (Source Han Sans 기반)<br>
+        사용처: 최종 보스전·오답 노트·교사용 취합 본문 · 라이선스 전문: <a href="fonts/OFL-NotoSansKR.txt">fonts/OFL-NotoSansKR.txt</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="name">Press Start 2P <span class="lic ofl">SIL OFL 1.1</span></div>
+      <div class="meta">
+        저작권자: The Press Start 2P Project Authors (CodeMan38)<br>
+        사용처: 최종 보스전 픽셀 숫자·라벨 · 라이선스 전문: <a href="fonts/OFL-PressStart2P.txt">fonts/OFL-PressStart2P.txt</a>
+      </div>
+    </div>
+    <div class="note">
+      세 글꼴 모두 원본 파일을 수정 없이 <b>fonts/ 폴더에 포함</b>하여 배포합니다(인터넷 없이도 화면이 동일하게 표시되도록).
+      SIL OFL 1.1은 재배포를 허용하며, 조건인 라이선스 전문을 위와 같이 동봉하였습니다. 글꼴 단독 판매 없음, 예약 폰트명 변경 없음.
+    </div>
+  </section>
+
+  <section>
+    <h2>3. 소리</h2>
+    <div class="card">
+      <div class="name">quiz_true.mp3 — 정답 효과음 <span class="lic cc0">CC0</span></div>
+      <div class="meta">Freesound — oggraphics, "Good answer harp glissando"<br>
+        <a href="https://freesound.org/people/oggraphics/sounds/610703/">freesound.org/people/oggraphics/sounds/610703</a> (원본 중 3초 발췌 편집)</div>
+    </div>
+    <div class="card">
+      <div class="name">quiz_false.mp3 — 오답 효과음 <span class="lic cc0">CC0</span></div>
+      <div class="meta">Freesound — Beetlemuse, "False C"<br>
+        <a href="https://freesound.org/people/Beetlemuse/sounds/692847/">freesound.org/people/Beetlemuse/sounds/692847</a></div>
+    </div>
+    <div class="card">
+      <div class="name">item_collect.mp3 — 아이템 획득 <span class="lic cc0">CC0</span></div>
+      <div class="meta">Freesound — Leszek_Szary, "3 up 1"<br>
+        <a href="https://freesound.org/people/Leszek_Szary/sounds/171580/">freesound.org/people/Leszek_Szary/sounds/171580</a></div>
+    </div>
+    <div class="card">
+      <div class="name">stage_clear.mp3 — 스테이지 클리어 <span class="lic cc0">CC0</span></div>
+      <div class="meta">Freesound — FunWithSound, "Success Fanfare Trumpets"<br>
+        <a href="https://freesound.org/people/FunWithSound/sounds/456966/">freesound.org/people/FunWithSound/sounds/456966</a></div>
+    </div>
+    <div class="card">
+      <div class="name">victory.mp3 — 승리 <span class="lic cc0">CC0</span></div>
+      <div class="meta">Freesound — JoanStar, "Victory Jingle"<br>
+        <a href="https://freesound.org/people/JoanStar/sounds/844831/">freesound.org/people/JoanStar/sounds/844831</a></div>
+    </div>
+    <div class="card">
+      <div class="name">warp.mp3 — 포털 이동 <span class="lic cc0">CC0</span></div>
+      <div class="meta">Freesound — colorsCrimsonTears, "Time Travel - Future"<br>
+        <a href="https://freesound.org/people/colorsCrimsonTears/sounds/585801/">freesound.org/people/colorsCrimsonTears/sounds/585801</a></div>
+    </div>
+    <div class="card">
+      <div class="name">wind.mp3 — 풍력 환경음 <span class="lic by">CC BY 4.0</span></div>
+      <div class="meta">
+        "Wind Turbine - Rhythmic Swoosh and Mechanical Hum (Close Perspective)" by <b>Funkelfang</b> (freesound.org),
+        licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. 원본에서 10초 발췌·편집.<br>
+        <a href="https://freesound.org/people/Funkelfang/sounds/845351/">freesound.org/people/Funkelfang/sounds/845351</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="name">quiz_answer_npc_talk.wav — 대화·선택 효과음 <span class="lic own">자체 제작</span></div>
+      <div class="meta">출품자가 사인파 합성 프로그램으로 직접 생성한 음원입니다.</div>
+    </div>
+    <div class="card">
+      <div class="name">bgm.mp3 — 배경 음악 <span class="lic own">Vrew 내보내기</span></div>
+      <div class="meta">Vrew(보이저엑스)에서 내보낸 음원(60초 루프). Vrew 콘텐츠 이용 정책에 따름.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4. 소스 코드</h2>
+    <div class="card">
+      <div class="name">HTML · CSS · JavaScript 전체 <span class="lic own">자체 개발</span></div>
+      <div class="meta">
+        외부 라이브러리·프레임워크·게임 엔진을 일절 사용하지 않았습니다(jQuery·Unity·RPG Maker 등 없음).<br>
+        렌더링·오디오·저장·서비스워커 등 전 모듈을 직접 구현하였으며,
+        개발 과정에서 <b>생성형 AI(Anthropic Claude)를 코딩 도구로 활용</b>하고 산출 코드는 출품자가 검토·수정·통합하였습니다.
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>5. 학생 개인정보</h2>
+    <div class="card">
+      <div class="meta">
+        서버 없이 동작하며 학생 데이터를 외부로 전송하지 않습니다.
+        학습 결과는 기기 안에만 기록되고, 학생이 직접 CSV 파일로 저장해 교사에게 제출하는 방식입니다.
+        엔딩의 후기(설문)는 선택 사항이며 이름·학교를 수집하지 않습니다.
+      </div>
+    </div>
+  </section>
+
+  <div id="btns">
+    <button class="btn" onclick="history.length>1?history.back():location.href='index.html'">◀ 돌아가기</button>
+    <button class="btn" onclick="location.href='index.html'">🏠 타이틀로</button>
+  </div>
+</body>
+</html>
