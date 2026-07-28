@@ -1,8 +1,12 @@
 // 에너지 퀘스트 — 서비스 워커 (PWA)
 // 네트워크 우선: 온라인이면 항상 최신을 보여주고(업데이트 즉시 반영),
 // 오프라인일 때만 캐시로 폴백. (예전엔 '캐시 우선'이라 업데이트가 안 보였음)
-const CACHE = 'energy-quest-v6';
+const CACHE = 'energy-quest-v7';
 const FILES = [
+  // 글꼴은 CSS만 미리 받아 둔다. 실제 woff2는 유니코드 범위별로 잘려 있어
+  // (222개·4.8MB) 전부 미리 받으면 저사양 태블릿의 첫 실행이 무거워진다.
+  // 화면에 쓰인 범위만 fetch 핸들러가 실행 중에 캐시한다.
+  '/fonts/eq-fonts.css',
   '/index.html',
   '/character-select.html',
   '/prologue.html',

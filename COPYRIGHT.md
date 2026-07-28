@@ -8,7 +8,7 @@
 | 자산 유형 | 수량 | 출처 | 이용 근거 |
 |---|---|---|---|
 | 이미지(캐릭터·배경) | 40여 점 | 생성형 AI(ChatGPT, OpenAI)로 출품자가 직접 생성 | OpenAI 이용약관 — 생성물(Output)에 대한 권리는 이용자에게 귀속 |
-| 폰트 | 3종 | Google Fonts 웹폰트 | SIL Open Font License 1.1 (자유 이용) |
+| 폰트 | 3종 | Google Fonts (파일을 프로젝트에 포함) | SIL Open Font License 1.1 (라이선스 전문 동봉) |
 | 오디오(BGM·효과음) | 9점 | Freesound.org(CC0) · Vrew 내보내기 · 자체 합성 | CC0(퍼블릭 도메인) / 자체 제작 |
 | 소스 코드 | 전체 | 출품자 자체 개발(생성형 AI 협업) | 자작(외부 라이브러리·프레임워크 미사용) |
 
@@ -25,13 +25,16 @@
 
 ## 3. 폰트 (SIL Open Font License 1.1)
 
-| 폰트 | 저작자 | 사용처 | 라이선스 |
+| 폰트 | 저작권자 | 사용처 | 라이선스 |
 |---|---|---|---|
-| Do Hyeon | 우아한형제들(Woowa Brothers) | 게임 전 화면 | SIL OFL 1.1 |
-| Noto Sans KR | Google | 교사용 취합·오답 노트 본문 | SIL OFL 1.1 |
-| Press Start 2P | CodeMan38 | 보스전 픽셀 숫자·라벨 | SIL OFL 1.1 |
+| Do Hyeon | The Do Hyeon Project Authors (우아한형제들) | 게임 전 화면 | SIL OFL 1.1 |
+| Noto Sans KR | Adobe / Google (Source Han Sans 기반) | 보스전·교사용 취합·오답 노트 본문 | SIL OFL 1.1 |
+| Press Start 2P | The Press Start 2P Project Authors (CodeMan38) | 보스전 픽셀 숫자·라벨 | SIL OFL 1.1 |
 
-- Google Fonts 웹폰트 링크 방식으로 사용(폰트 파일 재배포 없음). OFL은 상업적 이용 포함 자유 이용 허용.
+- **폰트 파일을 `fonts/` 디렉터리에 포함해 함께 배포**한다. 인터넷이 없는 교실·시연 환경에서도 화면이 동일하게 표시되도록 하기 위함이며, 외부 CDN(Google Fonts) 의존을 제거한 구성이다.
+- SIL OFL 1.1은 폰트 파일의 재배포·번들링을 허용하며, 조건으로 **라이선스 전문 동봉**을 요구한다. 이에 따라 각 폰트의 라이선스 전문을 아래 파일로 포함하였다.
+  - `fonts/OFL-DoHyeon.txt` · `fonts/OFL-NotoSansKR.txt` · `fonts/OFL-PressStart2P.txt`
+- OFL 준수 사항 확인: 폰트를 **단독 판매하지 않음**, **예약 폰트명(Reserved Font Name) 변경 없이 원본 그대로 사용**, 라이선스 전문 동봉. 폰트 파일은 Google Fonts가 배포하는 woff2 원본을 수정 없이 그대로 포함.
 
 ## 4. 오디오
 
@@ -69,4 +72,4 @@
 - 후기(설문)는 선택 사항이며 익명으로 수집(이름·학교 미수집)
 
 ---
-*최종 업데이트: 2026-07-17*
+*최종 업데이트: 2026-07-28*
