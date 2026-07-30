@@ -110,7 +110,7 @@ document.getElementById('game-wrapper').style.height=H+'px';
 // localStorage에서 캐릭터 팔레트 로드
 var charPal=null, charName='햇살', charJob='에너지 공학자', charDrawFn=null;
 try{charPal=JSON.parse(localStorage.getItem('eq_char_pal'));}catch(e){}
-charName=localStorage.getItem('eq_char_name')||'햇살';
+charName=localStorage.getItem('eq_char_name')||'와트';
 charJob=localStorage.getItem('eq_char_job')||'에너지 공학자';
 var charId=localStorage.getItem('eq_char_id')||'haetsal';
 if(!charPal) charPal={cloth:'#3a8aff',cloth2:'#2060cc',hair:'#3d2200',skin:'#f5c49a',pants:'#1a3a80',shoe:'#22223e',goggle:'#1a3fa0',goggle2:'#4488ff',antenna:'#ff8800',antenna2:'#ffcc00',badge:'#ffcc00',badge2:'#ff8800',eyeColor:'#1a1a8a'};

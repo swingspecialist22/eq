@@ -50,6 +50,8 @@ body{
 #logo .en{font-size:clamp(12px,2vw,17px);letter-spacing:14px;color:#ff9a2a;margin-top:12px;opacity:.95;}
 #logo .theme{font-size:clamp(15px,2.6vw,21px);color:#fff;margin-top:14px;letter-spacing:1px;}
 #logo .theme b{color:#ffb04a;}
+/* 연구보고서 제목 — 출품 요강상 시작 화면에 제목·대상학년을 명시해야 한다 */
+#logo .report{font-size:clamp(11px,1.5vw,14px);color:#c2ab8c;margin-top:10px;letter-spacing:.5px;}
 
 /* ── 버튼 ── */
 #menu{margin-top:34px;display:flex;flex-direction:column;align-items:center;gap:13px;animation:rise 1s .15s ease-out both;}
@@ -121,9 +123,11 @@ footer{
 
 <div id="wrap">
   <div id="logo">
+    <div class="badge">중학교 2학년 · 기술·가정</div>
     <h1><span class="bolt">⚡</span> 에너지 퀘스트</h1>
     <div class="en">E N E R G Y &nbsp; Q U E S T</div>
     <div class="theme">다크에너지를 막아라! <b>공학자의 에너지 탈환 대작전</b></div>
+    <div class="report">스테이지형 교육 게임 에너지 퀘스트로 에너지 리터러시 함양하기</div>
   </div>
 
   <div id="menu">
@@ -140,7 +144,7 @@ footer{
   </div>
 </div>
 
-<footer>DEC로부터 세계를 구하라 · ENERGY QUEST · <a href="credits.html">출처 · 저작권</a></footer>
+<footer>DEC로부터 세계를 구하라 · ENERGY QUEST · <a href="credits.html">출처 · 저작권</a> · <a href="teacher.html">교사용</a></footer>
 
 <script>
 // ── 저장 확인 ──

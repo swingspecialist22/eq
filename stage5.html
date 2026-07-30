@@ -883,7 +883,7 @@ function saveToLocalStorage(){
   localStorage.setItem('eq_stage5_cleared','1');
   if(window.EQLog)EQLog.stageClearOnce(5);
   localStorage.setItem('eq_char_id',   player.charId||'haetsal');
-  localStorage.setItem('eq_char_name', player.charName||'Alex');
+  localStorage.setItem('eq_char_name', player.charName||'와트');
   localStorage.setItem('eq_char_job',  player.charJob||'에너지 공학자');
   if(player.charPal) localStorage.setItem('eq_char_pal',JSON.stringify(player.charPal));
   if(player.inventory.has('ai_data')) localStorage.setItem('eq_ai_chip','1');
@@ -895,7 +895,7 @@ function loadFromLocalStorage(){
   player.lv=lv;player.exp=exp;player.coins=coins;
   player.expMax=120;for(let i=1;i<lv;i++)player.expMax=Math.floor(player.expMax*1.4);
   player.charId   = localStorage.getItem('eq_char_id')  ||'haetsal';
-  player.charName = localStorage.getItem('eq_char_name')||'Alex';
+  player.charName = localStorage.getItem('eq_char_name')||'와트';
   player.charJob  = localStorage.getItem('eq_char_job') ||'에너지 공학자';
   try{player.charPal=JSON.parse(localStorage.getItem('eq_char_pal'));}catch(e){player.charPal=null;}
   const nameEl=document.querySelector('#hud-left .name');

@@ -984,7 +984,7 @@ function loadFromLocalStorage(){
   for(let i=1;i<lv;i++) player.expMax=Math.floor(player.expMax*1.4);
   // 캐릭터 선택 정보
   player.charId   = localStorage.getItem('eq_char_id')  ||'haetsal';
-  player.charName = localStorage.getItem('eq_char_name')||'햇살';
+  player.charName = localStorage.getItem('eq_char_name')||'와트';
   player.charJob  = localStorage.getItem('eq_char_job') ||'에너지 공학자';
   try{ player.charPal = JSON.parse(localStorage.getItem('eq_char_pal')); }
   catch(e){ player.charPal = null; }
