@@ -9,7 +9,7 @@
 |---|---|---|---|
 | 이미지(캐릭터·배경) | 40여 점 | 생성형 AI(ChatGPT, OpenAI)로 출품자가 직접 생성 | OpenAI 이용약관 — 생성물(Output)에 대한 권리는 이용자에게 귀속 |
 | 폰트 | 3종 | Google Fonts (파일을 프로젝트에 포함) | SIL Open Font License 1.1 (라이선스 전문 동봉) |
-| 오디오(BGM·효과음) | 9점 | Freesound.org(CC0) · Vrew 내보내기 · 자체 합성 | CC0(퍼블릭 도메인) / 자체 제작 |
+| 오디오(BGM·효과음) | 9점 | Freesound.org(CC0 · CC BY 4.0) · 생성형 AI(Gemini) 생성 · 자체 합성 | CC0(퍼블릭 도메인) / CC BY 4.0(저작자 표시) / 자체 제작 |
 | 소스 코드 | 전체 | 출품자 자체 개발(생성형 AI 협업) | 자작(외부 라이브러리·프레임워크 미사용) |
 
 ## 2. 이미지 (생성형 AI 생성)
@@ -47,7 +47,7 @@
 | `victory.mp3` | 승리 | Freesound — JoanStar, "Victory Jingle" — https://freesound.org/people/JoanStar/sounds/844831/ (길이 4.00초 일치 확인) | **CC0** |
 | `warp.mp3` | 포털 이동 | Freesound — colorsCrimsonTears, "Time Travel - Future" — https://freesound.org/people/colorsCrimsonTears/sounds/585801/ (길이 4.33초 일치 확인) | **CC0** |
 | `wind.mp3` | 환경음(10초 발췌) | Freesound 풍력 터빈 실녹음 — ①Funkelfang, "Wind Turbine - Rhythmic Swoosh and Mechanical Hum" https://freesound.org/people/Funkelfang/sounds/845351/ (**CC BY 4.0**) ②nicola_ariutti, "wind_turbine" https://freesound.org/people/nicola_ariutti/sounds/648493/ (CC0) 중 발췌 편집 | CC BY 4.0 기준 준수 |
-| `bgm.mp3` | 배경 음악(60초 루프) | Vrew(보이저엑스)에서 내보내기(파일 메타데이터 "vrew Audio Export"로 확인) | Vrew 콘텐츠 이용 정책 |
+| `bgm.mp3` | 배경 음악(60초 루프) | **출품자가 생성형 AI(Google Gemini)로 직접 생성** — 생성 후 Vrew에서 60초 루프로 편집·내보내기(파일 메타데이터 "vrew Audio Export"는 이 편집 단계의 흔적) | 자작(생성형 AI 활용) |
 | `quiz_answer_npc_talk.wav` | 대화·선택 효과음 | **출품자 자체 합성 제작**(사인파 합성 프로그램으로 생성) | 자작 |
 
 ### 저작자 표시 (CC BY 4.0 준수)
