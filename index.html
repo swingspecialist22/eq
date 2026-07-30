@@ -71,11 +71,12 @@ body{
 }
 #btn-continue:hover{background:rgba(30,70,120,0.55);}
 #save-info{font-size:12.5px;color:#9c8b72;letter-spacing:1px;min-height:16px;}
-#btn-credits{
-  width:auto;padding:9px 18px;font-size:13px;letter-spacing:1px;min-height:44px;
-  border:1px solid rgba(255,190,110,.35);color:#c2ab8c;background:rgba(20,12,4,.45);
+/* 출처·저작권은 보조 링크 — 푸터 구석에 작게 둔다 */
+footer a{
+  color:#7a6a52;text-decoration:none;border-bottom:1px dotted rgba(122,106,82,.6);
+  padding:6px 2px;
 }
-#btn-credits:hover{background:rgba(60,38,12,.55);color:#ffd9a8;}
+footer a:hover{color:#c2ab8c;border-bottom-color:#c2ab8c;}
 
 /* ── 캐릭터 라인업 ── */
 #cast{
@@ -129,18 +130,17 @@ footer{
     <button class="btn" id="btn-new" onclick="newGame()">▶ 새 게임</button>
     <button class="btn" id="btn-continue" onclick="continueGame()">이어하기</button>
     <div id="save-info"></div>
-    <button class="btn" id="btn-credits" onclick="location.href='credits.html'">📜 출처 · 저작권</button>
   </div>
 
   <div id="cast">
-    <img src="assets/char/char_haetsal.png"  alt="햇살">
-    <img src="assets/char/char_nari.png"     alt="나리">
-    <img src="assets/char/char_nuri.png"     alt="누리">
-    <img src="assets/char/char_saebyeok.png" alt="새벽">
+    <img src="assets/char/char_haetsal.png"  alt="와트">
+    <img src="assets/char/char_nari.png"     alt="패러데이">
+    <img src="assets/char/char_nuri.png"     alt="퀴리">
+    <img src="assets/char/char_saebyeok.png" alt="테슬라">
   </div>
 </div>
 
-<footer>DEC로부터 세계를 구하라 · ENERGY QUEST</footer>
+<footer>DEC로부터 세계를 구하라 · ENERGY QUEST · <a href="credits.html">출처 · 저작권</a></footer>
 
 <script>
 // ── 저장 확인 ──
